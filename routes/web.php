@@ -19,10 +19,15 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'loginUser'])->name('loginUser');
 Route::group(['middleware' => ['auth']], function () {
+    
+    Route::get('users/index', [MstUsersController::class, 'index'])->name('user.index');
+    Route::get('users/edit', [MstUsersController::class, 'show'])->name('user.edit');
+    //Route::post('users/delete', [MstUsersController::class, 'destroy'])->name('user.destroy');
+    Route::post('users/lock/{id}', [MstUsersController::class, 'lockOrUnlockUser'])->name('user.lock');
+    Route::post('users/delete/{id}', [MstUsersController::class, 'deleteUser'])->name('user.delete');
+
     Route::get('/product', [MstProductController::class, 'index'])->name('product');
-    Route::get('/users', [MstUsersController::class, 'index'])->name('userList');
-    Route::get('/edit', [MstUsersController::class, 'show'])->name('user.edit');
-    Route::post('/delete', [MstUsersController::class, 'destroy'])->name('user.destroy');
-    Route::post('/lock', [MstUsersController::class, 'lock'])->name('user.lock');
+
+    Route::get('/logout', [LoginController::class, 'logOut'])->name('logout');
+
 });
-Route::get('/logout', [LoginController::class, 'logOut'])->name('logout');

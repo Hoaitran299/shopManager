@@ -11,7 +11,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\MstUsers;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use PhpParser\Node\Stmt\TryCatch;
 use Yajra\Datatables\Datatables;
 
 /**
@@ -44,7 +46,7 @@ class MstUsersController extends Controller
     //    return view('users.users',compact('users'));
         if ($request->ajax()) 
         {
-            $data = User::get();
+            $data = MstUsers::get();
 
             return Datatables::of($data)->make(true);
         }
@@ -117,14 +119,47 @@ class MstUsersController extends Controller
         //
     }
 
-    /**
-     * Lock User
+     /**
+     * Lock user or unlock user
      *
-     * @param  \App\Models\MstUsers  $mstUsers
-     * @return \Illuminate\Http\Response
+     * @param $id use for find specified user
      */
-    public function lock(MstUsers $mstUsers)
+    public function lockOrUnlockUser($id)
     {
-        //
+        try{
+            $status = MstUsers::where('id', $id)->pluck('is_active')->first();
+            if ($status === 1){
+                MstUsers::where('id', $id)->update(['is_active' => 0]);
+                $message = "Lock user thành công";
+            } else {
+                MstUsers::where('id', $id)->update(['is_active' => 1]);
+                $message = "Unlock user thành công";
+            }
+        } catch(ModelNotFoundException $e) {
+            $message = "Unlock user không thành công" + " Error: " + $e->getMessage();
+            if($status===1){
+                $message = "Lock user không thành công" + " Error: " + $e->getMessage();
+            }
+        }
+        
+        return back()->withError($message) ->withInput();
+    }
+
+    /**
+     * Update status user to deleted.
+     *
+     * @param $id use for find specified user
+     */
+    public function deleteUser($id)
+    {
+        try {
+            MstUsers::where('id', $id)->update(['is_delete' => 1]);
+            $message = "Xoá User không thành công";
+        } catch(ModelNotFoundException $e){
+            $message = "Xoá User không thành công";
+            return back()->withError($message + " Error: " + $e->getMessage())->withInput();
+        }
+        
+        return back();
     }
 }

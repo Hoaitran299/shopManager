@@ -18,18 +18,6 @@ class LoginController extends Controller
       */
      protected $redirectTo = '/product';
 
-     /**
-     * Create a new controller instance.
-     *
-     * @param App\Models\MstUsers $user submitted by users
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('guest')->except('logout');
-    }
-
     /**
      * Display a listing of the resource.
      *
@@ -48,7 +36,7 @@ class LoginController extends Controller
         $data = $request->only('email','password');
         $date = date_format(Carbon::now('Asia/Ho_Chi_Minh'), 'Y/m/d:H-i-s');
         if (Auth::attempt($data,$request->remember)) {
-            $request->session()->put('users',$request->input());
+            $request->session()->put('info',$request->input());
             MstUsers::where('email', $request->email)
                     ->update(['last_login_at' => $date, 'last_login_ip' => $request->ip()]);
             return redirect()->intended('product');
@@ -63,9 +51,10 @@ class LoginController extends Controller
      *
      */
     public function logOut() {
-        Session::flush();
+
+        session()->forget('info');
         Auth::logout();
-   
+    
         return redirect()->route('login');
     }
 }

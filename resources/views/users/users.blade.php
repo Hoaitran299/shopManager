@@ -34,25 +34,21 @@
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>Nhóm</label>
-                                <select class="form-control" id='group_role' name='group_role' placeholder="Chọn nhóm">
-                                    <option>option 1</option>
-                                    <option>option 2</option>
-                                    <option>option 3</option>
-                                    <option>option 4</option>
-                                    <option>option 5</option>
-                                </select>
+                                {!! Form::select('group_role', [1 => 'Admin', 2 => 'Editor', 3 => 'Reviewer'], null, [
+                                    'placeholder' => 'Chọn nhóm...',
+                                    'class' => 'form-control',
+                                    'id' => 'group_role',
+                                ]) !!}
                             </div>
                         </div>
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>Trạng thái</label>
-                                <select class="form-control" id='status' name='status' placeholder="Trạng thái">
-                                    <option>option 1</option>
-                                    <option>option 2</option>
-                                    <option>option 3</option>
-                                    <option>option 4</option>
-                                    <option>option 5</option>
-                                </select>
+                                {!! Form::select('is_active', [0 => 'Tạm khoá ', 1 => 'Đang hoạt động'], null, [
+                                    'placeholder' => 'Chọn trạng thái...',
+                                    'class' => 'form-control',
+                                    'id' => 'is_active',
+                                ]) !!}
                             </div>
                         </div>
                     </div>
@@ -62,20 +58,25 @@
                                     class="fa fa-user-plus fa-border"></i><span> Thêm mới</span></button>
                         </div>
                         <div class="col-md-10 text-right">
-                            <button type="button" class="btn btn-success"><i class="fa fa-search fa-border"></i><span> Tìm
+                            <button id="btnSearch" name="btnSearch" type="button" class="btn btn-success"><i
+                                    class="fa fa-search fa-border"></i><span> Tìm
                                     kiếm</span></button>
-                            <button type="button" class="btn btn-success"><i class="fa fa-border">X</i><span> Xoá tìm
+                            <button id="btnRemove" name="btnRemove" type="button" class="btn btn-success"><i
+                                    class="fa fa-border">X</i><span> Xoá tìm
                                     kiếm</span></button>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
+        @if (session('error'))
+            <div class="alert alert-danger text-center">{{ session('error') }}</div>
+        @endif
         <div class="card">
             <div class="table-responsive">
-                <table class="table table-hover userList" id="userList" name="userList">
+                <table class="table table-hover userList " id="userList" name="userList">
                     <thead>
-                        <tr class="table-info">
+                        <tr class="table-danger">
                             <th style="width: 10px">#</th>
                             <th>Họ tên</th>
                             <th>Email</th>
@@ -118,17 +119,142 @@
 @section('scripts')
     <script src="//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
     <script>
-        $(document).ready( function () {
-            var table = $('.userList').DataTable({
-               processing: true,
-               serverSide: true,
-               ajax: "{{ route('user.index') }}",
-               columns: [
-                   {data: 'id', name: 'id'},
-                   {data: 'name', name: 'name'},
-                   {data: 'email', name: 'email'},
-               ]
-           });
-        } );
+        $(document).ready(function() {
+            var $table = $('#userList');
+
+            var usersTable = $('.userList').DataTable({
+                processing: true,
+                serverSide: true,
+                searching: false,
+                ajax: "{{ route('user.index') }}",
+                order: [
+                    [0, 'desc']
+                ],
+                lengthMenu: [10, 20],
+                columns: [{
+                        data: 'id',
+                        name: 'id'
+                    },
+                    {
+                        data: 'name',
+                        name: 'name'
+                    },
+                    {
+                        data: 'email',
+                        name: 'email'
+                    },
+                    {
+                        data: 'group_role',
+                        name: 'group_role'
+                    },
+                    {
+                        data: 'is_active',
+                        render: function(data) {
+                            var str = "";
+                            if (data === 1) {
+                                str = "Đang hoạt động";
+                            } else {
+                                str = "Tạm khoá";
+                            }
+                            return str;
+                        },
+                    },
+                    {
+                        data: null,
+                        render: function(data, type, row) {
+                            // console.log(data);
+                            console.log(row);
+                            var html =
+                                '<a class="btn btn-info" href="#"><i class="fas fa-edit"></i></a>' +
+                                '<button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i></button>' +
+                                '<button type="submit" class="btn btn-default"><i class="fas fa-user-lock"></i></button>';
+                            return html;
+                        },
+                        orderable: false,
+                        searchable: false
+                    },
+                ],
+                drawCallback: function() {
+                    var page_min = 1;
+                    var $api = this.api();
+                    var pages = $api.page.info().pages;
+                    var rows = $api.data().length;
+
+                    if (rows < page_min) {
+                        $table
+                            .next('.dataTables_info').css('display', 'none')
+                            .next('.dataTables_paginate').css('display', 'none')
+                            .next('.dataTables_length').css('display', 'none');
+
+                    } else if (pages === 1) {
+                        $table
+                            .next('.dataTables_info').css('display', 'none')
+                            .next('.dataTables_paginate').css('display', 'none');
+                    } else {
+                        $table
+                            .next('.dataTables_info').css('display', 'block')
+                            .next('.dataTables_paginate').css('display', 'block');
+                    }
+                },
+                language: {
+                    processing: "Đang tiến hành tải dữ liệu",
+                    lengthMenu: "Hiển thị 1 ~ _MENU_ ",
+                    info: "Hiển thị từ _START_ ~ _END_ trong tổng số _TOTAL_ user",
+                    infoEmpty: "Không có dữ liệu",
+                    emptyTable: "Không có dữ liệu",
+                },
+            });
+
+            function getSearchUsers() {
+                var name = document.getElementById("name").value;
+                var email = document.getElementById("email").value;
+                var group_role = document.getElementById("group_role").value;
+                var is_active = document.getElementById("is_active").value;
+
+
+            }
+
+            $('#btnRemove').on('click', function(e) {
+                $('#is_active').prop('selectedIndex', -1);
+                $('#group_role').prop('selectedIndex', -1);
+                $(':input').val('');
+            });
+
+            $('#btnSearch').on('click', function(e) {
+                var name = $("#name").val();
+                var email = $("#email").val();
+                var role = $("#group_role").val();
+                var is_active = $('#is_active').val();
+                e.preventDefault();
+                if ((name != '') && (email != '') && (role === null) && (is_active === null)) {
+                    dataSearch = {
+                        name: name,
+                        email: email,
+                        role: role,
+                        is_active: is_active
+                    };
+                }
+            })
+
+            function getUserByID(id) {
+                var user = null;
+                $.ajax({
+                    url: base_url + '/users/' + id,
+                    type: "GET",
+                    async: false,
+                    data: {
+                        id: id,
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        user = data;
+                    },
+                    error: function(err) {
+                        alert('Somethings went wrong!');
+                    },
+                });
+                return user.data;
+            }
+        });
     </script>
 @stop
