@@ -75,7 +75,7 @@
             </div>
         </div>
         <!-- /.login-box -->
-      </div>
+    </div>
 @stop
 @section('scripts')
     {{-- <!-- AdminLTE App -->

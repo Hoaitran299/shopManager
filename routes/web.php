@@ -24,7 +24,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('users/getData', [MstUsersController::class, 'getUsersData'])->name('user.getData');
     Route::get('users/info/{id}', [MstUsersController::class, 'getUserByID']);
     Route::post('users/{id}', [MstUsersController::class, 'lockOrUnlockUser'])->name('user.lock');
-    Route::delete('users/{id}', [UserController::class, 'destroy'])->name('user.delete');
+    Route::post('users/create', [MstUsersController::class, 'store'])->name('user.create');
+    Route::post('users/update/{id}', [MstUsersController::class, 'update'])->name('user.update');
+    Route::delete('users/{id}', [MstUsersController::class, 'destroy'])->name('user.delete');
     
     Route::get('users/edit', [MstUsersController::class, 'show'])->name('user.edit');
     //Route::post('users/delete', [MstUsersController::class, 'destroy'])->name('user.destroy');

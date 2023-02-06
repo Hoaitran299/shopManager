@@ -10,9 +10,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AddUserRequest;
+use App\Http\Requests\EditUserRequest;
 use App\Models\MstUsers;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Yajra\Datatables\Datatables;
 
 /**
@@ -45,58 +48,55 @@ class MstUsersController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\AddUserRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(AddUserRequest $request)
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\MstUsers  $mstUsers
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\MstUsers  $mstUsers
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(MstUsers $mstUsers)
-    {
-        //
+        try {
+            $input = $request->all();
+            $data = [
+                'name' => $input['name'],
+                'email' => $input['email'],
+                'password' => Hash::make($input['password']),
+                'group_role' => $input['group_role'],
+                'is_active' => $input['is_active']
+            ];
+            MstUsers::create($data);
+            return response()->json(['status' => 'success'], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['status' => 'error'], 400);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\MstUsers  $mstUsers
+     * @param  \App\Http\Requests\EditUserRequest  $request
+     * @param  int  $id      used to update the user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, MstUsers $mstUsers)
+    public function update(EditUserRequest $request, $id)
     {
-        //
+        try {
+            $id = $request->id;
+            $input = $request->all();
+            $data = [
+                'name' => $input['name'],
+                'email' => $input['email'],
+                'group_role' => $input['group_role'],
+                'is_active' => $input['is_active']
+            ];
+            if(!empty($input['password'])){
+                $data['password'] = Hash::make($input['password']);
+            } 
+            MstUsers::where('id', $id)->update($data);
+            return response()->json(['status' => 'success'], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['status' => 'error'], 400);
+        }
     }
 
     /**
@@ -108,10 +108,10 @@ class MstUsersController extends Controller
     public function destroy($id)
     {
         try {
-            MstUsers::where('id', $id)->delete();
-            return response()->json(['status' => 'success', 'data' => [], 'message' => 'Xoá thành công!'], 200);
-        } catch (\Throwable$th) {
-            return response()->json(['status' => 'error', 'data' => [], 'message' => 'Xảy ra lỗi khi xóa, vui lòng thử lại!'], 400);
+            MstUsers::destroy($id);
+            return response()->json(['status' => 'success', 'data' => []], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['status' => 'error', 'data' => []], 400);
         }
     }
 
@@ -126,18 +126,12 @@ class MstUsersController extends Controller
             $status = MstUsers::where('id', $id)->pluck('is_active')->first();
             if ($status === 1) {
                 MstUsers::where('id', $id)->update(['is_active' => 0]);
-                $message = "Lock user thành công";
             } else {
                 MstUsers::where('id', $id)->update(['is_active' => 1]);
-                $message = "Unlock user thành công";
             }
-            return response()->json(['status' => 'success', 'data' => [], 'message' => $message], 200);
+            return response()->json(['status' => 'success'], 200);
         } catch (ModelNotFoundException $e) {
-            $message = "Unlock user không thành công"+" Error: "+$e->getMessage();
-            if ($status === 1) {
-                $message = "Lock user không thành công"+" Error: "+$e->getMessage();
-            }
-            return response()->json(['status' => 'error', 'data' => [], 'message' => $message], 400);
+            return response()->json(['status' => 'error'], 400);
         }
     }
 
@@ -151,9 +145,9 @@ class MstUsersController extends Controller
     {
         try {
             $user = MstUsers::find($id);
-            return response()->json(['status' => 'success', 'data' => $user, 'message' => ''], 200);
-        } catch (\Throwable$th) {
-            return response()->json(['status' => 'error', 'data' => [], 'message' => 'Không tìm thấy người dùng'], 200);
+            return response()->json(['status' => 'success', 'data' => $user], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['status' => 'error', 'data' => [], 'message' => __('User not found')], 200);
         }
     }
 

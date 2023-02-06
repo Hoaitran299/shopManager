@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App;
 use App\Http\Requests\LoginRequest;
 use App\Models\MstUsers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
@@ -35,7 +37,9 @@ class LoginController extends Controller
      */
     public function loginUser(LoginRequest $request){
         $data = $request->only('email','password');
-        $date = date_format(Carbon::now(), Config::get('config.FORMAT_DATE_TIME'));
+        $format = Config::get('config.FORMAT_DATE_TIME');
+        $date = date_format(Carbon::now(),$format);
+
         if (Auth::attempt($data,$request->remember)) {
             $request->session()->put('info',$request->input());
             MstUsers::where('email', $request->email)
@@ -43,7 +47,7 @@ class LoginController extends Controller
             return redirect()->intended('product');
         } 
         return back()->withInput($request->only('email', 'remember'))->withErrors([
-            'password' => 'Password không chính xác.',
+            'password' => trans('Incorrect password')
         ]);
     }
 

@@ -33,7 +33,9 @@
     <!-- Bootstrap 4 -->
     <script src="{{ asset('adminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <!-- sweetalert2 style -->
-    <script src="{{ asset('resources/views/vendor/sweetalert/alert.blade.php') }}"></script>
+    <script src="{{ asset('vendor/sweetalert/sweetalert.all.js') }}"></script>
+
+    
 
     {{-- Scripts link to file or js custom --}}
     @yield('scripts')

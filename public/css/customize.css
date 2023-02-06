@@ -6,3 +6,6 @@ hr {
     background-color: rgb(124, 194, 252);
     margin: 0px;
 }
+.error {
+   color: #dc3545!important;
+}

@@ -6,53 +6,47 @@
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
-        <form id="addUserForm" class="form-horizontal">
+        <form id="addUserForm" class="form-horizontal" action="">
+            @csrf
             <div class="modal-body">
                 @csrf
                 <div class="form-group">
                     <label>Tên</label>
-                    <input type="text" class="form-control" id="addName" name="addName"
+                    <input type="text" class="form-control" id="inputName" name="inputName"
                         placeholder="Nhập họ tên">
-                    <span id="errName" class="text-danger d-none"></span>
                 </div>
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" class="form-control" id="addEmail" name="addEmail" placeholder="Email">
-                    <span id="errEmail" class="text-danger d-none"></span>
+                    <input type="email" class="form-control" id="inputEmail" name="inputEmail" placeholder="Email">
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" class="form-control" id="addPassword" name="addPassword"
+                    <input type="password" class="form-control" id="inputPassword" name="inputPassword"
                         placeholder="Mật khẩu">
-                    <span id="errPassword" class="text-danger d-none"></span>
                 </div>
                 <div class="form-group">
                     <label>Xác nhận</label>
-                    <input type="password" class="form-control" id="addPasswordConfirm" name="addPasswordConfirm"
+                    <input type="password" class="form-control" id="inputPasswordConfirm" name="inputPasswordConfirm"
                         placeholder="Xác nhận mật khẩu">
-                    <span id="errpasswordConfirm" class="text-danger d-none"></span>
                 </div>
                 <div class="form-group">
                     <label>Nhóm</label>
                     {!! Form::select('group_role', [1 => 'Admin', 2 => 'Editor', 3 => 'Reviewer'], null, [
-                        'placeholder' => 'Chọn nhóm...',
                         'class' => 'form-control',
-                        'id' => 'addGroupRole',
-                        'name' => 'addGroupRole'
+                        'id' => 'selGroupRole',
+                        'name' => 'selGroupRole'
                     ]) !!}
-                    <span id="errGroupRole" class="text-danger d-none"></span>
                 </div>
 
                 <div class="form-group">
                     <label class="">Trạng thái</label>
-                    <input type="checkbox" name="my-checkbox" checked data-bootstrap-switch id="addActive"
-                        name="addActive">
+                    <input type="checkbox" checked data-toggle="toggle" data-onstyle="success" data-offstyle="secondary" id="checkActive" name="checkActive"/>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" id="closePopup" name="closePopup" class="btn btn-secondary"
                     data-dismiss="modal">Hủy</button>
-                <button id="addButton" name="addButton" type="submit" class="btn btn-danger">Lưu</button>
+                <button id="addUserButton" name="addUserButton" type="submit" class="btn btn-danger addUserButton">Lưu</button>
             </div>
         </form>
     </div>

@@ -4,7 +4,8 @@
 
 @section('styles')
     <link rel="stylesheet" href="//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" href="{{ asset('adminLTE/plugins/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css') }}">
+    <link href="//cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css"
+        rel="stylesheet">
 @stop
 
 @section('content')
@@ -104,7 +105,9 @@
     <!-- DataTables -->
     <script src="//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
     <!-- jQuery -->
-    <script src="{{ asset('adminLTE/plugins/bootstrap-switch/js/bootstrap-switch.min.js') }}"></script>
+    <script src="//cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+    <script src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.js" type="text/javascript"></script>
+
     <script>
         $.ajaxSetup({
             headers: {
@@ -115,6 +118,7 @@
         $(document).ready(function() {
             var $table = $('#userList');
 
+             // Get data lên DataTable
             var usersTable = $('.userList').DataTable({
                 processing: true,
                 serverSide: true,
@@ -168,18 +172,18 @@
                             $id = data["id"];
                             $btn = '<button type="button" id="popupEdit-' + $id + '" data-id="' +
                                 $id +
-                                '" data-toggle="modal" data-target=".popupUser" class="btn btn-info"><i class="fa fa-edit"></i></button>';
+                                '" data-toggle="modal" data-target=".popupUser" class="btn btn-info popupEditUser"><i class="fa fa-edit"></i></button>';
                             $btn = $btn + ' <button type="button" id="delD-' + $id +
                                 '" name="delD-' + $id + '" data-id="' + $id +
                                 '" class="btn btn-danger removeUser" ><i class="fa fa-trash"></i></button>';
                             if (data["is_active"] === 1) {
                                 $btn = $btn + ' <button type="button" id="lockID-' + $id +
                                     '" name="lockID-' + $id + '"data-id="' + $id +
-                                    '" class="btn btn-default"><i class="fa fa-user-lock"></i></button>';
+                                    '" class="btn btn-default lockUser"><i class="fa fa-user-lock"></i></button>';
                             } else {
                                 $btn = $btn + ' <button type="button" id="lockID-' + $id +
                                     '" name="lockID-' + $id + '"data-id="' + $id +
-                                    '" class="btn btn-default"><i class="fa fa-unlock"></i></button>';
+                                    '" class="btn btn-default lockUser"><i class="fa fa-unlock"></i></button>';
                             }
                             return $btn;
                         },
@@ -210,14 +214,15 @@
                     }
                 },
                 language: {
-                    processing: "Đang tiến hành tải dữ liệu",
-                    lengthMenu: "Hiển thị 1 ~ _MENU_ ",
-                    info: "Hiển thị từ _START_ ~ _END_ trong tổng số _TOTAL_ user",
-                    infoEmpty: "Không có dữ liệu",
-                    emptyTable: "Không có dữ liệu",
+                    processing: "{{ __('processing') }}",
+                    lengthMenu: "{{ __('lengthMenu') }}",
+                    info: "{{ __('showPage') }}",
+                    infoEmpty: "{{ __('infoEmpty') }}",
+                    emptyTable: "{{ __('infoEmpty') }}",
                 },
             });
 
+             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
                 $('#is_active').prop('selectedIndex', 0);
                 $('#group_role').prop('selectedIndex', 0);
@@ -226,6 +231,7 @@
                 usersTable.ajax.reload();
             });
 
+            // Xử lý search dữ liệu cho userList
             $('#btnSearch').on('click', function(e) {
                 console.log($('#is_active').val());
                 e.preventDefault();
@@ -233,6 +239,7 @@
 
             })
 
+            // Get thông tin user by ID
             function getUserByID(id) {
                 var user = null;
                 $.ajax({
@@ -241,20 +248,21 @@
                     async: false,
                     dataType: 'json',
                     success: function(data) {
-                        console.log(data)
                         user = data.data;
                     },
                 });
                 return user;
             }
 
+            // Xử lý xoá user is_delete = 1
             $(document).on('click', '.removeUser', function(e) {
                 var id = $(this).data("id");
                 var user = getUserByID(id);
+                var cfm = "{{ __('Confirm delete') }}" + " " + user.name + " ?"
                 e.preventDefault();
                 Swal.fire({
-                    title: 'Nhắc nhở',
-                    text: "Bạn muốn xóa thành viên " + user.name + "?",
+                    title: "{{ __('Warning') }}",
+                    text: cfm,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
@@ -263,21 +271,253 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "users/" + id,
+                            url: "/users/" + id,
                             type: "delete",
                             async: false,
-                            success: function($result) {
-                                console.log($result);
-                                if ($result['status'] === 'success') {
-                                    Swal.fire('Thông báo', 'Người dùng đã bị xóa.','success');
+                            success: function(result) {
+                                if (result['status'] === 'success') {
+                                    Swal.fire("{{ __('Notification') }}",
+                                        "{{ __('Delete success') }}", 'success');
                                     usersTable.ajax.reload();
                                 } else {
-                                    Swal.fire('Thông báo','không thể xóa được người dùng.', 'error');
+                                    Swal.fire("{{ __('Notification') }}",
+                                        "{{ __('Delete error') }}", 'error');
                                 }
                             },
                         });
                     }
                 })
+            });
+
+             // Xử lý xoá user is_delete = 1
+            $(document).on('click', '.lockUser', function(e) {
+                var id = $(this).data("id");
+                var user = getUserByID(id);
+                var active = user.is_active;
+                var cfm = (active === 1) ? "{{ __('Confirm lock') }}" + " " + user.name + " ?" :
+                    "{{ __('Confirm unlock') }}" + " " + user.name + " ?"
+                console.log(cfm);
+                e.preventDefault();
+                Swal.fire({
+                    title: "{{ __('Warning') }}",
+                    text: cfm,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'OK!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "/users/" + id,
+                            type: "post",
+                            async: false,
+                            success: function(result) {
+                                if (result['status'] === 'success') {
+                                    if (active === 1) {
+                                        Swal.fire("{{ __('Notification') }}",
+                                            "{{ __('Unlock success') }}", 'success'
+                                        );
+                                    } else {
+                                        Swal.fire("{{ __('Notification') }}",
+                                            "{{ __('Lock success') }}", 'success');
+                                    }
+                                    usersTable.ajax.reload();
+                                } else {
+                                    if (active === 1) {
+                                        Swal.fire("{{ __('Notification') }}",
+                                            "{{ __('Unlock error') }}", 'error');
+                                    } else {
+                                        Swal.fire("{{ __('Notification') }}",
+                                            "{{ __('Lock error') }}", 'error');
+                                    }
+                                }
+                            },
+                        });
+                    }
+                })
+            });
+
+            var validator = $("#inputForm").validate();
+
+            // Reset PopupEditAddUser
+            function initUserForm() {
+                $("#inputName").val('');
+                $("#inputEmail").val('');
+                $("#inputPassword").val('');
+                $("#inputPasswordConfirm").val('');
+                $("#checkActive").empty();
+                $("#selGroupRole").prop('selectedIndex', 1);
+                validator.resetForm();
+            }
+
+            // validate signup form on keyup and submit
+            $("#inputForm").validate({
+                onkeyup: function(element) {
+                    this.element(element);
+                },
+                onfocusout: function(element) {
+                    this.element(element);
+                },
+                rules: {
+                    inputName: {
+                        required: true,
+                        minlength: 5
+                    },
+                    inputEmail: {
+                        required: true,
+                        email: true
+                    },
+                    inputPassword: {
+                        required: true,
+                        minlength: 5,
+                        pwcheck: true
+                    },
+                    inputPasswordConfirm: {
+                        required: true,
+                        equalTo: "#inputPassword"
+                    },
+                    selGroupRole: {
+                        required: true,
+                    },
+
+                },
+                messages: {
+                    inputName: {
+                        required: "{{__('UserRequired')}}",
+                        minlength: "{{__('UserMinlength')}}",
+                    },
+                    inputEmail: {
+                        required: "{{__('EmailRequired')}}",
+                        email: "{{__('EmailType')}}",
+                    },
+                    inputPassword: {
+                        required: "{{__('PasswordRequired')}}",
+                        minlength: "{{__('PasswordMinlength')}}",
+                        pwcheck: "{{__('PasswordCheck')}}",
+                    },
+                    inputPasswordConfirm: {
+                        required: "{{__('PasswordConfirmRequired')}}",
+                        equalTo: "{{__('PasswordConfirmEqualTo')}}",
+                    },
+                },
+                submitHandler: function(form, event) {
+                    event.preventDefault();
+                    $('body').on('click', '#inputButton', function(e) {
+                        e.preventDefault();
+                        var name = $("#inputName").val();
+                        var email = $("#inputEmail").val();
+                        var password = $("#inputPassword").val();
+                        var role = $("#selGroupRole").val();
+                        var active = ($("#checkActive").val()) === "on" ? 1 : 0;
+
+                        $.ajax({
+                            url: "{{ route('user.create') }}",
+                            type: "POST",
+                            data: {
+                                name: name,
+                                email: email,
+                                password: password,
+                                group_role: role,
+                                is_active: active,
+                            },
+                            async: false,
+                            success: function(result) {
+                                console.log(result);
+                                if (result['status'] === 'success') {
+                                    Swal.fire("{{ __('Notification') }}",
+                                        "{{ __('Add success') }}", 'success');
+                                    usersTable.ajax.reload();
+                                } else {
+                                    Swal.fire("{{ __('Notification') }}",
+                                        "{{ __('Add error') }}", 'error');
+                                }
+                            },
+                            beforeSend: function() {
+                                initUserForm();
+                            },
+                        });
+                    });
+                    return false;
+                }
+            });
+
+            // check validate password
+            $.validator.addMethod("pwcheck", function(value) {
+                return /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/.test(
+                        value) // consists of only these
+                    &&
+                    /[a-z]/.test(value) // has a lowercase letter
+                    &&
+                    /\d/.test(value) // has a digit
+                    &&
+                    /[#?!@$%^&*-]/.test(value) // has special character
+            });
+
+            var userID = null;
+
+            // Get user cho popupEditUser
+            $(document).on('click', '.popupEditUser', function() {
+                $('#popupTitle').html("{{ __('Edit user') }}")
+                var idUSer = $(this).data("id");
+                var user = getUserByID(idUSer);
+                if (user != null) {
+                    userID = user.id;
+                    $('#addUserButton').attr('id', 'editUserButton');
+                    $("#inputName").val(user.name);
+                    $("#inputEmail").val(user.email);
+                    console.log(user.group_role);
+                    $('select option:contains("'+user.group_role+'")').prop('selected',true);
+                    if (user.is_active === 1) {
+                        $('#checkActive').bootstrapToggle('on');
+                    } else {
+                        $('#checkActive').bootstrapToggle('off');
+                    }
+                } else {
+                    Swal.fire("{{ __('Notification') }}", "{{ __('User not found') }}", 'error');
+                }
+            })
+
+            // Xử lý sửa thông tin user
+            $('body').on('click', '#editUserButton', function(e) {
+                e.preventDefault();
+                var name = $("#inputName").val();
+                var email = $("#inputEmail").val();
+                var password = $("#inputPassword").val();
+                var password_confirmation = $("#inputPasswordConfirm").val();
+                var role = $("#selGroupRole").val();
+                var active = ($("#checkActive").val()) === "on" ? 1 : 0;
+
+                $.ajax({
+                    url: '/users/update' + userID,
+                    type: "PUT",
+                    data: {
+                        id: userID,
+                        name: name,
+                        email: email,
+                        password: password,
+                        password_confirmation: password_confirmation,
+                        group_role: role,
+                        is_active: userStatus,
+                        _method: 'PUT',
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        $("#closePopup").trigger("click");
+                        if (result['status'] === 'success') {
+                            Swal.fire("{{ __('Notification') }}",
+                                "{{ __('Edit success') }}", 'success');
+                            usersTable.ajax.reload();
+                        } else {
+                            Swal.fire("{{ __('Notification') }}",
+                                "{{ __('Edit error') }}", 'error');
+
+                        }
+                    },
+                    beforeSend: function() {
+                        initUserForm();
+                    },
+                });
             });
         });
     </script>
