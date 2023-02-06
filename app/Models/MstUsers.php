@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class MstUsers extends Authenticatable
 {
     protected $table ='mst_users';
+    protected $primary ='id';
 
     /**
      * The attributes that are mass assignable.
@@ -14,7 +15,7 @@ class MstUsers extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','group_role','is_active','last_login_at','last_login_ip',
+        'id','name', 'email', 'password','group_role','is_active','last_login_at','last_login_ip',
     ];
 
     /**

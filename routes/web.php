@@ -19,12 +19,16 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'loginUser'])->name('loginUser');
 Route::group(['middleware' => ['auth']], function () {
-    
+    //Route::resource('users', MstUsersController::class);
     Route::get('users/index', [MstUsersController::class, 'index'])->name('user.index');
+    Route::get('users/getData', [MstUsersController::class, 'getUsersData'])->name('user.getData');
+    Route::get('users/info/{id}', [MstUsersController::class, 'getUserByID']);
+    Route::post('users/{id}', [MstUsersController::class, 'lockOrUnlockUser'])->name('user.lock');
+    Route::delete('users/{id}', [UserController::class, 'destroy'])->name('user.delete');
+    
     Route::get('users/edit', [MstUsersController::class, 'show'])->name('user.edit');
     //Route::post('users/delete', [MstUsersController::class, 'destroy'])->name('user.destroy');
-    Route::post('users/lock/{id}', [MstUsersController::class, 'lockOrUnlockUser'])->name('user.lock');
-    Route::post('users/delete/{id}', [MstUsersController::class, 'deleteUser'])->name('user.delete');
+    
 
     Route::get('/product', [MstProductController::class, 'index'])->name('product');
 

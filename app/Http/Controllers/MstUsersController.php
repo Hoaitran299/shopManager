@@ -5,7 +5,7 @@
  * @package Shop manager
  * @subpackage Controllers
  * @copyright Copyright (c) 2016 CriverCrane! Corporation. All Rights Reserved.
- * @author Tran Hoai<tran.hoai@rivercrane.vn>  
+ * @author Tran Hoai<tran.hoai@rivercrane.vn>
  */
 
 namespace App\Http\Controllers;
@@ -13,14 +13,13 @@ namespace App\Http\Controllers;
 use App\Models\MstUsers;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use PhpParser\Node\Stmt\TryCatch;
 use Yajra\Datatables\Datatables;
 
 /**
  * Users Controller
  *
  * @copyright Copyright (c) 2016 CriverCrane! Corporation. All Rights Reserved.
- * @author Tran Hoai<tran.hoai@rivercrane.vn>  
+ * @author Tran Hoai<tran.hoai@rivercrane.vn>
  */
 
 class MstUsersController extends Controller
@@ -42,14 +41,6 @@ class MstUsersController extends Controller
      */
     public function index(Request $request)
     {
-    //    $users = MstUsers::orderBy('id','desc')->paginate(10);
-    //    return view('users.users',compact('users'));
-        if ($request->ajax()) 
-        {
-            $data = MstUsers::get();
-
-            return Datatables::of($data)->make(true);
-        }
         return view('users.users');
     }
 
@@ -80,9 +71,9 @@ class MstUsersController extends Controller
      * @param  \App\Models\MstUsers  $mstUsers
      * @return \Illuminate\Http\Response
      */
-    public function show(MstUsers $mstUsers)
+    public function show($id)
     {
-        //
+
     }
 
     /**
@@ -111,55 +102,85 @@ class MstUsersController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\MstUsers  $mstUsers
+     * @param int $id used to delete the user
      * @return \Illuminate\Http\Response
      */
-    public function destroy(MstUsers $mstUsers)
+    public function destroy($id)
     {
-        //
+        try {
+            MstUsers::where('id', $id)->delete();
+            return response()->json(['status' => 'success', 'data' => [], 'message' => 'Xoá thành công!'], 200);
+        } catch (\Throwable$th) {
+            return response()->json(['status' => 'error', 'data' => [], 'message' => 'Xảy ra lỗi khi xóa, vui lòng thử lại!'], 400);
+        }
     }
 
-     /**
+    /**
      * Lock user or unlock user
      *
      * @param $id use for find specified user
      */
     public function lockOrUnlockUser($id)
     {
-        try{
+        try {
             $status = MstUsers::where('id', $id)->pluck('is_active')->first();
-            if ($status === 1){
+            if ($status === 1) {
                 MstUsers::where('id', $id)->update(['is_active' => 0]);
                 $message = "Lock user thành công";
             } else {
                 MstUsers::where('id', $id)->update(['is_active' => 1]);
                 $message = "Unlock user thành công";
             }
-        } catch(ModelNotFoundException $e) {
-            $message = "Unlock user không thành công" + " Error: " + $e->getMessage();
-            if($status===1){
-                $message = "Lock user không thành công" + " Error: " + $e->getMessage();
+            return response()->json(['status' => 'success', 'data' => [], 'message' => $message], 200);
+        } catch (ModelNotFoundException $e) {
+            $message = "Unlock user không thành công"+" Error: "+$e->getMessage();
+            if ($status === 1) {
+                $message = "Lock user không thành công"+" Error: "+$e->getMessage();
             }
+            return response()->json(['status' => 'error', 'data' => [], 'message' => $message], 400);
         }
-        
-        return back()->withError($message) ->withInput();
     }
 
     /**
-     * Update status user to deleted.
+     * get user by user id
      *
      * @param $id use for find specified user
+     * @return \Illuminate\Http\Response
      */
-    public function deleteUser($id)
+    public function getUserByID($id)
     {
         try {
-            MstUsers::where('id', $id)->update(['is_delete' => 1]);
-            $message = "Xoá User không thành công";
-        } catch(ModelNotFoundException $e){
-            $message = "Xoá User không thành công";
-            return back()->withError($message + " Error: " + $e->getMessage())->withInput();
+            $user = MstUsers::find($id);
+            return response()->json(['status' => 'success', 'data' => $user, 'message' => ''], 200);
+        } catch (\Throwable$th) {
+            return response()->json(['status' => 'error', 'data' => [], 'message' => 'Không tìm thấy người dùng'], 200);
         }
-        
-        return back();
+    }
+
+    /**
+     * search user .
+     *
+     */
+    public function getUsersData(Request $request)
+    {
+        if (request()->ajax()) {
+            $input = $request->all();
+            $querySearch = MstUsers::query();
+            $data = $querySearch->where('is_delete', 0);
+            if (!empty($input['name'])) {
+                $data = $data->where('name', 'like', '%' . $input['name'] . '%');
+            }
+            if (!empty($input['email'])) {
+                $data = $data->where('email', 'like', '%' . $input['email'] . '%');
+            }
+            if (!empty($input['role'])) {
+                $data = $data->where('group_role', $input['role']);
+            }
+            if ($input['active'] != "") {
+                $data = $data->where('is_active', (int) $input['active']);
+            }
+            $data = $data->orderBy('id', 'DESC')->get();
+            return Datatables::of($data)->make(true);
+        }
     }
 }

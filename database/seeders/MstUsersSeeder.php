@@ -16,10 +16,10 @@ class MstUsersSeeder extends Seeder
     public function run()
     {
         MstUsers::create([
-            'name' => 'test',
-            'email' => 'test@gmail.com', 
+            'name' => 'Admin',
+            'email' => 'admin@gmail.com', 
             'password'=> Hash::make('123'), 
-            'group_role'=>'Editor'
+            'group_role'=>'Admin'
         ]);
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Requests\LoginRequest;
 use App\Models\MstUsers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
@@ -34,7 +35,7 @@ class LoginController extends Controller
      */
     public function loginUser(LoginRequest $request){
         $data = $request->only('email','password');
-        $date = date_format(Carbon::now('Asia/Ho_Chi_Minh'), 'Y/m/d:H-i-s');
+        $date = date_format(Carbon::now(), Config::get('config.FORMAT_DATE_TIME'));
         if (Auth::attempt($data,$request->remember)) {
             $request->session()->put('info',$request->input());
             MstUsers::where('email', $request->email)
