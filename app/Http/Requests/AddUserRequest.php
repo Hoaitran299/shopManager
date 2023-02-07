@@ -28,7 +28,32 @@ class AddUserRequest extends FormRequest
             'email' => 'required|max:255|email:rfc,dns|unique:mst_users',
             'password' => 'required|min:5|regex:/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/',
             'password_confirmation' => 'required|min:5|same:password',
-            'group_role' => 'required',
+        ];
+    }
+
+    /**
+     * customize msg error
+     * @return array
+     */
+    public function messages()
+    {
+        return [
+            'name.required' => trans('UserRequired'),
+            'name.min' => trans('UserMinlength'),
+            'email.required' => trans('EmailRequired'),
+            'email.email' =>  trans('EmailType'),
+            'email.unique' =>  trans('email.unique'),
+            "email.exists" => trans('email.exists'),
+            "email.unique" => trans('email.unique'),
+            "email.max" => trans('email.max'),
+
+            'password.required' =>  trans('password.required'),
+            "password.min" => trans('PasswordMinlength'),
+            "password.regex" => trans('password.regex'),
+
+            "password_confirmation.required" => trans('PasswordConfirmRequired'),
+            "password_confirmation.min" => trans('PasswordConfirmMinlength'),
+            "password_confirmation.same" => trans('PasswordConfirmEqualTo')
         ];
     }
 }

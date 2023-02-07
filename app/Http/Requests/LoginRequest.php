@@ -35,10 +35,10 @@ class LoginRequest extends FormRequest
     public function messages()
     {
         return [
-            'email.required' => 'Email không được trống',
-            'email.email' => 'Email không đúng định dạng',
-            'email.exists' => 'Email không tồn tại',
-            'password.required' => 'Password không được trống'
+            'email.required' => trans('email.required'),
+            'email.email' =>  trans('email.email'),
+            'email.exists' =>  trans('email.exists'),
+            'password.required' =>  trans('password.required'),
         ];
     }
 }

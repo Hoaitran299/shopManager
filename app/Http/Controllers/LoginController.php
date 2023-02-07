@@ -8,7 +8,6 @@ use App\Models\MstUsers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
@@ -19,7 +18,7 @@ class LoginController extends Controller
       *
       * @var string
       */
-     protected $redirectTo = '/product';
+     protected $redirectTo = '/products';
 
     /**
      * Display a listing of the resource.
@@ -37,14 +36,12 @@ class LoginController extends Controller
      */
     public function loginUser(LoginRequest $request){
         $data = $request->only('email','password');
-        $format = Config::get('config.FORMAT_DATE_TIME');
-        $date = date_format(Carbon::now(),$format);
-
+        $date = date_format(Carbon::now(), Config::get('config.FORMAT_DATE_TIME'));
         if (Auth::attempt($data,$request->remember)) {
             $request->session()->put('info',$request->input());
             MstUsers::where('email', $request->email)
                     ->update(['last_login_at' => $date, 'last_login_ip' => $request->ip()]);
-            return redirect()->intended('product');
+            return redirect()->intended('products');
         } 
         return back()->withInput($request->only('email', 'remember'))->withErrors([
             'password' => trans('Incorrect password')

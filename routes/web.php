@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MstCustomerController;
 use App\Http\Controllers\MstProductController;
 use App\Http\Controllers\MstUsersController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,11 +30,20 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('users/update/{id}', [MstUsersController::class, 'update'])->name('user.update');
     Route::delete('users/{id}', [MstUsersController::class, 'destroy'])->name('user.delete');
     
-    Route::get('users/edit', [MstUsersController::class, 'show'])->name('user.edit');
-    //Route::post('users/delete', [MstUsersController::class, 'destroy'])->name('user.destroy');
-    
+    // Customers route
+    Route::get('customers', [MstCustomerController::class, 'index'])->name('customers.index');
+    Route::get('customers/getData', [MstCustomerController::class, 'getCustomerData'])->name('customers.getData');
+    Route::get('customers/info/{id}', [MstCustomerController::class, 'getCustomerByID']);
+    Route::post('customers', [MstCustomerController::class, 'store'])->name('customers.store'); 
+    Route::post('customers/update/{id}', [MstCustomerController::class, 'update'])->name('customers.update'); 
+    Route::get('customers/export', [MstCustomerController::class, 'export'])->name('customers.export'); 
+    Route::post('customers/import', [MstCustomerController::class, 'import'])->name('customers.import');
 
-    Route::get('/product', [MstProductController::class, 'index'])->name('product');
+    // Product
+     Route::get('products', [MstProductController::class, 'index'])->name('products');
+    // Route::get('products/details/{id}', [MstProductController::class, 'show'])->name('products.show'); 
+    // Route::post('products', [MstProductController::class, 'store'])->name('products.store'); 
+    // Route::post('products/update/{id}', [MstProductController::class, 'update'])->name('products.update'); 
 
     Route::get('/logout', [LoginController::class, 'logOut'])->name('logout');
 

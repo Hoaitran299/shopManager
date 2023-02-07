@@ -15,6 +15,7 @@ use App\Http\Requests\EditUserRequest;
 use App\Models\MstUsers;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Hash;
 use Yajra\Datatables\Datatables;
 
@@ -44,6 +45,7 @@ class MstUsersController extends Controller
      */
     public function index(Request $request)
     {
+        App::currentLocale();
         return view('users.users');
     }
 

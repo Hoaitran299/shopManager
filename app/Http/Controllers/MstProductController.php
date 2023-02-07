@@ -24,7 +24,7 @@ class MstProductController extends Controller
      */
     public function index()
     {
-        return view('product.product');
+        return view('products.product');
     }
 
     /**

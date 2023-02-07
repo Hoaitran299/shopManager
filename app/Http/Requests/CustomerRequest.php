@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class EditUserRequest extends FormRequest
+class CustomerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,9 +25,9 @@ class EditUserRequest extends FormRequest
     {
         return [
             'name' => 'required|min:5',
-            'email' => 'required|max:255|email:rfc,dns|unique:mst_users,email',
-            'password' => 'sometimes|min:5|regex:/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/',
-            'password_confirmation' => 'sometimes|min:5|same:password',
+            'email' => 'required|max:255|email:rfc,dns|unique:mst_customer',
+            'tel_num' => 'required|regex:/^([0-9]*)$/|min:7|max:13',
+            'address' => 'required|max:255',
         ];
     }
 
@@ -38,20 +38,22 @@ class EditUserRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => trans('UserRequired'),
-            'name.min' => trans('UserMinlength'),
+            'name.required' => trans('CustomerRequired'),
+            'name.min' => trans('CustomerMinlength'),
             'email.required' => trans('EmailRequired'),
             'email.email' =>  trans('EmailType'),
             'email.unique' =>  trans('email.unique'),
             "email.exists" => trans('email.exists'),
             "email.unique" => trans('email.unique'),
             "email.max" => trans('email.max'),
-            
-            "password.min" => trans('PasswordMinlength'),
-            "password.regex" => trans('password.regex'),
 
-            "password_confirmation.min" => trans('PasswordConfirmMinlength'),
-            "password_confirmation.same" => trans('PasswordConfirmEqualTo')
+            "tel_num.required" => trans('tel_num.required'),
+            "tel_num.regex" => trans('tel_num.regex'),
+            "tel_num.min" => trans('tel_num.min'),
+            "tel_num.max" => trans('tel_num.max'),
+
+            "address.required" => trans('address.required'),
+            "address.max" => trans('address.max'),
         ];
     }
 }

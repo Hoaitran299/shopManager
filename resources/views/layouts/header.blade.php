@@ -2,13 +2,13 @@
     <nav class="navbar navbar-expand navbar-white navbar-light">
 
         <ul class="navbar-nav">
-            <a class="navbar-brand" href="{{ route('product') }}"><img src="{{ asset('img/logo.png') }}" width="100%"
+            <a class="navbar-brand" href="{{ route('products') }}"><img src="{{ asset('img/logo.png') }}" width="100%"
                     height="60%" alt="RiverCrane Vietnam"></a>
             <li class="nav-item d-none d-sm-inline-block">
                 <a href="" class="nav-link justify-content-center align-items-center">Sản phẩm</a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="#" class="nav-link">Khách hàng</a>
+                <a href="{{ route('customers.index') }}" class="nav-link">Khách hàng</a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
                 <a href="{{ route('user.index') }}" class="nav-link">Users</a>

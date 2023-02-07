@@ -4,16 +4,14 @@
 
 @section('styles')
     <link rel="stylesheet" href="//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
-    <link href="//cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css"
-        rel="stylesheet">
+    <link href="//cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
 @stop
 
 @section('content')
-    {{-- @include('sweetalert::alert') --}}
     @include('layouts.header')
     <div class="container-fluid pr-0 pl-0">
         <div class="row">
-            <h4 class="ml-3"><strong>User List</strong></h4>
+            <h4 class="ml-3"><strong>Users List</strong></h4>
             <hr>
         </div>
         <div class="card">
@@ -76,24 +74,27 @@
         @if (session('error'))
             <div class="alert alert-danger text-center">{{ session('error') }}</div>
         @endif
-        <div class="card">
-            <div class="table-responsive">
-                <table class="table table-hover userList " id="userList" name="userList">
-                    <thead>
-                        <tr class="bg-danger">
-                            <th style="width: 10px">#</th>
-                            <th>Họ tên</th>
-                            <th>Email</th>
-                            <th>Nhóm</th>
-                            <th>Trạng thái</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+        <div class="row" style="margin:0.25rem">
+            <div class="card">
+                <div class="table-responsive" style="margin-top:0.25rem">
+                    <table class="table table-hover userList " id="userList" name="userList">
+                        <thead>
+                            <tr class="bg-danger">
+                                <th style="width: 10px">#</th>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>Nhóm</th>
+                                <th>Trạng thái</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+
         <div class="row">
             <div class="modal fade popupUser" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
                 @include('users.popupEditAddUser')
@@ -106,7 +107,9 @@
     <script src="//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
     <!-- jQuery -->
     <script src="//cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
-    <script src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.js" type="text/javascript"></script>
+    <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.min.js">
+        //<script src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.js" type="text/javascript">
+    </script>
 
     <script>
         $.ajaxSetup({
@@ -118,7 +121,7 @@
         $(document).ready(function() {
             var $table = $('#userList');
 
-             // Get data lên DataTable
+            // Get data lên DataTable
             var usersTable = $('.userList').DataTable({
                 processing: true,
                 serverSide: true,
@@ -222,7 +225,7 @@
                 },
             });
 
-             // Xử lý xoá textbox search
+            // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
                 $('#is_active').prop('selectedIndex', 0);
                 $('#group_role').prop('selectedIndex', 0);
@@ -236,7 +239,6 @@
                 console.log($('#is_active').val());
                 e.preventDefault();
                 usersTable.ajax.reload();
-
             })
 
             // Get thông tin user by ID
@@ -289,7 +291,7 @@
                 })
             });
 
-             // Xử lý xoá user is_delete = 1
+            // Xử lý xoá user is_delete = 1
             $(document).on('click', '.lockUser', function(e) {
                 var id = $(this).data("id");
                 var user = getUserByID(id);
@@ -338,21 +340,11 @@
                 })
             });
 
-            var validator = $("#inputForm").validate();
-
-            // Reset PopupEditAddUser
-            function initUserForm() {
-                $("#inputName").val('');
-                $("#inputEmail").val('');
-                $("#inputPassword").val('');
-                $("#inputPasswordConfirm").val('');
-                $("#checkActive").empty();
-                $("#selGroupRole").prop('selectedIndex', 1);
-                validator.resetForm();
-            }
-
+            //# Xử lý ADD-EDIT USER POPUP 
             // validate signup form on keyup and submit
-            $("#inputForm").validate({
+            var validator = $("#addUserForm").validate();
+            $("#addUserForm").validate({
+                debug: true,
                 onkeyup: function(element) {
                     this.element(element);
                 },
@@ -384,27 +376,26 @@
                 },
                 messages: {
                     inputName: {
-                        required: "{{__('UserRequired')}}",
-                        minlength: "{{__('UserMinlength')}}",
+                        required: "{{ __('UserRequired') }}",
+                        minlength: "{{ __('UserMinlength') }}",
                     },
                     inputEmail: {
-                        required: "{{__('EmailRequired')}}",
-                        email: "{{__('EmailType')}}",
+                        required: "{{ __('email.required') }}",
+                        email: "{{ __('EmailType') }}",
                     },
                     inputPassword: {
-                        required: "{{__('PasswordRequired')}}",
-                        minlength: "{{__('PasswordMinlength')}}",
-                        pwcheck: "{{__('PasswordCheck')}}",
+                        required: "{{ __('PasswordRequired') }}",
+                        minlength: "{{ __('PasswordMinlength') }}",
+                        pwcheck: "{{ __('PasswordCheck') }}",
                     },
                     inputPasswordConfirm: {
-                        required: "{{__('PasswordConfirmRequired')}}",
-                        equalTo: "{{__('PasswordConfirmEqualTo')}}",
+                        required: "{{ __('PasswordConfirmRequired') }}",
+                        equalTo: "{{ __('PasswordConfirmEqualTo') }}",
                     },
                 },
                 submitHandler: function(form, event) {
-                    event.preventDefault();
-                    $('body').on('click', '#inputButton', function(e) {
-                        e.preventDefault();
+                    $('body').on('click', '#addUserButton', function(event) {
+                        event.preventDefault();
                         var name = $("#inputName").val();
                         var email = $("#inputEmail").val();
                         var password = $("#inputPassword").val();
@@ -425,21 +416,49 @@
                             success: function(result) {
                                 console.log(result);
                                 if (result['status'] === 'success') {
-                                    Swal.fire("{{ __('Notification') }}",
-                                        "{{ __('Add success') }}", 'success');
+                                    Swal.fire(
+                                        "{{ __('Notification') }}",
+                                        "{{ __('Add success') }}",
+                                        'success');
                                     usersTable.ajax.reload();
                                 } else {
-                                    Swal.fire("{{ __('Notification') }}",
-                                        "{{ __('Add error') }}", 'error');
+                                    Swal.fire(
+                                        "{{ __('Notification') }}",
+                                        "{{ __('Add error') }}",
+                                        'error');
                                 }
                             },
                             beforeSend: function() {
-                                initUserForm();
-                            },
+                                clearMessages();
+                            }
                         });
                     });
                     return false;
                 }
+            });
+            // Reset PopupEditAddUser
+            function initUserForm() {
+                $("#inputName").val('');
+                $("#inputEmail").val('');
+                $("#inputPassword").val('');
+                $("#inputPasswordConfirm").val('');
+                $("#checkActive").empty();
+                $("#selGroupRole").prop('selectedIndex', 0);
+            }
+
+            // clear error message
+            function clearMessages() {
+                $("#errName").val('');
+                $("#errEmail").val('');
+                $("#errPassword").val('');
+                $("#errPasswordConfirm").val('');
+                validator.resetForm();
+            }
+
+            // Reset Form AddUser
+            $('#btnAdd').on('click', function() {
+                clearMessages();
+                initUserForm();
             });
 
             // check validate password
@@ -458,6 +477,7 @@
 
             // Get user cho popupEditUser
             $(document).on('click', '.popupEditUser', function() {
+                clearMessages();
                 $('#popupTitle').html("{{ __('Edit user') }}")
                 var idUSer = $(this).data("id");
                 var user = getUserByID(idUSer);
@@ -467,7 +487,7 @@
                     $("#inputName").val(user.name);
                     $("#inputEmail").val(user.email);
                     console.log(user.group_role);
-                    $('select option:contains("'+user.group_role+'")').prop('selected',true);
+                    $('select option:contains("' + user.group_role + '")').prop('selected', true);
                     if (user.is_active === 1) {
                         $('#checkActive').bootstrapToggle('on');
                     } else {
@@ -481,6 +501,8 @@
             // Xử lý sửa thông tin user
             $('body').on('click', '#editUserButton', function(e) {
                 e.preventDefault();
+
+                clearMessages();
                 var name = $("#inputName").val();
                 var email = $("#inputEmail").val();
                 var password = $("#inputPassword").val();
@@ -489,24 +511,23 @@
                 var active = ($("#checkActive").val()) === "on" ? 1 : 0;
 
                 $.ajax({
-                    url: '/users/update' + userID,
-                    type: "PUT",
+                    url: '/users/update/' + userID,
+                    type: "POST",
                     data: {
                         id: userID,
                         name: name,
                         email: email,
                         password: password,
-                        password_confirmation: password_confirmation,
                         group_role: role,
-                        is_active: userStatus,
-                        _method: 'PUT',
+                        is_active: active,
                     },
                     dataType: 'json',
                     success: function(data) {
-                        $("#closePopup").trigger("click");
                         if (result['status'] === 'success') {
                             Swal.fire("{{ __('Notification') }}",
                                 "{{ __('Edit success') }}", 'success');
+                            $('#editUserButton').attr('id', 'addUserButton');
+                            $("#closePopup").trigger("click");
                             usersTable.ajax.reload();
                         } else {
                             Swal.fire("{{ __('Notification') }}",
@@ -515,10 +536,17 @@
                         }
                     },
                     beforeSend: function() {
-                        initUserForm();
+                        clearMessages();
                     },
                 });
             });
+
+            // Reset AddUserForm sau khi close popup
+            $(document).on('click', '#closePopup', function() {
+                $('#popupTitle').html("Thêm mới User")
+                clearMessages();
+                initUserForm();
+            })
         });
     </script>
 @stop

@@ -1,13 +1,12 @@
 <div class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header bg-info">
-            <h4 class="modal-title" id="popupTitle">Thêm User</h4>
+            <h4 class="modal-title" id="popupTitle">Thêm khách hàng</h4>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
-        <form id="addUserForm" class="form-horizontal">
-            @csrf
+        <form id="addCustomerForm" class="form-horizontal">
             <div class="modal-body">
                 <div class="form-group">
                     <label>Tên</label>
@@ -21,26 +20,16 @@
                     
                 </div>
                 <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" class="form-control" id="inputPassword" name="inputPassword"
-                        placeholder="Mật khẩu">
-                        
+                    <label>Địa chỉ</label>
+                    <input type="text" class="form-control" id="inputAddress" name="inputAddress"
+                        placeholder="Nhập địa chỉ">
                 </div>
                 <div class="form-group">
-                    <label>Xác nhận</label>
-                    <input type="password" class="form-control" id="inputPasswordConfirm" name="inputPasswordConfirm"
-                        placeholder="Xác nhận mật khẩu">
+                    <label>Điện thoại</label>
+                    <input type="text" class="form-control" id="inputPhone" name="inputPhone"
+                    placeholder="Nhập điện thoại">
                         
                 </div>
-                <div class="form-group">
-                    <label>Nhóm</label>
-                    {!! Form::select('group_role', [1 => 'Admin', 2 => 'Editor', 3 => 'Reviewer'], null, [
-                        'class' => 'form-control',
-                        'id' => 'selGroupRole',
-                        'name' => 'selGroupRole'
-                    ]) !!}
-                </div>
-
                 <div class="form-group">
                     <label class="">Trạng thái</label>
                     <input type="checkbox" checked data-toggle="toggle" data-onstyle="success" data-offstyle="secondary" id="checkActive" name="checkActive"/>
@@ -49,7 +38,7 @@
             <div class="modal-footer">
                 <button type="button" id="closePopup" name="closePopup" class="btn btn-secondary"
                     data-dismiss="modal">Hủy</button>
-                <button id="addUserButton" name="addUserButton" type="submit" class="btn btn-danger addUserButton">Lưu</button>
+                <button id="btnAddCustomer" name="btnAddCustomer" type="submit" class="btn btn-danger btnAddCustomer">Lưu</button>
             </div>
         </form>
     </div>
