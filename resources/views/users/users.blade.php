@@ -3,8 +3,7 @@
 @section('title', 'RiverCrane Vietnam - Users')
 
 @section('styles')
-    <link rel="stylesheet" href="//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
-    <link href="//cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+
 @stop
 
 @section('content')
@@ -21,14 +20,14 @@
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>Tên</label>
-                                <input id='name' name='name' type="text" class="form-control"
+                                <input id='txtName' name='txtName' type="text" class="form-control"
                                     placeholder="Nhập họ tên">
                             </div>
                         </div>
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>Email</label>
-                                <input id='email' name='email' type="text" class="form-control"
+                                <input id='txtEmail' name='txtEmail' type="text" class="form-control"
                                     placeholder="Nhập email">
                             </div>
                         </div>
@@ -76,7 +75,7 @@
         @endif
         <div class="row" style="margin:0.25rem">
             <div class="card">
-                <div class="table-responsive" style="margin-top:0.25rem">
+                <div class="table-responsive dt-responsive nowrap" style="margin-top:0.25rem;width: 100%;">
                     <table class="table table-hover userList " id="userList" name="userList">
                         <thead>
                             <tr class="bg-danger">
@@ -103,13 +102,10 @@
     </div>
 @stop
 @section('scripts')
-    <!-- DataTables -->
-    <script src="//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    
     <!-- jQuery -->
-    <script src="//cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
-    <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.min.js">
-        //<script src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.js" type="text/javascript">
-    </script>
+    <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.min.js"></script>
+    {{-- <script src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.js" type="text/javascript"></script> --}}
 
     <script>
         $.ajaxSetup({
@@ -120,18 +116,24 @@
 
         $(document).ready(function() {
             var $table = $('#userList');
+            $.fn.DataTable.ext.pager.numbers_length = 10;
 
             // Get data lên DataTable
             var usersTable = $('.userList').DataTable({
                 processing: true,
                 serverSide: true,
                 searching: false,
+                autoWidth: false,
+                pagingType: "full_numbers_no_ellipses",
                 pageLength: 10,
+                dom: "<'row'<'col-sm-4'i><'col-sm-8 text-center'p>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 text-center'p>>",
                 ajax: {
                     url: "{{ route('user.getData') }}",
                     data: function(d) {
-                        d.name = $("#name").val() ?? '';
-                        d.email = $("#email").val() ?? '';
+                        d.name = $("#txtName").val() ?? '';
+                        d.email = $("#txtEmail").val() ?? '';
                         d.role = $("#group_role").val() ?? '';
                         d.active = $("#is_active").val() ?? '';
                     }
@@ -139,7 +141,7 @@
                 order: [
                     [0, 'desc']
                 ],
-                lengthMenu: [10, 20],
+                lengthChange: false,
                 columns: [{
                         data: 'id',
                         name: 'id'
@@ -218,10 +220,15 @@
                 },
                 language: {
                     processing: "{{ __('processing') }}",
-                    lengthMenu: "{{ __('lengthMenu') }}",
                     info: "{{ __('showPage') }}",
                     infoEmpty: "{{ __('infoEmpty') }}",
                     emptyTable: "{{ __('infoEmpty') }}",
+                    paginate: {
+                        first: "<<",
+                        previous: "<",
+                        next: ">",
+                        last: ">>"
+                    },
                 },
             });
 
@@ -340,111 +347,55 @@
                 })
             });
 
-            //# Xử lý ADD-EDIT USER POPUP 
-            // validate signup form on keyup and submit
-            var validator = $("#addUserForm").validate();
-            $("#addUserForm").validate({
-                debug: true,
-                onkeyup: function(element) {
-                    this.element(element);
-                },
-                onfocusout: function(element) {
-                    this.element(element);
-                },
-                rules: {
-                    inputName: {
-                        required: true,
-                        minlength: 5
+            $(document).on('click', '#addUserButton', function(e) {
+                e.preventDefault();
+                var name = $("#name").val();
+                var email = $("#email").val();
+                var password = $("#password").val();
+                var passwordConfirm = $("#password_confirm").val();
+                var role = $("#selGroupRole").val();
+                var active = ($("#checkActive").val()) === "on" ? 1 : 0;
+                console.log('add user');
+                $.ajax({
+                    url: "/users",
+                    type: "POST",
+                    data: {
+                        name: name,
+                        email: email,
+                        password: password,
+                        password_confirm: passwordConfirm,
+                        group_role: role,
+                        is_active: active,
                     },
-                    inputEmail: {
-                        required: true,
-                        email: true
+                    success: function(result) {
+                        console.log(result);
+                        if (result['status'] === 'success') {
+                            $("#closePopup").trigger("click");
+                            Swal.fire("{{ __('Notification') }}", "{{ __('Add success') }}",
+                                'success');
+                        } else {
+                            Swal.fire(
+                                "{{ __('Notification') }}",
+                                "{{ __('Add error') }}",
+                                'error');
+                        }
                     },
-                    inputPassword: {
-                        required: true,
-                        minlength: 5,
-                        pwcheck: true
-                    },
-                    inputPasswordConfirm: {
-                        required: true,
-                        equalTo: "#inputPassword"
-                    },
-                    selGroupRole: {
-                        required: true,
-                    },
-
-                },
-                messages: {
-                    inputName: {
-                        required: "{{ __('UserRequired') }}",
-                        minlength: "{{ __('UserMinlength') }}",
-                    },
-                    inputEmail: {
-                        required: "{{ __('email.required') }}",
-                        email: "{{ __('EmailType') }}",
-                    },
-                    inputPassword: {
-                        required: "{{ __('PasswordRequired') }}",
-                        minlength: "{{ __('PasswordMinlength') }}",
-                        pwcheck: "{{ __('PasswordCheck') }}",
-                    },
-                    inputPasswordConfirm: {
-                        required: "{{ __('PasswordConfirmRequired') }}",
-                        equalTo: "{{ __('PasswordConfirmEqualTo') }}",
-                    },
-                },
-                submitHandler: function(form, event) {
-                    $('body').on('click', '#addUserButton', function(event) {
-                        event.preventDefault();
-                        var name = $("#inputName").val();
-                        var email = $("#inputEmail").val();
-                        var password = $("#inputPassword").val();
-                        var role = $("#selGroupRole").val();
-                        var active = ($("#checkActive").val()) === "on" ? 1 : 0;
-
-                        $.ajax({
-                            url: "{{ route('user.create') }}",
-                            type: "POST",
-                            data: {
-                                name: name,
-                                email: email,
-                                password: password,
-                                group_role: role,
-                                is_active: active,
-                            },
-                            async: false,
-                            success: function(result) {
-                                console.log(result);
-                                if (result['status'] === 'success') {
-                                    Swal.fire(
-                                        "{{ __('Notification') }}",
-                                        "{{ __('Add success') }}",
-                                        'success');
-                                    usersTable.ajax.reload();
-                                } else {
-                                    Swal.fire(
-                                        "{{ __('Notification') }}",
-                                        "{{ __('Add error') }}",
-                                        'error');
-                                }
-                            },
-                            beforeSend: function() {
-                                clearMessages();
-                            }
-                        });
-                    });
-                    return false;
-                }
+                    beforeSend: function() {
+                        clearMessages();
+                    }
+                });
+                usersTable.ajax.reload();
             });
+
             // Reset PopupEditAddUser
             function initUserForm() {
-                $("#inputName").val('');
-                $("#inputEmail").val('');
-                $("#inputPassword").val('');
-                $("#inputPasswordConfirm").val('');
+                $("#name").val('');
+                $("#email").val('');
+                $("#password").val('');
+                $("#password_confirm").val('');
                 $("#checkActive").empty();
                 $("#selGroupRole").prop('selectedIndex', 0);
-            }
+            };
 
             // clear error message
             function clearMessages() {
@@ -452,15 +403,14 @@
                 $("#errEmail").val('');
                 $("#errPassword").val('');
                 $("#errPasswordConfirm").val('');
-                validator.resetForm();
-            }
-
+            };
             // Reset Form AddUser
             $('#btnAdd').on('click', function() {
                 clearMessages();
                 initUserForm();
             });
 
+            var validator = $("#addUserForm").validate();
             // check validate password
             $.validator.addMethod("pwcheck", function(value) {
                 return /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/.test(
@@ -481,12 +431,13 @@
                 $('#popupTitle').html("{{ __('Edit user') }}")
                 var idUSer = $(this).data("id");
                 var user = getUserByID(idUSer);
+
                 if (user != null) {
                     userID = user.id;
                     $('#addUserButton').attr('id', 'editUserButton');
-                    $("#inputName").val(user.name);
-                    $("#inputEmail").val(user.email);
-                    console.log(user.group_role);
+                    $("#name").val(user.name);
+                    $("#email").val(user.email);
+
                     $('select option:contains("' + user.group_role + '")').prop('selected', true);
                     if (user.is_active === 1) {
                         $('#checkActive').bootstrapToggle('on');
@@ -496,19 +447,21 @@
                 } else {
                     Swal.fire("{{ __('Notification') }}", "{{ __('User not found') }}", 'error');
                 }
-            })
+            });
 
             // Xử lý sửa thông tin user
-            $('body').on('click', '#editUserButton', function(e) {
+            $(document).on('click', '#editUserButton', function(e) {
                 e.preventDefault();
 
                 clearMessages();
-                var name = $("#inputName").val();
-                var email = $("#inputEmail").val();
-                var password = $("#inputPassword").val();
-                var password_confirmation = $("#inputPasswordConfirm").val();
+                var name = $("#name").val();
+                var email = $("#email").val();
+                var password = $("#password").val();
+                var password_confirm = $("#password_confirm").val();
                 var role = $("#selGroupRole").val();
                 var active = ($("#checkActive").val()) === "on" ? 1 : 0;
+
+                console.log('edit user');
 
                 $.ajax({
                     url: '/users/update/' + userID,
@@ -518,6 +471,7 @@
                         name: name,
                         email: email,
                         password: password,
+                        password_confirm: password_confirm,
                         group_role: role,
                         is_active: active,
                     },
@@ -546,7 +500,7 @@
                 $('#popupTitle').html("Thêm mới User")
                 clearMessages();
                 initUserForm();
-            })
+            });
         });
     </script>
 @stop

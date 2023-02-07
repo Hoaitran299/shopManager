@@ -3,8 +3,6 @@
 @section('title', 'RiverCrane Vietnam - Customers')
 
 @section('styles')
-    <link rel="stylesheet" href="//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
-    <link href="//cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
 @stop
 
 @section('content')
@@ -21,14 +19,14 @@
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>{{ trans('Fullname') }}</label>
-                                <input id='name' name='name' type="text" class="form-control"
+                                <input id='txtName' name='txtName' type="text" class="form-control"
                                     placeholder="Nhập {{ trans('Fullname') }}">
                             </div>
                         </div>
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>Email</label>
-                                <input id='email' name='email' type="text" class="form-control"
+                                <input id='txtEmail' name='txtEmail' type="text" class="form-control"
                                     placeholder="Nhập email">
                             </div>
                         </div>
@@ -45,7 +43,7 @@
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>{{ trans('Address') }}</label>
-                                <input id='address' name='address' type="text" class="form-control"
+                                <input id='txtAddress' name='txtAddress' type="text" class="form-control"
                                     placeholder="Nhập địa chỉ">
                             </div>
                         </div>
@@ -100,14 +98,9 @@
     </div>
 @stop
 @section('scripts')
-    <!-- DataTables -->
-    <script src="//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
     <!-- jQuery -->
-    <script src="//cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
-    {{-- <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script> --}}
-    <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.min.js">
-        //<script src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.js" type="text/javascript">
-    </script>
+    <script type="text/javascript" src="//cdn.datatables.net/rowreorder/1.3.2/js/dataTables.rowReorder.min.js"></script>
+    <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.min.js"></script>
 
     <script>
         $.ajaxSetup({
@@ -116,97 +109,57 @@
             }
         });
         // validate signup form on keyup and submit
-        $(document).ready(function() {
-            //var validator = $("#addCustomerForm").validate();
-            $("#addCustomerForm").validate({
-                onkeyup: function(element) {
-                    this.element(element);
-                },
-                onfocusout: function(element) {
-                    this.element(element);
-                },
-                rules: {
-                    inputName: {
-                        required: true,
-                        minlength: 5
-                    },
-                    inputEmail: {
-                        required: true,
-                        email: true
-                    },
-                    inputAddress: {
-                        required: true,
-                    },
-                    inputPhone: {
-                        required: true,
-                        digits: true,
-                        max: 9999999999,
-                    },
-                },
-                messages: {
-                    inputName: {
-                        required: "{{ __('CustomerRequired') }}",
-                        minlength: "{{ __('CustomerMinlength') }}",
-                    },
-                    inputEmail: {
-                        required: "{{ __('EmailRequired') }}",
-                        email: "{{ __('EmailType') }}",
-                    },
-                    inputAddress: {
-                        required: "{{ __('address.required') }}",
-                    },
-                    inputPhone: {
-                        required: "{{ __('PasswordConfirmRequired') }}",
-                        digits: "{{ __('tel_num.regex') }}",
-                        max: "{{ __('tel_num.max') }}",
-                    },
-                },
-                submitHandler: function(form) {
-                    console.log('aaaaaaaaaa');
-                    // $('body').on('click', '#btnAddCustomer', function(event) {
-                    //         event.preventDefault();
+        // $(document).ready(function() {
+        //     $("#addCustomerForm").validate({
+        //         onkeyup: function(element) {
+        //             this.element(element);
+        //         },
+        //         onfocusout: function(element) {
+        //             this.element(element);
+        //         },
+        //         rules: {
+        //             name: {
+        //                 required: true,
+        //                 minlength: 5
+        //             },
+        //             email: {
+        //                 required: true,
+        //                 email: true
+        //             },
+        //             address: {
+        //                 required: true,
+        //             },
+        //             tel_num: {
+        //                 required: true,
+        //                 digits: true,
+        //                 max: 9999999999,
+        //             },
+        //         },
+        //         messages: {
+        //             name: {
+        //                 required: "{{ __('CustomerRequired') }}",
+        //                 minlength: "{{ __('CustomerMinlength') }}",
+        //             },
+        //             email: {
+        //                 required: "{{ __('EmailRequired') }}",
+        //                 email: "{{ __('EmailType') }}",
+        //             },
+        //             address: {
+        //                 required: "{{ __('address.required') }}",
+        //             },
+        //             tel_num: {
+        //                 required: "{{ __('PasswordConfirmRequired') }}",
+        //                 digits: "{{ __('tel_num.regex') }}",
+        //                 max: "{{ __('tel_num.max') }}",
+        //             },
+        //         },
+        //         submitHandler: function(form) {
+        //             console.log('aaaaaaaaaa');
 
-                    //     var name = $("#inputName").val();
-                    //     var email = $("#inputEmail").val();
-                    //     var tel = $("#inputPhone").val();
-                    //     var address = $("#inputAddress").val();
-                    //     var active = ($("#checkActive").val()) === "on" ? 1 : 0;
-                    //     console.log('aaaaaaaaaa');
-                    //     $.ajax({
-                    //         url: "{{ route('customers.store') }}",
-                    //         type: "POST",
-                    //         data: {
-                    //             name: name,
-                    //             email: email,
-                    //             tel_num: tel,
-                    //             address: address,
-                    //             is_active: active,
-                    //         },
-                    //         dataType: 'json',
-                    //         success: function(result) {
-                    //             console.log(result);
-                    //             if (result['status'] === 'success') {
-                    //                 Swal.fire(
-                    //                     "{{ __('Notification') }}",
-                    //                     "{{ __('Add success') }}",
-                    //                     'success');
-                    //                 customerTable.ajax.reload();
-                    //             } else {
-                    //                 Swal.fire(
-                    //                     "{{ __('Notification') }}",
-                    //                     "{{ __('Add error') }}",
-                    //                     'error');
-                    //             }
-                    //         },
-                    //         // beforeSend: function() {
-                    //         //     clearMessages();
-                    //         // }
-                    //     });
-                    // });
-                    // return false;
-                }
-            });
-        });
+        //             // return false;
+        //         }
+        //     });
+        // });
         $(document).ready(function() {
             var $table = $('#customerList');
 
@@ -215,20 +168,25 @@
                 processing: true,
                 serverSide: true,
                 searching: false,
+                autoWidth: false,
+                pagingType: "full_numbers_no_ellipses",
                 pageLength: 10,
+                dom: "<'row'<'col-sm-4'i><'col-sm-8 text-center'p>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 text-center'p>>",
                 ajax: {
                     url: "{{ route('customers.getData') }}",
                     data: function(d) {
-                        d.name = $("#name").val() ?? '';
-                        d.email = $("#email").val() ?? '';
-                        d.address = $("#inputAddress").val() ?? '';
+                        d.name = $("#txtName").val() ?? '';
+                        d.email = $("#txtEmail").val() ?? '';
+                        d.address = $("#txtAddress").val() ?? '';
                         d.active = $("#is_active").val() ?? '';
                     }
                 },
                 order: [
                     [0, 'desc']
                 ],
-                lengthMenu: [10, 20],
+                lengthChange: false,
                 columns: [{
                         data: 'customer_id',
                         name: 'customer_id'
@@ -256,6 +214,10 @@
                             $btn = '<button type="button" id="editCustomer-' + $id + '" data-id="' +
                                 $id +
                                 '" class="btn btn-info editCustomer"><i class="fa fa-edit"></i></button>';
+                            $btn = $btn + ' <button type="button" id="saveCustomer-' + $id +
+                                '" data-id="' +
+                                $id +
+                                '" class="btn btn-info saveCustomer d-none"><i class="fa fa-save"></i></button>';
                             return $btn;
                         },
                         orderable: false,
@@ -271,34 +233,39 @@
                     if (rows < page_min) {
                         $table
                             .next('.dataTables_info').css('display', 'none')
-                            .next('.dataTables_paginate').css('display', 'none')
+                            .next('.paginate_button').css('display', 'none')
                             .next('.dataTables_length').css('display', 'none');
 
                     } else if (pages === 1) {
                         $table
                             .next('.dataTables_info').css('display', 'none')
-                            .next('.dataTables_paginate').css('display', 'none');
+                            .next('.paginate_button').css('display', 'none');
                     } else {
                         $table
                             .next('.dataTables_info').css('display', 'block')
-                            .next('.dataTables_paginate').css('display', 'block');
+                            .next('.paginate_button').css('display', 'block');
                     }
                 },
                 language: {
                     processing: "{{ __('processing') }}",
-                    lengthMenu: "{{ __('lengthMenu') }}",
                     info: "{{ __('showPage') }}",
                     infoEmpty: "{{ __('infoEmpty') }}",
                     emptyTable: "{{ __('infoEmpty') }}",
+                    paginate: {
+                        first: "<<",
+                        previous: "<",
+                        next: ">",
+                        last: ">>"
+                    },
                 },
             });
 
             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
                 $('#is_active').prop('selectedIndex', 0);
-                $('#inputAddress').val('');
-                $('#name').val('');
-                $('#email').val('');
+                $('#txtAddress').val('');
+                $('#txtName').val('');
+                $('#txtEmail').val('');
                 customerTable.ajax.reload();
             });
 
@@ -327,11 +294,11 @@
 
             // Reset PopupEditAddUser
             function initUserForm() {
-                $("#inputName").val('');
-                $("#inputEmail").val('');
-                $("#inputPhone").val('');
+                $("#name").val('');
+                $("#email").val('');
+                $("#tel_num").val('');
                 $("#checkActive").empty();
-                $("#inputAddress").prop('selectedIndex', 0);
+                $("#address").prop('selectedIndex', 0);
             }
 
             // clear error message
@@ -349,40 +316,89 @@
                 initUserForm();
             });
 
+            $(document).on('click', '#btnAddCustomer', function(event) {
+                event.preventDefault();
+
+                var name = $("#name").val();
+                var email = $("#email").val();
+                var tel = $("#tel_num").val();
+                var address = $("#address").val();
+                var active = ($("#checkActive").val()) === "on" ? 1 : 0;
+                console.log('aaaaaaaaaa');
+                $.ajax({
+                    url: "{{ route('customers.store') }}",
+                    type: "POST",
+                    data: {
+                        name: name,
+                        email: email,
+                        tel_num: tel,
+                        address: address,
+                        is_active: active,
+                    },
+                    dataType: 'json',
+                    success: function(result) {
+                        console.log(result);
+                        if (result['status'] === 'success') {
+                            Swal.fire(
+                                "{{ __('Notification') }}",
+                                "{{ __('Add success') }}",
+                                'success');
+                            customerTable.ajax.reload();
+                        } else {
+                            Swal.fire(
+                                "{{ __('Notification') }}",
+                                "{{ __('Add error') }}",
+                                'error');
+                        }
+                    },
+                });
+            });
             var customerID = null;
 
             // Get user cho popupEditCustomer
-            $(document).on('click', '.popupEditCustomer', function() {
+            $('#customerList').on('mousedown', '.editCustomer', function() {
                 //clearMessages();
                 $('#popupTitle').html("{{ __('Edit user') }}")
                 var id = $(this).data("id");
                 var customer = getCustomerByID(id);
                 if (customer != null) {
                     customerID = customer.customer_id;
-                    $('#btnAddCustomer').attr('id', 'btnEditCustomer');
-                    $("#inputName").val(customer.customer_name);
-                    $("#inputEmail").val(customer.email);
-
-                    if (customer.is_active === 1) {
-                        $('#checkActive').bootstrapToggle('on');
-                    } else {
-                        $('#checkActive').bootstrapToggle('off');
-                    }
+                    $('.editCustomer').addClass("d-none");
+                    $('.saveCustomer').removeClass("d-none");
+                    var $row = $(this).closest("tr").off("mousedown");
+                    var $tds = $row.find("td").not(':first').not(':last');
+                    $.each($tds, function(i, el) {
+                        var txt = $(this).text();
+                        $(this).html("").append("<input type='text' value=\"" + txt + "\">");
+                    });
                 } else {
                     Swal.fire("{{ __('Notification') }}", "{{ __('User not found') }}", 'error');
                 }
-            })
+            });
+            $("#customerList").on('mousedown', "input", function(e) {
+                e.stopPropagation();
+            });
 
+            $("#customerList").on('mousedown', ".saveCustomer", function(e) {
+
+                $('.saveCustomer').addClass("d-none");
+                $('.editCustomer').removeClass("d-none");
+                var $row = $(this).closest("tr");
+                var $tds = $row.find("td").not(':first').not(':last');
+
+                $.each($tds, function(i, el) {
+                    var txt = $(this).find("input").val()
+                    $(this).html(txt);
+                });
+            });
             // Xử lý sửa thông tin user
             $('body').on('click', '#btnEditCustomer', function(e) {
                 e.preventDefault();
 
                 //clearMessages();
-                var name = $("#inputName").val();
-                var email = $("#inputEmail").val();
-                // var password = $("#inputPassword").val();
-                // var password_confirmation = $("#inputPasswordConfirm").val();
-                var address = $("#inputAddress").val();
+                var name = $("#name").val();
+                var email = $("#email").val();
+                var address = $("#address").val();
                 var active = ($("#checkActive").val()) === "on" ? 1 : 0;
 
                 $.ajax({

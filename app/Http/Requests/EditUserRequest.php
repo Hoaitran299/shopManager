@@ -27,7 +27,7 @@ class EditUserRequest extends FormRequest
             'name' => 'required|min:5',
             'email' => 'required|max:255|email:rfc,dns|unique:mst_users,email',
             'password' => 'sometimes|min:5|regex:/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/',
-            'password_confirmation' => 'sometimes|min:5|same:password',
+            'password_confirm' => 'sometimes|min:5|same:password',
         ];
     }
 
@@ -43,15 +43,14 @@ class EditUserRequest extends FormRequest
             'email.required' => trans('EmailRequired'),
             'email.email' =>  trans('EmailType'),
             'email.unique' =>  trans('email.unique'),
-            "email.exists" => trans('email.exists'),
-            "email.unique" => trans('email.unique'),
+            'email.exists' => trans('email.exists'),
             "email.max" => trans('email.max'),
             
             "password.min" => trans('PasswordMinlength'),
             "password.regex" => trans('password.regex'),
 
-            "password_confirmation.min" => trans('PasswordConfirmMinlength'),
-            "password_confirmation.same" => trans('PasswordConfirmEqualTo')
+            "password_confirm.min" => trans('PasswordConfirmMinlength'),
+            "password_confirm.same" => trans('PasswordConfirmEqualTo')
         ];
     }
 }

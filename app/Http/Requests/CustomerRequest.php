@@ -43,8 +43,7 @@ class CustomerRequest extends FormRequest
             'email.required' => trans('EmailRequired'),
             'email.email' =>  trans('EmailType'),
             'email.unique' =>  trans('email.unique'),
-            "email.exists" => trans('email.exists'),
-            "email.unique" => trans('email.unique'),
+            'email.exists' => trans('email.exists'),
             "email.max" => trans('email.max'),
 
             "tel_num.required" => trans('tel_num.required'),

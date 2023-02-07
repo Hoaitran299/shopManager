@@ -58,6 +58,9 @@ class MstUsersController extends Controller
     public function store(AddUserRequest $request)
     {
         try {
+             // Retrieve the validated input data...
+            //$validated = $request->validated();
+            //dd($validated);
             $input = $request->all();
             $data = [
                 'name' => $input['name'],
@@ -67,7 +70,7 @@ class MstUsersController extends Controller
                 'is_active' => $input['is_active']
             ];
             MstUsers::create($data);
-            return response()->json(['status' => 'success'], 200);
+            return response()->json(['status' => 'success','message'=>$input->errors()], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['status' => 'error'], 400);
         }
