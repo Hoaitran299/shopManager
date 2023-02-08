@@ -16,6 +16,8 @@
 
   "Export success": "Export thành công",
   "Export error": "Export thất bại",
+  "Import success": "Import thành công",
+  "Import error": "Dữ liệu import lỗi, vui lòng xem chi tiết trong log",
   "Incorrect password": "Mật khẩu không đúng.",
   "Add success ": "Thêm mới thành công",
   "Add error ": "Thêm mới thất bại, vui lòng thử lại",

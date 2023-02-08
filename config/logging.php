@@ -117,6 +117,13 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+        'LOG_IMPORT_CUSTOMER_EXCEL' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/LOG_IMPORT_CUSTOMER_EXCEL.log'),
+            'level' => 'debug',
+            'days' => 7,
+            'permission' => 777,
+        ],
     ],
 
 ];

@@ -6,9 +6,12 @@ use App\Exports\CustomersExport;
 use App\Http\Requests\CustomerRequest;
 use App\Imports\CustomersImport;
 use App\Models\MstCustomer;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException;
 use Yajra\DataTables\Facades\DataTables;
 
 class MstCustomerController extends Controller
@@ -135,9 +138,21 @@ class MstCustomerController extends Controller
      */
     public function import(Request $request)
     {
-        Excel::import(new CustomersImport, 'customers.xlsx');
-        
-        return redirect('/')->with('success', 'All good!');
+        try {
+            $import = Excel::import(new CustomersImport, request()->file('file'));
+            //dd($import);
+            return response()->json(['status' => 'success', 'message' => trans('Import success')], 200);
+        } catch (ValidationException $e) {
+             $failures = $e->failures();
+             
+             foreach ($failures as $failure) {
+                 $row = $failure->row(); // row that went wrong
+                 $column = $failure->attribute(); // either heading key (if using heading row concern) or column index
+                 $messages = $failure->errors(); // Actual error messages from Laravel validator
+                 Log::channel('LOG_IMPORT_CUSTOMER_EXCEL')->debug('Error row: ' . $row . ' \n| column error:'.$column.' \n| Message: ' . $messages[0]);
+            }
+            return response()->json(['status' => 'error', 'message' => trans('Import error')], 400);
+        }
     }
 
     /**
@@ -146,10 +161,26 @@ class MstCustomerController extends Controller
      */
     public function export(Request $request)
     {
-        // $input = [];
-        // if (request()->ajax()) {
-        //     $input = $request->all();
-        // }
-        return Excel::download(new CustomersExport(), 'customers.xlsx');
+        $date = Carbon::now()->year."".Carbon::now()->month."".Carbon::now()->day."".Carbon::now()->hour."".Carbon::now()->minute."".Carbon::now()->second;
+        
+        $filename = 'customers_' .$date.'.xlsx';
+        $data = null;
+        $filter = $request->all();
+        $data = MstCustomer::query();
+        if (!empty($filter['name'])) {
+            $data = $data->where('customer_name', 'like', '%' . $filter['name'] . '%');
+        }
+        if (!empty($filter['email'])) {
+            $data = $data->where('email', 'like', '%' . $filter['email'] . '%');
+        }
+        if (!empty($filter['address'])) {
+            $data = $data->where('address', 'like', '%' . $filter['address'] . '%');
+        }
+        if ($filter['is_active'] != "") {
+            $data = $data->where('is_active', (int) $filter['is_active']);
+        }
+        $data = $data->select('customer_name','email','tel_num','address')->orderBy('customer_id', 'DESC')->get();
+            //dd($data);
+        return Excel::download(new CustomersExport($data),$filename);
     }
 }

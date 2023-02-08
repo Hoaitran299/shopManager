@@ -14,7 +14,7 @@
         </div>
         <div class="card">
             <div class="card-body">
-                <form action="" id="searchForm">
+                <form action="" id="searchForm" enctype="multipart/form-data">
                     <div class="row">
                         <div class="col-sm-3">
                             <div class="form-group">
@@ -55,9 +55,10 @@
                                     mới</span></button>
                         </div>
                         <div class="col-md-4 text-left">
-                            <button id="btnImport" name="btnImport" type="submit" class="btn btn-success">
-                                <span><i class="fas fa-upload"></i>Import</span>
-                            </button>
+                            <label class="btn btn-success">
+                                <i class="fa fa-upload"></i> &nbsp;Import
+                                <input class="hidden" name="import" id="import" type="file">
+                            </label>
                             <button id="btnExport" name="btnExport" type="submit" class="btn btn-success">
                                 <span><i class="fas fa-file-export"></i>Export</span>
                             </button>
@@ -402,7 +403,7 @@
                     $(this).html(txt);
                 });
             });
-           
+
             // Xử lý sửa thông tin customers
             $('body').on('click', '#btnEditCustomer', function(e) {
                 e.preventDefault();
@@ -443,38 +444,66 @@
                 });
             });
 
-             // Xử lý export customers
-             $('body').on('click', '#btnExport', function(e) {
+            // Xử lý import customers
+            $('#searchForm').on('change', '#import', function(e) {
+                e.preventDefault();
+                var file_data = $('#import').prop('files')[0];
+                console.log(file_data);
+                var formData = new FormData();
+                formData.append('file', file_data);
+
+                $.ajax({
+                    //url: "{{ route('customers.import') }}",
+                    type: "POST",
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data['status'] === "success") {
+                            Swal.fire(
+                                '{{ __('Notification') }}',
+                                '{{ __('Import success') }}',
+                                'success'
+                            )
+                        } else {
+                            Swal.fire(
+                                '{{ __('Notification') }}',
+                                '{{ __('Import error') }}',
+                                'error'
+                            )
+                        }
+
+                    },
+                });
+                customerTable.ajax.reload();
+            });
+
+            // Xử lý export customers
+            $('body').on('click', '#btnExport', function(e) {
                 e.preventDefault();
                 var name = $("#txtName").val();
                 var email = $("#txtEmail").val();
                 var address = $("#txtAddress").val();
                 var active = "";
-                if($("#checkActive").val()){
+                if ($("#checkActive").val()) {
                     active = $("#checkActive").val() === "on" ? 1 : 0
-                } 
-                $.ajax({
-                    url: "/customers/export",
-                    type: "GET",
-                    data: {
-                        name: name,
-                        email: email,
-                        address: address,
-                        is_active: active,
-                    },
-                    dataType: 'json',
-                    success: function(data) {
-                        var msg = "{{ __('Edit error') }}"+ data.messages;
-                        if (result['status'] === 'success') {
-                            Swal.fire("{{ __('Notification') }}",
-                                "{{ __('Export success') }}", 'success');
-                        } else {
-                            Swal.fire("{{ __('Notification') }}",
-                            msg, 'error');
+                }
+                var filter = {
+                    name: name,
+                    email: email,
+                    address: address,
+                    is_active: active,
+                };
 
-                        }
-                    },
-                });
+                var base_url = window.location.origin;
+                var url = base_url + '/customers/export?' + $.param(filter);
+                window.location = url;
+                Swal.fire(
+                    '{{ __('Notification') }}',
+                    '{{ __('Export success') }}',
+                    'success'
+                )
             });
 
             // Reset addCustomerForm sau khi close popup
