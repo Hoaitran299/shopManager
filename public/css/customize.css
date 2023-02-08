@@ -10,7 +10,7 @@ hr {
    color: #dc3545!important;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+/* .dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
     background-color: lightgrey !important;
     border: 1px solid rgb(28, 3, 253);
     color: rgb(33, 10, 241);
@@ -18,4 +18,4 @@ hr {
 .dataTables_wrapper .dataTables_paginate .paginate_button {
     color: rgb(21, 60, 235) !important;
     border: 1px solid rgb(28, 3, 253);
-}
+} */

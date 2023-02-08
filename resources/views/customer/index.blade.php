@@ -14,7 +14,7 @@
         </div>
         <div class="card">
             <div class="card-body">
-                <form action="" method="post">
+                <form action="" id="searchForm">
                     <div class="row">
                         <div class="col-sm-3">
                             <div class="form-group">
@@ -33,10 +33,10 @@
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>{{ trans('Active') }}</label>
-                                {!! Form::select('is_active', [0 => 'Tạm khóa', 1 => 'Đang hoạt động'], null, [
+                                {!! Form::select('checkActive', [0 => 'Tạm khóa', 1 => 'Đang hoạt động'], null, [
                                     'placeholder' => 'Chọn trạng thái...',
                                     'class' => 'form-control',
-                                    'id' => 'is_active',
+                                    'id' => 'checkActive',
                                 ]) !!}
                             </div>
                         </div>
@@ -54,7 +54,16 @@
                                 data-target=".popupCustomer"><i class="fa fa-user-plus fa-border"></i><span> Thêm
                                     mới</span></button>
                         </div>
-                        <div class="col-md-10 text-right">
+                        <div class="col-md-4 text-left">
+                            <button id="btnImport" name="btnImport" type="submit" class="btn btn-success">
+                                <span><i class="fas fa-upload"></i>Import</span>
+                            </button>
+                            <button id="btnExport" name="btnExport" type="submit" class="btn btn-success">
+                                <span><i class="fas fa-file-export"></i>Export</span>
+                            </button>
+
+                        </div>
+                        <div class="col-md-6 text-right">
                             <button id="btnSearch" name="btnSearch" type="button" class="btn btn-success"><i
                                     class="fa fa-search fa-border"></i><span> Tìm
                                     kiếm</span></button>
@@ -108,60 +117,11 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-        // validate signup form on keyup and submit
-        // $(document).ready(function() {
-        //     $("#addCustomerForm").validate({
-        //         onkeyup: function(element) {
-        //             this.element(element);
-        //         },
-        //         onfocusout: function(element) {
-        //             this.element(element);
-        //         },
-        //         rules: {
-        //             name: {
-        //                 required: true,
-        //                 minlength: 5
-        //             },
-        //             email: {
-        //                 required: true,
-        //                 email: true
-        //             },
-        //             address: {
-        //                 required: true,
-        //             },
-        //             tel_num: {
-        //                 required: true,
-        //                 digits: true,
-        //                 max: 9999999999,
-        //             },
-        //         },
-        //         messages: {
-        //             name: {
-        //                 required: "{{ __('CustomerRequired') }}",
-        //                 minlength: "{{ __('CustomerMinlength') }}",
-        //             },
-        //             email: {
-        //                 required: "{{ __('EmailRequired') }}",
-        //                 email: "{{ __('EmailType') }}",
-        //             },
-        //             address: {
-        //                 required: "{{ __('address.required') }}",
-        //             },
-        //             tel_num: {
-        //                 required: "{{ __('PasswordConfirmRequired') }}",
-        //                 digits: "{{ __('tel_num.regex') }}",
-        //                 max: "{{ __('tel_num.max') }}",
-        //             },
-        //         },
-        //         submitHandler: function(form) {
-        //             console.log('aaaaaaaaaa');
 
-        //             // return false;
-        //         }
-        //     });
-        // });
         $(document).ready(function() {
             var $table = $('#customerList');
+            var action = "add";
+            $.fn.DataTable.ext.pager.numbers_length = 10;
 
             // Get data lên DataTable
             var customerTable = $('#customerList').DataTable({
@@ -171,6 +131,11 @@
                 autoWidth: false,
                 pagingType: "full_numbers_no_ellipses",
                 pageLength: 10,
+                // rowReorder: {
+                //     dataSrc: 'readingOrder',
+                //     editor:  editor
+                // },
+                select: true,
                 dom: "<'row'<'col-sm-4'i><'col-sm-8 text-center'p>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 text-center'p>>",
@@ -180,7 +145,7 @@
                         d.name = $("#txtName").val() ?? '';
                         d.email = $("#txtEmail").val() ?? '';
                         d.address = $("#txtAddress").val() ?? '';
-                        d.active = $("#is_active").val() ?? '';
+                        d.active = $("#checkActive").val() ?? '';
                     }
                 },
                 order: [
@@ -260,9 +225,78 @@
                 },
             });
 
+            // validate signup form on keyup and submit
+            var validator = $("#addCustomerForm").validate({
+                rules: {
+                    name: {
+                        required: true,
+                        minlength: 5
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    address: {
+                        required: true,
+                    },
+                    tel_num: {
+                        required: true,
+                        digits: true,
+                        max: 999999999999,
+                        min: 7,
+                    },
+                },
+                messages: {
+                    name: {
+                        required: "{{ __('CustomerRequired') }}",
+                        minlength: "{{ __('CustomerMinlength') }}",
+                    },
+                    email: {
+                        required: "{{ __('EmailRequired') }}",
+                        email: "{{ __('EmailType') }}",
+                    },
+                    address: {
+                        required: "{{ __('address.required') }}",
+                    },
+                    tel_num: {
+                        required: "{{ __('tel_num.required') }}",
+                        digits: "{{ __('tel_num.regex') }}",
+                        max: "max",
+                        min: "min"
+                    },
+                },
+                submitHandler: function(form, e) {
+                    e.preventDefault();
+
+                    var formData = new FormData(form);
+                    console.log('add custom');
+                    $.ajax({
+                        url: "/customers",
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function(result) {
+                            console.log(result);
+                            if (result['status'] === 'success') {
+                                Swal.fire(
+                                    "{{ __('Notification') }}",
+                                    "{{ __('Add success') }}",
+                                    'success');
+                            } else {
+                                Swal.fire(
+                                    "{{ __('Notification') }}",
+                                    "{{ __('Add error') }}",
+                                    'error');
+                            }
+                        },
+                    });
+                    customerTable.ajax.reload();
+                }
+            });
             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
-                $('#is_active').prop('selectedIndex', 0);
+                $('#checkActive').prop('selectedIndex', 0);
                 $('#txtAddress').val('');
                 $('#txtName').val('');
                 $('#txtEmail').val('');
@@ -297,79 +331,56 @@
                 $("#name").val('');
                 $("#email").val('');
                 $("#tel_num").val('');
-                $("#checkActive").empty();
-                $("#address").prop('selectedIndex', 0);
+                $("#address").val('');
+                $("#is_active").prop('selectedIndex', 0);
             }
 
             // clear error message
-            // function clearMessages() {
-            //     $("#errName").val('');
-            //     $("#errEmail").val('');
-            //     // $("#errPassword").val('');
-            //     // $("#errPasswordConfirm").val('');
-            //     validator.resetForm();
-            // }
+            function clearMessages() {
+                $("#name-error").val('');
+                $("#email-error").val('');
+                $("#tel_num-error").val('');
+                $("#address").val('');
+                validator.resetForm();
+            };
 
             // Reset Form AddUser
             $('#btnAdd').on('click', function() {
-                //clearMessages();
+                clearMessages();
                 initUserForm();
             });
 
-            $(document).on('click', '#btnAddCustomer', function(event) {
-                event.preventDefault();
-
-                var name = $("#name").val();
-                var email = $("#email").val();
-                var tel = $("#tel_num").val();
-                var address = $("#address").val();
-                var active = ($("#checkActive").val()) === "on" ? 1 : 0;
-                console.log('aaaaaaaaaa');
-                $.ajax({
-                    url: "{{ route('customers.store') }}",
-                    type: "POST",
-                    data: {
-                        name: name,
-                        email: email,
-                        tel_num: tel,
-                        address: address,
-                        is_active: active,
-                    },
-                    dataType: 'json',
-                    success: function(result) {
-                        console.log(result);
-                        if (result['status'] === 'success') {
-                            Swal.fire(
-                                "{{ __('Notification') }}",
-                                "{{ __('Add success') }}",
-                                'success');
-                            customerTable.ajax.reload();
-                        } else {
-                            Swal.fire(
-                                "{{ __('Notification') }}",
-                                "{{ __('Add error') }}",
-                                'error');
-                        }
-                    },
-                });
-            });
             var customerID = null;
 
             // Get user cho popupEditCustomer
-            $('#customerList').on('mousedown', '.editCustomer', function() {
-                //clearMessages();
-                $('#popupTitle').html("{{ __('Edit user') }}")
+            $('#customerList').on('click', '.editCustomer', function() {
                 var id = $(this).data("id");
                 var customer = getCustomerByID(id);
+                console.log(customer);
                 if (customer != null) {
                     customerID = customer.customer_id;
-                    $('.editCustomer').addClass("d-none");
-                    $('.saveCustomer').removeClass("d-none");
+                    $(this).val("d-none");
+                    // $save = '.saveCustomer-'+customerID;
+                    // $('.editCustomer-'+customerID).addClass("d-none");
+                    $($save).removeClass("d-none");
                     var $row = $(this).closest("tr").off("mousedown");
                     var $tds = $row.find("td").not(':first').not(':last');
                     $.each($tds, function(i, el) {
                         var txt = $(this).text();
-                        $(this).html("").append("<input type='text' value=\"" + txt + "\">");
+                        var name = "";
+                        if (i === 0) {
+                            name = "name-" + customerID;
+                        } else if (i === 1) {
+                            name = "email-" + customerID;
+                        } else if (i === 1) {
+                            name = "address-" + customerID;
+                        } else {
+                            name = "tel_num-" + customerID;
+                        }
+
+                        $(this).html("").append("<input class='form-control' id=\"" + name +
+                            "\" name=\"" + name + "\" type='text' value=\"" + txt +
+                            "\">");
                     });
                 } else {
                     Swal.fire("{{ __('Notification') }}", "{{ __('User not found') }}", 'error');
@@ -391,7 +402,8 @@
                     $(this).html(txt);
                 });
             });
-            // Xử lý sửa thông tin user
+           
+            // Xử lý sửa thông tin customers
             $('body').on('click', '#btnEditCustomer', function(e) {
                 e.preventDefault();
 
@@ -427,6 +439,40 @@
                     },
                     beforeSend: function() {
                         clearMessages();
+                    },
+                });
+            });
+
+             // Xử lý export customers
+             $('body').on('click', '#btnExport', function(e) {
+                e.preventDefault();
+                var name = $("#txtName").val();
+                var email = $("#txtEmail").val();
+                var address = $("#txtAddress").val();
+                var active = "";
+                if($("#checkActive").val()){
+                    active = $("#checkActive").val() === "on" ? 1 : 0
+                } 
+                $.ajax({
+                    url: "/customers/export",
+                    type: "GET",
+                    data: {
+                        name: name,
+                        email: email,
+                        address: address,
+                        is_active: active,
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        var msg = "{{ __('Edit error') }}"+ data.messages;
+                        if (result['status'] === 'success') {
+                            Swal.fire("{{ __('Notification') }}",
+                                "{{ __('Export success') }}", 'success');
+                        } else {
+                            Swal.fire("{{ __('Notification') }}",
+                            msg, 'error');
+
+                        }
                     },
                 });
             });

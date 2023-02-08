@@ -25,7 +25,7 @@ class AddUserRequest extends FormRequest
     {
         return [
             'name' => 'required|min:5',
-            'email' => 'required|max:255|email:rfc,dns|unique:mst_users',
+            'email' => 'required|max:255|email|unique:mst_users,email',
             'password' => 'required|min:5|regex:/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/',
             'password_confirm' => 'required|min:5|same:password',
         ];

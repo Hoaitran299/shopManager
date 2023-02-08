@@ -44,10 +44,10 @@
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>Trạng thái</label>
-                                {!! Form::select('is_active', [0 => 'Tạm khoá ', 1 => 'Đang hoạt động'], null, [
+                                {!! Form::select('checkActive', [0 => 'Tạm khoá ', 1 => 'Đang hoạt động'], null, [
                                     'placeholder' => 'Chọn trạng thái...',
                                     'class' => 'form-control',
-                                    'id' => 'is_active',
+                                    'id' => 'checkActive',
                                 ]) !!}
                             </div>
                         </div>
@@ -102,9 +102,9 @@
     </div>
 @stop
 @section('scripts')
-    
+
     <!-- jQuery -->
-    <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.13.1/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
     {{-- <script src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.js" type="text/javascript"></script> --}}
 
     <script>
@@ -116,9 +116,9 @@
 
         $(document).ready(function() {
             var $table = $('#userList');
-            $.fn.DataTable.ext.pager.numbers_length = 10;
+            var action = 'add';
 
-            // Get data lên DataTable
+            $.fn.DataTable.ext.pager.numbers_length = 10;
             var usersTable = $('.userList').DataTable({
                 processing: true,
                 serverSide: true,
@@ -135,7 +135,7 @@
                         d.name = $("#txtName").val() ?? '';
                         d.email = $("#txtEmail").val() ?? '';
                         d.role = $("#group_role").val() ?? '';
-                        d.active = $("#is_active").val() ?? '';
+                        d.active = $("#checkActive").val() ?? '';
                     }
                 },
                 order: [
@@ -232,6 +232,115 @@
                 },
             });
 
+            //# Xử lý ADD-EDIT USER POPUP 
+            // validate signup form on keyup and submit
+            var validator = $("#userForm").validate({
+                rules: {
+                    name: {
+                        required: true,
+                        minlength: 5
+                    },
+                    email: {
+                        required: true,
+                        email: true,
+                        
+                    },
+                    password: {
+                        required: true,
+                        minlength: 5,
+                        pwchkregex: true
+                    },
+                    password_confirm: {
+                        required: true,
+                        equalTo: "#password"
+                    },
+                    group_role: {
+                        required: true,
+                    }
+                },
+                messages: {
+                    name: {
+                        required: "{{ __('UserRequired') }}",
+                        minlength: "{{ __('UserMinlength') }}",
+                    },
+                    email: {
+                        required: "{{ __('email.required') }}",
+                        email: "{{ __('EmailType') }}",
+                        //remote: "{{ __('email.unique') }}",
+                    },
+                    password: {
+                        required: "{{ __('PasswordRequired') }}",
+                        minlength: "{{ __('PasswordMinlength') }}",
+                        pwchkregex: "{{ __('password.regex') }}",
+                    },
+                    password_confirm: {
+                        required: "{{ __('PasswordConfirmRequired') }}",
+                        equalTo: "{{ __('PasswordConfirmEqualTo') }}",
+                    },
+                },
+                submitHandler: function(form, e) {
+                    e.preventDefault();
+                    var formData = new FormData(form);
+                    var name = $("#name").val();
+                    var email = $("#email").val();
+                    var password = $("#password").val();
+                    var passwordConfirm = $("#password_confirm").val();
+                    var role = $("#group_role").val();
+                    var active = ($("#is_active").val()) === "on" ? 1 : 0;
+
+                    if (action === 'add') {
+                        console.log('add user');
+                        $.ajax({
+                            url: "/users",
+                            type: "POST",
+                            data: {
+                                name: name,
+                                email: email,
+                                password: password,
+                                password_confirm: passwordConfirm,
+                                group_role: role,
+                                is_active: active,
+                            },
+                            success: function(result) {
+                                console.log(result);
+                                if (result['status'] === 'success') {
+                                    $("#closePopup").trigger("click");
+                                    Swal.fire("{{ __('Notification') }}",
+                                        "{{ __('Add success') }}",
+                                        'success');
+                                } else {
+                                    Swal.fire(
+                                        "{{ __('Notification') }}",
+                                        "{{ __('Add error') }}",
+                                        'error');
+                                }
+                            },
+                        });
+                    } else {
+                        console.log('edit user');
+                        $.ajax({
+                            url: '/users/update/' + userID,
+                            type: "POST",
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            success: function(data) {
+                                if (data['status'] === 'success') {
+                                    //$("#closePopup").trigger("click");
+                                    Swal.fire("{{ __('Notification') }}",
+                                        "{{ __('Edit success') }}", 'success');
+                                } else {
+                                    Swal.fire("{{ __('Notification') }}",
+                                        "{{ __('Edit error') }}", 'error');
+
+                                }
+                            },
+                        });
+                    }
+                    usersTable.ajax.reload();
+                },
+            });
+
             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
                 $('#is_active').prop('selectedIndex', 0);
@@ -243,7 +352,6 @@
 
             // Xử lý search dữ liệu cho userList
             $('#btnSearch').on('click', function(e) {
-                console.log($('#is_active').val());
                 e.preventDefault();
                 usersTable.ajax.reload();
             })
@@ -347,46 +455,6 @@
                 })
             });
 
-            $(document).on('click', '#addUserButton', function(e) {
-                e.preventDefault();
-                var name = $("#name").val();
-                var email = $("#email").val();
-                var password = $("#password").val();
-                var passwordConfirm = $("#password_confirm").val();
-                var role = $("#selGroupRole").val();
-                var active = ($("#checkActive").val()) === "on" ? 1 : 0;
-                console.log('add user');
-                $.ajax({
-                    url: "/users",
-                    type: "POST",
-                    data: {
-                        name: name,
-                        email: email,
-                        password: password,
-                        password_confirm: passwordConfirm,
-                        group_role: role,
-                        is_active: active,
-                    },
-                    success: function(result) {
-                        console.log(result);
-                        if (result['status'] === 'success') {
-                            $("#closePopup").trigger("click");
-                            Swal.fire("{{ __('Notification') }}", "{{ __('Add success') }}",
-                                'success');
-                        } else {
-                            Swal.fire(
-                                "{{ __('Notification') }}",
-                                "{{ __('Add error') }}",
-                                'error');
-                        }
-                    },
-                    beforeSend: function() {
-                        clearMessages();
-                    }
-                });
-                usersTable.ajax.reload();
-            });
-
             // Reset PopupEditAddUser
             function initUserForm() {
                 $("#name").val('');
@@ -394,25 +462,27 @@
                 $("#password").val('');
                 $("#password_confirm").val('');
                 $("#checkActive").empty();
-                $("#selGroupRole").prop('selectedIndex', 0);
+                $("#group_role").val("Admin");
             };
 
             // clear error message
             function clearMessages() {
-                $("#errName").val('');
-                $("#errEmail").val('');
-                $("#errPassword").val('');
-                $("#errPasswordConfirm").val('');
+                $("#name-error").val('');
+                $("#email-error").val('');
+                $("#password-error").val('');
+                $("#password_confirm-error").val('');
+                validator.resetForm();
             };
+            
             // Reset Form AddUser
             $('#btnAdd').on('click', function() {
+                action = "add";
                 clearMessages();
                 initUserForm();
             });
 
-            var validator = $("#addUserForm").validate();
             // check validate password
-            $.validator.addMethod("pwcheck", function(value) {
+            $.validator.addMethod("pwchkregex", function(value) {
                 return /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/.test(
                         value) // consists of only these
                     &&
@@ -423,18 +493,35 @@
                     /[#?!@$%^&*-]/.test(value) // has special character
             });
 
+            // check validate email
+            $.validator.addMethod("chkemail", function(value) {
+                var flag = false;
+                $.ajax({
+                    url: "{{ route('user.chkemail') }}",
+                    type: "GET",
+                    async: false,
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log(data);
+                        flag = data;
+                    },
+                });
+                return flag;
+            });
+
             var userID = null;
 
             // Get user cho popupEditUser
             $(document).on('click', '.popupEditUser', function() {
                 clearMessages();
+                action = "edit";
+
                 $('#popupTitle').html("{{ __('Edit user') }}")
                 var idUSer = $(this).data("id");
                 var user = getUserByID(idUSer);
-
+                console.log(user);
                 if (user != null) {
                     userID = user.id;
-                    $('#addUserButton').attr('id', 'editUserButton');
                     $("#name").val(user.name);
                     $("#email").val(user.email);
 
@@ -449,55 +536,10 @@
                 }
             });
 
-            // Xử lý sửa thông tin user
-            $(document).on('click', '#editUserButton', function(e) {
-                e.preventDefault();
-
-                clearMessages();
-                var name = $("#name").val();
-                var email = $("#email").val();
-                var password = $("#password").val();
-                var password_confirm = $("#password_confirm").val();
-                var role = $("#selGroupRole").val();
-                var active = ($("#checkActive").val()) === "on" ? 1 : 0;
-
-                console.log('edit user');
-
-                $.ajax({
-                    url: '/users/update/' + userID,
-                    type: "POST",
-                    data: {
-                        id: userID,
-                        name: name,
-                        email: email,
-                        password: password,
-                        password_confirm: password_confirm,
-                        group_role: role,
-                        is_active: active,
-                    },
-                    dataType: 'json',
-                    success: function(data) {
-                        if (result['status'] === 'success') {
-                            Swal.fire("{{ __('Notification') }}",
-                                "{{ __('Edit success') }}", 'success');
-                            $('#editUserButton').attr('id', 'addUserButton');
-                            $("#closePopup").trigger("click");
-                            usersTable.ajax.reload();
-                        } else {
-                            Swal.fire("{{ __('Notification') }}",
-                                "{{ __('Edit error') }}", 'error');
-
-                        }
-                    },
-                    beforeSend: function() {
-                        clearMessages();
-                    },
-                });
-            });
-
-            // Reset AddUserForm sau khi close popup
+            // Reset userForm sau khi close popup
             $(document).on('click', '#closePopup', function() {
                 $('#popupTitle').html("Thêm mới User")
+                action = "add";
                 clearMessages();
                 initUserForm();
             });

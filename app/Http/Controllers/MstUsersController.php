@@ -58,19 +58,16 @@ class MstUsersController extends Controller
     public function store(AddUserRequest $request)
     {
         try {
-             // Retrieve the validated input data...
-            //$validated = $request->validated();
-            //dd($validated);
             $input = $request->all();
             $data = [
                 'name' => $input['name'],
                 'email' => $input['email'],
                 'password' => Hash::make($input['password']),
                 'group_role' => $input['group_role'],
-                'is_active' => $input['is_active']
+                'is_active' => $input['is_active'],
             ];
             MstUsers::create($data);
-            return response()->json(['status' => 'success','message'=>$input->errors()], 200);
+            return response()->json(['status' => 'success'], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['status' => 'error'], 400);
         }
@@ -88,15 +85,16 @@ class MstUsersController extends Controller
         try {
             $id = $request->id;
             $input = $request->all();
+
             $data = [
                 'name' => $input['name'],
                 'email' => $input['email'],
                 'group_role' => $input['group_role'],
-                'is_active' => $input['is_active']
+                'is_active' => $input['is_active'] === "on" ? 1: 0,
             ];
-            if(!empty($input['password'])){
+            if (!empty($input['password'])) {
                 $data['password'] = Hash::make($input['password']);
-            } 
+            }
             MstUsers::where('id', $id)->update($data);
             return response()->json(['status' => 'success'], 200);
         } catch (ModelNotFoundException $e) {
@@ -180,6 +178,16 @@ class MstUsersController extends Controller
             }
             $data = $data->orderBy('id', 'DESC')->get();
             return Datatables::of($data)->make(true);
+        }
+    }
+
+    public function checkEmail(Request $request)
+    {
+        $user = MstUsers::where('email', $request->email)->first();
+        if ($user->email) {
+            return response()->json(true);
+        } else {
+            return response()->json(false);
         }
     }
 }

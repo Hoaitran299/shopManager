@@ -29,7 +29,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('users', [MstUsersController::class, 'store'])->name('user.create');
     Route::post('users/update/{id}', [MstUsersController::class, 'update'])->name('user.update');
     Route::delete('users/{id}', [MstUsersController::class, 'destroy'])->name('user.delete');
-    
+
+    Route::get('check-email',[MstUsersController::class, 'checkEmail'])->name('user.chkemail');
     // Customers route
     Route::get('customers', [MstCustomerController::class, 'index'])->name('customers.index');
     Route::get('customers/getData', [MstCustomerController::class, 'getCustomerData'])->name('customers.getData');

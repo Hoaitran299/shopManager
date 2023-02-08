@@ -14,6 +14,8 @@
   "address.required": "Địa chỉ không được để trống",
   "address.max": "Địa chỉ quá dài",
 
+  "Export success": "Export thành công",
+  "Export error": "Export thất bại",
   "Incorrect password": "Mật khẩu không đúng.",
   "Add success ": "Thêm mới thành công",
   "Add error ": "Thêm mới thất bại, vui lòng thử lại",
