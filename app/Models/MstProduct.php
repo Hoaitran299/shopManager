@@ -9,9 +9,12 @@ class MstProduct extends Model
 {
     use HasFactory;
     
-    protected $table = 'mst_product';
     protected $primary = 'product_id';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
+    protected $table = 'mst_product';
+    
     /**
      * The attributes that are mass assignable.
      *

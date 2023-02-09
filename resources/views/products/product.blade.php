@@ -6,9 +6,9 @@
 @stop
 
 @section('content')
-@php
-    $TitlePage = "Danh sách sản phẩm";
-@endphp
+    @php
+        $TitlePage = 'Danh sách sản phẩm';
+    @endphp
     @include('layouts.header')
     <div class="container-fluid pr-0 pl-0">
         <div class="card">
@@ -25,7 +25,7 @@
                         <div class="col-sm-2">
                             <div class="form-group">
                                 <label>{{ trans('Active') }}</label>
-                                {!! Form::select('isSales', [0 => "Ngưng bán", 1 => "Đang bán"], null, [
+                                {!! Form::select('isSales', [0 => 'Ngưng bán', 1 => 'Đang bán'], null, [
                                     'placeholder' => 'Chọn trạng thái...',
                                     'class' => 'form-control',
                                     'id' => 'isSales',
@@ -44,17 +44,19 @@
                                 <label>{{ trans('PriceTo') }}</label>
                                 <input id='txtPriceTo' name='txtPriceTo' type="text" class="form-control">
                             </div>
-                        </div>  
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-2 text-left">
-                            <a href="{{ route('products.create') }}" id="btnAdd" name="btnAdd" class="btn btn-primary"><i class="fa fa-user-plus fa-border"></i><span> {{ trans('Add') }}</span></a>
+                            <a href="{{ route('products.create') }}" id="btnAdd" name="btnAdd"
+                                class="btn btn-primary"><i class="fa fa-user-plus fa-border"></i><span>
+                                    {{ trans('Add') }}</span></a>
                         </div>
                         <div class="col-md-10 text-right">
                             <button id="btnSearch" name="btnSearch" type="button" class="btn btn-success"><i
-                                    class="fa fa-search fa-border"></i><span> {{ __('Search')}}</span></button>
+                                    class="fa fa-search fa-border"></i><span> {{ __('Search') }}</span></button>
                             <button id="btnDelSearch" name="btnDelSearch" type="button" class="btn btn-success"><i
-                                    class="fa fa-border">X</i><span> {{ __('DeleteSearch')}}</span></button>
+                                    class="fa fa-border">X</i><span> {{ __('DeleteSearch') }}</span></button>
                         </div>
                     </div>
                 </form>
@@ -81,14 +83,12 @@
                 </div>
             </div>
         </div>
-        @if (session('error'))
-            <div class="alert alert-danger text-center">{{ session('error') }}</div>
-        @endif
+
     </div>
 @stop
 @section('scripts')
     <script>
-         $.ajaxSetup({
+        $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
@@ -152,8 +152,9 @@
                         data: null,
                         render: function(data) {
                             $id = data["product_id"];
-                            $btn = '<a href="'+'{{ route("products.edit",["id"=>\'' + $id +'\' ]) }}'+'" id="popupEdit-' + $id + '" data-id="' +
-                                $id +
+                            console.log($id);
+                            $btn = '<a href="/products/' + $id + '/edit" id="popupEdit-' + $id +
+                                '" data-id="' + $id +
                                 '" class="btn btn-info popupEditProduct"><i class="fa fa-edit"></i></a>';
                             $btn = $btn + ' <button type="button" id="delD-' + $id +
                                 '" name="delD-' + $id + '" data-id="' + $id +
@@ -170,15 +171,13 @@
                     var pages = $api.page.info().pages;
                     var rows = $api.data().length;
 
-                    if((rows === 0 && pages === 0)){
+                    if ((rows === 0 && pages === 0)) {
                         $('.dataTables_paginate ').css('display', 'none');
                         $('.dataTables_info ').css('display', 'none');
-                    }
-                    else if (pages === 1) {
+                    } else if (pages === 1) {
                         $('.dataTables_paginate ').css('display', 'none');
                         $('.dataTables_info ').css('display', 'block');
-                    } 
-                    else {
+                    } else {
                         $('.dataTables_paginate ').css('display', 'block');
                         $('.dataTables_info ').css('display', 'block');
                     }
@@ -197,7 +196,7 @@
                 },
             });
 
-            
+
             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
                 $('#isSales').prop('selectedIndex', 0);
@@ -232,7 +231,7 @@
             $(document).on('click', '.removeProduct', function(e) {
                 var id = $(this).data("id");
                 var product = getProductByID(id);
-                var cfm = "{{__('Confirm delete product')}}"+ " " + product.product_name + " ?";
+                var cfm = "{{ __('Confirm delete product') }}" + " " + product.product_name + " ?";
                 e.preventDefault();
                 Swal.fire({
                     title: "{{ __('Warning') }}",
