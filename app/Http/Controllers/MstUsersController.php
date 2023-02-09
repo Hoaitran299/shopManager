@@ -68,7 +68,7 @@ class MstUsersController extends Controller
             ];
             MstUsers::create($data);
             return response()->json(['status' => 'success'], 200);
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             return response()->json(['status' => 'error'], 400);
         }
     }
@@ -97,7 +97,7 @@ class MstUsersController extends Controller
             }
             MstUsers::where('id', $id)->update($data);
             return response()->json(['status' => 'success'], 200);
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             return response()->json(['status' => 'error'], 400);
         }
     }
@@ -113,7 +113,7 @@ class MstUsersController extends Controller
         try {
             MstUsers::destroy($id);
             return response()->json(['status' => 'success', 'data' => []], 200);
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             return response()->json(['status' => 'error', 'data' => []], 400);
         }
     }
@@ -133,7 +133,7 @@ class MstUsersController extends Controller
                 MstUsers::where('id', $id)->update(['is_active' => 1]);
             }
             return response()->json(['status' => 'success'], 200);
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             return response()->json(['status' => 'error'], 400);
         }
     }
@@ -149,7 +149,7 @@ class MstUsersController extends Controller
         try {
             $user = MstUsers::find($id);
             return response()->json(['status' => 'success', 'data' => $user], 200);
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             return response()->json(['status' => 'error', 'data' => [], 'message' => __('User not found')], 200);
         }
     }

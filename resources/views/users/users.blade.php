@@ -7,12 +7,11 @@
 @stop
 
 @section('content')
+@php
+    $TitlePage = "Danh sách User";
+@endphp
     @include('layouts.header')
     <div class="container-fluid pr-0 pl-0">
-        <div class="row">
-            <h4 class="ml-3"><strong>Users List</strong></h4>
-            <hr>
-        </div>
         <div class="card">
             <div class="card-body">
                 <form action="" method="post">
@@ -55,45 +54,42 @@
                     <div class="row">
                         <div class="col-md-2 text-left">
                             <button id="btnAdd" name="btnAdd" type="button" class="btn btn-primary" data-toggle="modal"
-                                data-target=".popupUser"><i class="fa fa-user-plus fa-border"></i><span> Thêm
-                                    mới</span></button>
+                                data-target=".popupUser"><i class="fa fa-user-plus fa-border"></i><span> {{ __('Add')}}</span></button>
                         </div>
                         <div class="col-md-10 text-right">
                             <button id="btnSearch" name="btnSearch" type="button" class="btn btn-success"><i
-                                    class="fa fa-search fa-border"></i><span> Tìm
-                                    kiếm</span></button>
+                                    class="fa fa-search fa-border"></i><span> {{ __('Search')}}</span></button>
                             <button id="btnDelSearch" name="btnDelSearch" type="button" class="btn btn-success"><i
-                                    class="fa fa-border">X</i><span> Xoá tìm
-                                    kiếm</span></button>
+                                    class="fa fa-border">X</i><span> {{ __('DeleteSearch')}}</span></button>
                         </div>
                     </div>
                 </form>
+                <hr>
+                <div class="row" style="margin:0.25rem">
+                    <div class="card">
+                        <div class="table-responsive dt-responsive nowrap" style="margin-top:0.25rem;width: 100%;">
+                            <table class="table table-hover userList " id="userList" name="userList">
+                                <thead>
+                                    <tr class="bg-primary">
+                                        <th style="width: 10px">#</th>
+                                        <th>Họ tên</th>
+                                        <th>Email</th>
+                                        <th>Nhóm</th>
+                                        <th>Trạng thái</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         @if (session('error'))
             <div class="alert alert-danger text-center">{{ session('error') }}</div>
         @endif
-        <div class="row" style="margin:0.25rem">
-            <div class="card">
-                <div class="table-responsive dt-responsive nowrap" style="margin-top:0.25rem;width: 100%;">
-                    <table class="table table-hover userList " id="userList" name="userList">
-                        <thead>
-                            <tr class="bg-danger">
-                                <th style="width: 10px">#</th>
-                                <th>Họ tên</th>
-                                <th>Email</th>
-                                <th>Nhóm</th>
-                                <th>Trạng thái</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
         <div class="row">
             <div class="modal fade popupUser" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
                 @include('users.popupEditAddUser')
@@ -102,11 +98,6 @@
     </div>
 @stop
 @section('scripts')
-
-    <!-- jQuery -->
-    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
-    {{-- <script src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.js" type="text/javascript"></script> --}}
-
     <script>
         $.ajaxSetup({
             headers: {
@@ -125,7 +116,7 @@
                 searching: false,
                 autoWidth: false,
                 pagingType: "full_numbers_no_ellipses",
-                pageLength: 10,
+                pageLength: 20,
                 dom: "<'row'<'col-sm-4'i><'col-sm-8 text-center'p>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 text-center'p>>",
@@ -197,25 +188,22 @@
                     },
                 ],
                 drawCallback: function() {
-                    var page_min = 1;
+                    var row_page = 20;
                     var $api = this.api();
                     var pages = $api.page.info().pages;
                     var rows = $api.data().length;
-
-                    if (rows < page_min) {
-                        $table
-                            .next('.dataTables_info').css('display', 'none')
-                            .next('.dataTables_paginate').css('display', 'none')
-                            .next('.dataTables_length').css('display', 'none');
-
-                    } else if (pages === 1) {
-                        $table
-                            .next('.dataTables_info').css('display', 'none')
-                            .next('.dataTables_paginate').css('display', 'none');
-                    } else {
-                        $table
-                            .next('.dataTables_info').css('display', 'block')
-                            .next('.dataTables_paginate').css('display', 'block');
+                    
+                    if((rows === 0 && pages === 0)){
+                        $('.dataTables_paginate ').css('display', 'none');
+                        $('.dataTables_info ').css('display', 'none');
+                    }
+                    else if (pages === 1) {
+                        $('.dataTables_paginate ').css('display', 'none');
+                        $('.dataTables_info ').css('display', 'block');
+                    } 
+                    else {
+                        $('.dataTables_paginate ').css('display', 'block');
+                        $('.dataTables_info ').css('display', 'block');
                     }
                 },
                 language: {
@@ -224,10 +212,10 @@
                     infoEmpty: "{{ __('infoEmpty') }}",
                     emptyTable: "{{ __('infoEmpty') }}",
                     paginate: {
-                        first: "<<",
-                        previous: "<",
-                        next: ">",
-                        last: ">>"
+                        first: "«",
+                        previous: "‹",
+                        next: "›",
+                        last: "»"
                     },
                 },
             });
@@ -243,7 +231,7 @@
                     email: {
                         required: true,
                         email: true,
-                        
+
                     },
                     password: {
                         required: true,
@@ -375,7 +363,7 @@
             $(document).on('click', '.removeUser', function(e) {
                 var id = $(this).data("id");
                 var user = getUserByID(id);
-                var cfm = "{{ __('Confirm delete') }}" + " " + user.name + " ?"
+                var cfm = "{{ __('Confirm delete user') }}" + " " + user.name + " ?"
                 e.preventDefault();
                 Swal.fire({
                     title: "{{ __('Warning') }}",
@@ -406,7 +394,7 @@
                 })
             });
 
-            // Xử lý xoá user is_delete = 1
+            // Xử lý xoá user is_lock = 1
             $(document).on('click', '.lockUser', function(e) {
                 var id = $(this).data("id");
                 var user = getUserByID(id);
@@ -473,7 +461,7 @@
                 $("#password_confirm-error").val('');
                 validator.resetForm();
             };
-            
+
             // Reset Form AddUser
             $('#btnAdd').on('click', function() {
                 action = "add";
@@ -538,7 +526,7 @@
 
             // Reset userForm sau khi close popup
             $(document).on('click', '#closePopup', function() {
-                $('#popupTitle').html("Thêm mới User")
+                $('#popupTitle').html("{{ __('TitleAddUser')}}")
                 action = "add";
                 clearMessages();
                 initUserForm();

@@ -23,7 +23,7 @@ class MstCustomerController extends Controller
      */
     public function index()
     {
-        return view('customer.index');
+        return view('customer.customer');
     }
 
     /**
@@ -45,7 +45,7 @@ class MstCustomerController extends Controller
             ];
             MstCustomer::create($data);
             return response()->json(['status' => 'success'], 200);
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             return response()->json(['status' => 'error'], 400);
         }
     }
@@ -73,20 +73,9 @@ class MstCustomerController extends Controller
             MstCustomer::where('id', $id)->update($data);
 
             return response()->json(['status' => 'success'], 200);
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             return response()->json(['status' => 'error'], 400);
         }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\MstCustomer  $mstCustomer
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(MstCustomer $mstCustomer)
-    {
-        //
     }
 
     /**
@@ -100,7 +89,7 @@ class MstCustomerController extends Controller
         try {
             $customer = MstCustomer::where('customer_id',$id)->first();
             return response()->json(['status' => 'success', 'data' => $customer], 200);
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             return response()->json(['status' => 'error', 'data' => [], 'message' => __('User not found')], 200);
         }
     }
@@ -124,8 +113,8 @@ class MstCustomerController extends Controller
             if (!empty($input['address'])) {
                 $data = $data->where('address', 'like', '%' . $input['address'] . '%');
             }
-            if ($input['active'] != "") {
-                $data = $data->where('is_active', (int) $input['active']);
+            if ($input['is_active'] != "") {
+                $data = $data->where('is_active', (int) $input['is_active']);
             }
             $data = $data->orderBy('customer_id', 'DESC')->get();
             return DataTables::of($data)->make(true);

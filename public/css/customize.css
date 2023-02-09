@@ -1,21 +1,10 @@
-hr {
-    height: 0.25rem;
-    width: 100%;
-    padding: 0px;
-    color: rgb(124, 194, 252);
+
+hr#hrTitle:not([size]) {
+    height: 5px;
     background-color: rgb(124, 194, 252);
     margin: 0px;
 }
+
 .error {
    color: #dc3545!important;
 }
-
-/* .dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-    background-color: lightgrey !important;
-    border: 1px solid rgb(28, 3, 253);
-    color: rgb(33, 10, 241);
-}
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    color: rgb(21, 60, 235) !important;
-    border: 1px solid rgb(28, 3, 253);
-} */

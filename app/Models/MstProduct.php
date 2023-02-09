@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class MstProduct extends Model
 {
     use HasFactory;
+    
     protected $table = 'mst_product';
+    protected $primary = 'product_id';
 
     /**
      * The attributes that are mass assignable.
@@ -16,6 +18,6 @@ class MstProduct extends Model
      * @var array
      */
     protected $fillable = [
-        'product_id', 'product_name', 'product_image', 'product_price', 'description', 'is_sales',
+        'product_id', 'product_name', 'product_image', 'product_price', 'description', 'is_sales'
     ];
 }
