@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App;
 use App\Http\Requests\LoginRequest;
 use App\Models\MstUsers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
 {

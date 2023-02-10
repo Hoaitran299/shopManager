@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductRequest;
 use App\Models\MstProduct;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Request as FacadesRequest;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Session;
 use Yajra\DataTables\Facades\DataTables;
 
 class MstProductController extends Controller
@@ -37,29 +40,44 @@ class MstProductController extends Controller
      */
     public function create()
     {
-        return view('products.add_edit_product',["product"=>"","action"=>"add"]);
+        return view('products.add_product');
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\ProductRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
         try {
             $input = $request->all();
+            $id = $request->product_name[0] . floor(time() - 999999999);
+            $img = "";
+            if ($request->product_image && $request->product_image->getClientOriginalName() != 'default.jpg') {
+                $filename = time(). '_' . $request->product_image->getClientOriginalName();
+                $request->file('product_image')->move(public_path('img/products'), $filename);
+                $img = 'img/products/' . $filename;
+            }
             $data = [
-                'product_name' => $input['name'],
-                'product_price' => $input['price'],
+                'product_id' => $id,
+                'product_name' => $input['product_name'],
+                'product_price' => $input['product_price'],
                 'description' => $input['description'],
-                'is_sales' => $input['is_sales']
+                'is_sales' => $input['is_sales'],
+                'product_image' => $img
             ];
-            MstProduct::create($data);
-            return response()->json(['status' => 'success'], 200);
+            $product = MstProduct::create($data);
+            if($product){
+                Session::flash('success', 'Product created successfully.');
+            } else {
+                Session::flash('error', 'Tạo mới product thất bại');
+            }
+            return back();
+            // ->with('success', 'Product created successfully.');
         } catch (\Throwable $e) {
-            return response()->json(['status' => 'error'], 400);
+            return back()->withInput($request->only('product_name'))->withErrors(["error" => $e->getMessage()]);
         }
     }
 
@@ -77,40 +95,49 @@ class MstProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  Illuminate\Http\Request
      * @param  string $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request, $id)
+    public function edit($id)
     {
         $product = MstProduct::where('product_id',$id)->first();
-        return view('products.add_edit_product',["product"=> $product,"action"=>"edit"]);
+        return view('products.edit_product',["product"=> $product]);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\ProductRequest  $request
      * @param  string $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ProductRequest $request, $id)
     {
         try {
-            $id = $request->id;
             $input = $request->all();
-
+            dd($input);
+            $img = MstProduct::where('product_id', $id)->pluck('product_image')->first();
+            if ($request->product_image && $request->product_image->getClientOriginalName() != "default.jpg") {
+                $filename = time(). '_' . $request->product_image->getClientOriginalName();
+                $request->file('product_image')->move(public_path('img/products'), $filename);
+                if($img!= "") {
+                    Storage::disk('public')->delete($img);
+                }
+                $img = 'img/products/' . $filename;
+                
+            }
             $data = [
-                'product_name' => $input['name'],
-                'product_price' => $input['price'],
+                'product_name' => $input['product_name'],
+                'product_price' => $input['product_price'],
                 'description' => $input['description'],
-                'is_sales' => $input['is_sales']
+                'is_sales' => $input['is_sales'],
+                'product_image' => $img
             ];
             MstProduct::where('product_id', $id)->update($data);
 
-            return response()->json(['status' => 'success'], 200);
+            return back()->with('success', 'Product update successfully.')->withInput();
         } catch (\Throwable $e) {
-            return response()->json(['status' => 'error'], 400);
+            return back()->with('error', $e->getMessage());
         }
     }
 

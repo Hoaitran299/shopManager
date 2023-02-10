@@ -47,7 +47,8 @@
             </div>
             <div class="col-sm-6" >
                 <ol class="breadcrumb float-sm-right menuRight">
-                    <li class="breadcrumb-item active menu1">{{ $TitlePage }}</li>
+                    <li class="breadcrumb-item menu1"><a href="{{$redirect}}">{{ $TitlePage }}</a></li>
+                    <li class="breadcrumb-item menu2">{{ $childMenu }}</li>
                 </ol>
             </div>
         </div>

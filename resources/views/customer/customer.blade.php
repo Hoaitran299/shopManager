@@ -8,6 +8,8 @@
 @section('content')
 @php
     $TitlePage = "Danh sách khách hàng";
+    $redirect = "#";
+    $childMenu = "";
 @endphp
     @include('layouts.header')
     <div class="container-fluid pr-0 pl-0">
@@ -48,21 +50,20 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-2 text-left">
+                        <div class="col-sm-3 text-left">
                             <button id="btnAdd" name="btnAdd" type="button" class="btn btn-primary" data-toggle="modal"
                                 data-target=".popupCustomer"><i class="fa fa-user-plus fa-border"></i><span> {{ __('Add')}}</span></button>
                         </div>
-                        <div class="col-md-4 text-left">
-                            <label class="btn btn-success">
-                                <i class="fa fa-upload"></i> &nbsp;Import
-                                <input class="hidden" name="import" id="import" type="file">
-                            </label>
-                            <button id="btnExport" name="btnExport" type="submit" class="btn btn-success">
-                                <span><i class="fas fa-file-export"></i>Export</span>
-                            </button>
-
+                        <div class="col-sm-4 text-left">
+                                <label class="btn btn-success">
+                                    <i class="fa fa-upload"></i> &nbsp;Import
+                                    <input class="d-none" name="import" id="import" type="file">
+                                </label>
+                                <button id="btnExport" name="btnExport" type="submit" class="btn btn-success" style="margin-bottom: 6px">
+                                    <span><i class="fas fa-file-export"></i>Export</span>
+                                </button>
                         </div>
-                        <div class="col-md-6 text-right">
+                        <div class="col-sm-5 text-right">
                             <button id="btnSearch" name="btnSearch" type="button" class="btn btn-success"><i
                                     class="fa fa-search fa-border"></i><span> {{ __('Search')}}</span></button>
                             <button id="btnDelSearch" name="btnDelSearch" type="button" class="btn btn-success"><i
@@ -112,7 +113,7 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-
+        var dataTemp = null;
         $(document).ready(function() {
             var $table = $('#customerList');
             var action = "add";
@@ -354,26 +355,32 @@
                     $(this).val("d-none");
                     // $save = '.saveCustomer-'+customerID;
                     // $('.editCustomer-'+customerID).addClass("d-none");
-                    $($save).removeClass("d-none");
                     var $row = $(this).closest("tr").off("mousedown");
                     var $tds = $row.find("td").not(':first').not(':last');
+                    var item = {};
                     $.each($tds, function(i, el) {
                         var txt = $(this).text();
-                        var name = "";
+                        var inputName = "";
+                        var title = "";
                         if (i === 0) {
-                            name = "name-" + customerID;
+                            title = "name";
+                            item.name = txt;
                         } else if (i === 1) {
-                            name = "email-" + customerID;
-                        } else if (i === 1) {
-                            name = "address-" + customerID;
+                            title = "email";
+                            item.email = txt;
+                        } else if (i === 2) {
+                            title = "address";
+                            item.address = txt;
                         } else {
-                            name = "tel_num-" + customerID;
+                            title = "tel_num";
+                            item.tel_num = txt;
                         }
-
-                        $(this).html("").append("<input class='form-control' id=\"" + name +
-                            "\" name=\"" + name + "\" type='text' value=\"" + txt +
+                        inputName = title+ "-"+ customerID;
+                        $(this).html("").append("<input class='form-control' id=\"" + inputName +
+                            "\" name=\"" + inputName + "\" type='text' value=\"" + txt +
                             "\">");
                     });
+                    console.log(item);
                 } else {
                     Swal.fire("{{ __('Notification') }}", "{{ __('User not found') }}", 'error');
                 }

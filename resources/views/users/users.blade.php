@@ -9,6 +9,8 @@
 @section('content')
 @php
     $TitlePage = "Danh sách User";
+    $redirect = "#";
+    $childMenu = "";
 @endphp
     @include('layouts.header')
     <div class="container-fluid pr-0 pl-0">

@@ -8,6 +8,8 @@
 @section('content')
     @php
         $TitlePage = 'Danh sách sản phẩm';
+        $redirect = "/products";
+        $childMenu = "";
     @endphp
     @include('layouts.header')
     <div class="container-fluid pr-0 pl-0">
@@ -25,7 +27,7 @@
                         <div class="col-sm-2">
                             <div class="form-group">
                                 <label>{{ trans('Active') }}</label>
-                                {!! Form::select('isSales', [0 => 'Ngưng bán', 1 => 'Đang bán'], null, [
+                                {!! Form::select('isSales', [0 => 'Ngưng bán', 1 => 'Đang bán', 2=> 'Hết hàng'], null, [
                                     'placeholder' => 'Chọn trạng thái...',
                                     'class' => 'form-control',
                                     'id' => 'isSales',
@@ -133,7 +135,8 @@
                     },
                     {
                         data: 'product_price',
-                        name: 'product_price'
+                        name: 'product_price',
+                        render: $.fn.dataTable.render.number( ',', '.',0,'$')
                     },
                     {
                         data: 'is_sales',
@@ -142,8 +145,10 @@
                             if (data === 1) {
                                 str =
                                     "<span class='text-left text-success'>Đang bán</span>";
-                            } else {
+                            } else if(data == 0) {
                                 str = "<span class='text-left text-danger'>Ngưng bán</span>";
+                            } else {
+                                str = "<span class='text-left text-gray'>Hết hàng</span>";
                             }
                             return str;
                         },
@@ -211,21 +216,6 @@
                 e.preventDefault();
                 productsTable.ajax.reload();
             })
-
-            // Get thông tin product by ID
-            // function getProductByID(id) {
-            //     var product = null;
-            //     $.ajax({
-            //         url: "/products/details/" + id,
-            //         type: "GET",
-            //         async: false,
-            //         dataType: 'json',
-            //         success: function(data) {
-            //             product = data.data;
-            //         },
-            //     });
-            //     return product;
-            // }
 
             // // Xử lý xoá product 
             $(document).on('click', '.removeProduct', function(e) {
