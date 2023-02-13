@@ -91,8 +91,7 @@
 @stop
 @section('scripts')
     <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js" type="text/javascript"></script>
-
+    
     <script>
         $.ajaxSetup({
             headers: {
@@ -135,13 +134,10 @@
                     {
                         data: null,
                         render: function(data) {
-                            $id = data["id"];
-                            $name = data["product_name"];
-                            $imgName = data["product_image"] ?
-                                "{{ asset('img/products/"+data["product_image"]+"') }}" :
-                                "{{ asset('img/products/default.jpg') }}";
-                            var str = "<div><a href='#' class='imgProduct' data-id=" + $id +
-                                " data-image=" + $imgName + ">" + $name + "</a></div>";
+                            var name = data["product_name"];
+                            var img = data["product_image"];
+                            var imgName = img != '' ? "img/products/"+ img : "img/products/default.jpg";
+                            var str = "<div><a class='imgProduct' data-image=" + imgName + ">" + name + "</a></div>";
                             return str;
                         },
                     },
@@ -215,7 +211,10 @@
                     },
                 },
             });
+
+            //Show image when mouse over product name
             $('#productList').on('mouseover', '.imgProduct', function(e) {
+                e.preventDefault();
                 if ($(this).parent('div').children('div.image').length) {
                     $(this).parent('div').children('div.image').show();
                 } else {
@@ -224,8 +223,8 @@
                         image_name + '" alt="image" height="100" />' + '</div>';
                     $(this).parent('div').append(imageTag);
                 }
-            }).on('mouseout', 'td', function() {
-                console.log('out');
+            }).on('mouseout', '.imgProduct', function(e) {
+                e.preventDefault();
                 $(this).parent('div').children('div.image').hide();
             });
 

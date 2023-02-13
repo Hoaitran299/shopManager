@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductRequest;
 use App\Models\MstProduct;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\File;
+
 use Yajra\DataTables\Facades\DataTables;
 
 class MstProductController extends Controller
@@ -135,11 +134,14 @@ class MstProductController extends Controller
                 $filename = time(). '_' . $request->product_image->getClientOriginalName();
                 $request->file('product_image')->move(public_path('img/products'), $filename);
                 if($img!= "") {
-                    Storage::disk('public')->delete($img);
+                    File::delete('img/products/'.$img);
                 }
                 $img = $filename;
-                
-            } else {
+            } else if ($img != "" && $request->img === "default.jpg"){
+                File::delete('img/products/'.$img);
+                $img = "";
+            }
+            else {
                 $img = "";
             }
             $data = [

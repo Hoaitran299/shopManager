@@ -14,7 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('mst_product', function (Blueprint $table) {
-            $table->string('product_id',20)->primary()->index()->unique();
+            $table->increments('id');
+            $table->string('product_id',20)->index()->unique();
             $table->string('product_name');
             $table->string('product_image')->nullable();
             $table->decimal('product_price')->default(0);

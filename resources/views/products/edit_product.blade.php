@@ -19,8 +19,8 @@
                 <ul></ul>
             </div>
             <div class="card-body">
-                <form method="POST" id="productForm"
-                    name="productForm" class="form-horizontal" enctype="multipart/form-data">
+                <form method="POST" id="productForm" name="productForm" class="form-horizontal"
+                    enctype="multipart/form-data">
                     <div class="row">
                         <div class="col-sm-6">
                             <input type="hidden" value="{{ $product->id }}" id="id">
@@ -66,21 +66,23 @@
                                 </div>
                                 <div class="row">
                                     <img style="margin-left: 10px;width: 100%;height: 100%%;" id="preview" name="preview"
-                                        src="{{ $product->product_image ? asset('img/products/' . $product->product_image) : asset('img/products/default.jpg') }}"
+                                        src="{{ $product->product_image ? '/img/products/' . $product->product_image : '/img/products/default.jpg' }}"
                                         alt="your image" />
                                     <span class="text-danger msg-error" id="product_image-error"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <button id="removeImg" name="removeImg" type="button" class="btn btn-danger col-sm-3" style="display: none">Xóa
+                                <button id="removeImg" name="removeImg" type="button" class="btn btn-danger col-sm-3"
+                                    style="display: none">Xóa
                                     ảnh</button>
                                 <div class="file-upload col-sm-9">
                                     <div class="file-select">
                                         <div class="file-select-button " id="fileName">Choose File</div>
                                         <div class="file-select-name" id="noFile">
-                                            {{ $product->product_image ?? 'No file chosen...' }}</div>
+                                            {{ $product->product_image ? $product->product_image : 'No file choosen' }}
+                                        </div>
                                         <input type="file" name="product_image" id="product_image" class="form-control"
-                                            value="{{ asset('img/products/' .$product->product_image) }}">
+                                            value="{{ asset('img/products/' . $product->product_image) }}">
                                     </div>
                                 </div>
                             </div>
@@ -96,7 +98,7 @@
                             </div>
                         </div>
                 </form>
-                
+
             </div>
         </div>
     </div>
@@ -110,9 +112,10 @@
         });
         $(document).ready(function() {
             var product = getProductByID($("#id").val());
-            product['product_image'] ? $('#removeImg').css('display', 'block') : $('#removeImg').css('display', 'none')
+            product['product_image'] ? $('#removeImg').css('display', 'block') : $('#removeImg').css('display',
+                'none')
             var defaultImage = "default.jpg";
-            
+
             $('#product_image').change(function(e) {
                 $("#product_image-error").empty();
                 e.preventDefault();
@@ -135,8 +138,8 @@
                 }
             });
 
-             // clear error message
-             function clearMessages() {
+            // clear error message
+            function clearMessages() {
                 $("#product_name-error").empty();
                 $("#description-error").empty();
                 $("#product_price-error").empty();
@@ -149,6 +152,9 @@
                 var id = $("#id").val();
                 var form = $('#productForm')[0];
                 var formData = new FormData(this);
+                var srcImg = $('#preview').attr('src').split('/');
+                var imgName = srcImg[srcImg.length - 1];
+                formData.append('img', imgName);
                 formData.append('product_image', $('#product_image')[0].files[0]);
 
                 $.ajax({
@@ -208,7 +214,7 @@
                 $('#removeImg').hide();
                 $("#preview").attr("src", "{{ asset('img/products/default.jpg') }}");
                 $(".file-upload").removeClass('active');
-                $("#noFile").text("No file chosen...");
+                $("#noFile").text("No file choosen");
                 $("#product_image").val('');
                 $("#product_image-error").empty();
             });

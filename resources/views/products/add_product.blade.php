@@ -84,8 +84,9 @@
                         <div class="row">
                             <div class="col-sm-7"></div>
                             <div class="col-sm-5 text-right">
-                                <button id="btnCancel" name="btnCancel" class="btn btn-secondary">
-                                    Hủy</button>
+                                <a href="{{ route('products') }}" id="btnCancel" name="btnCancel"
+                                    class="btn btn-secondary">
+                                    Hủy</a>
                                 <button id="btnSave" name="btnSave" type="submit" class="btn btn-danger">
                                     Lưu</button>
                             </div>
