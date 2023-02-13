@@ -10,21 +10,21 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>Tên</label>
-                    <input type="text" class="form-control" id="name" name="name"
+                    <input type="text" class="form-control" id="txtName" name="txtName"
                         placeholder="Nhập họ tên">
                 </div>
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Email">
+                    <input type="email" class="form-control" id="txtEmail" name="txtEmail" placeholder="Email">
                 </div>
                 <div class="form-group">
                     <label>Địa chỉ</label>
-                    <input type="text" class="form-control" id="address" name="address"
+                    <input type="text" class="form-control" id="txtAddress" name="txtAddress"
                         placeholder="Nhập địa chỉ">
                 </div>
                 <div class="form-group">
                     <label>Điện thoại</label>
-                    <input type="text" class="form-control" id="tel_num" name="tel_num"
+                    <input type="text" class="form-control" id="txtTel_num" name="txtTel_num"
                         placeholder="Nhập điện thoại">
                 </div>
                 <div class="form-group">

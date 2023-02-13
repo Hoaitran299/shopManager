@@ -7,11 +7,11 @@
 @stop
 
 @section('content')
-@php
-    $TitlePage = "Danh sách User";
-    $redirect = "#";
-    $childMenu = "";
-@endphp
+    @php
+        $TitlePage = 'Danh sách User';
+        $redirect = '#';
+        $childMenu = '';
+    @endphp
     @include('layouts.header')
     <div class="container-fluid pr-0 pl-0">
         <div class="card">
@@ -56,13 +56,14 @@
                     <div class="row">
                         <div class="col-md-2 text-left">
                             <button id="btnAdd" name="btnAdd" type="button" class="btn btn-primary" data-toggle="modal"
-                                data-target=".popupUser"><i class="fa fa-user-plus fa-border"></i><span> {{ __('Add')}}</span></button>
+                                data-target=".popupUser"><i class="fa fa-user-plus fa-border"></i><span>
+                                    {{ __('Add') }}</span></button>
                         </div>
                         <div class="col-md-10 text-right">
                             <button id="btnSearch" name="btnSearch" type="button" class="btn btn-success"><i
-                                    class="fa fa-search fa-border"></i><span> {{ __('Search')}}</span></button>
+                                    class="fa fa-search fa-border"></i><span> {{ __('Search') }}</span></button>
                             <button id="btnDelSearch" name="btnDelSearch" type="button" class="btn btn-success"><i
-                                    class="fa fa-border">X</i><span> {{ __('DeleteSearch')}}</span></button>
+                                    class="fa fa-border">X</i><span> {{ __('DeleteSearch') }}</span></button>
                         </div>
                     </div>
                 </form>
@@ -100,6 +101,7 @@
     </div>
 @stop
 @section('scripts')
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
     <script>
         $.ajaxSetup({
             headers: {
@@ -194,16 +196,14 @@
                     var $api = this.api();
                     var pages = $api.page.info().pages;
                     var rows = $api.data().length;
-                    
-                    if((rows === 0 && pages === 0)){
+
+                    if ((rows === 0 && pages === 0)) {
                         $('.dataTables_paginate ').css('display', 'none');
                         $('.dataTables_info ').css('display', 'none');
-                    }
-                    else if (pages === 1) {
+                    } else if (pages === 1) {
                         $('.dataTables_paginate ').css('display', 'none');
                         $('.dataTables_info ').css('display', 'block');
-                    } 
-                    else {
+                    } else {
                         $('.dataTables_paginate ').css('display', 'block');
                         $('.dataTables_info ').css('display', 'block');
                     }
@@ -305,6 +305,9 @@
                                         'error');
                                 }
                             },
+                            error: function(error){
+                                console.log(error);
+                            }
                         });
                     } else {
                         console.log('edit user');
@@ -325,6 +328,9 @@
 
                                 }
                             },
+                            error: function(error){
+                                console.log(error);
+                            }
                         });
                     }
                     usersTable.ajax.reload();
@@ -528,7 +534,7 @@
 
             // Reset userForm sau khi close popup
             $(document).on('click', '#closePopup', function() {
-                $('#popupTitle').html("{{ __('TitleAddUser')}}")
+                $('#popupTitle').html("{{ __('TitleAddUser') }}")
                 action = "add";
                 clearMessages();
                 initUserForm();

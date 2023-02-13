@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'RiverCrane Vietnam - Sản phẩm')
+@section('title', 'RiverCrane Vietnam - Chỉnh sửa Sản phẩm')
 
 @section('styles')
 @stop
@@ -8,8 +8,8 @@
 @section('content')
     @php
         $TitlePage = 'Danh sách sản phẩm';
-        $redirect = "/products";
-        $childMenu = "";
+        $redirect = '/products';
+        $childMenu = '';
     @endphp
     @include('layouts.header')
     <div class="container-fluid pr-0 pl-0">
@@ -27,7 +27,7 @@
                         <div class="col-sm-2">
                             <div class="form-group">
                                 <label>{{ trans('Active') }}</label>
-                                {!! Form::select('isSales', [0 => 'Ngưng bán', 1 => 'Đang bán', 2=> 'Hết hàng'], null, [
+                                {!! Form::select('isSales', [0 => 'Ngưng bán', 1 => 'Đang bán', 2 => 'Hết hàng'], null, [
                                     'placeholder' => 'Chọn trạng thái...',
                                     'class' => 'form-control',
                                     'id' => 'isSales',
@@ -83,12 +83,14 @@
                         </div>
                     </div>
                 </div>
+                <img src="http://via.placeholder.com/30x30" id="avatar" style="position: relative">
             </div>
         </div>
 
     </div>
 @stop
 @section('scripts')
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
     <script>
         $.ajaxSetup({
             headers: {
@@ -96,6 +98,13 @@
             }
         });
         $(document).ready(function() {
+            $(".productList table tr").mousemove(function(e) {
+                console.log('aaaaaaaa');
+                $("#avatar").css({
+                    top: e.pageY,
+                    left: e.pageX
+                });
+            });
 
             $.fn.DataTable.ext.pager.numbers_length = 10;
             var productsTable = $('.productList').DataTable({
@@ -136,7 +145,7 @@
                     {
                         data: 'product_price',
                         name: 'product_price',
-                        render: $.fn.dataTable.render.number( ',', '.',0,'$')
+                        render: $.fn.dataTable.render.number(',', '.', 0, '$')
                     },
                     {
                         data: 'is_sales',
@@ -145,7 +154,7 @@
                             if (data === 1) {
                                 str =
                                     "<span class='text-left text-success'>Đang bán</span>";
-                            } else if(data == 0) {
+                            } else if (data == 0) {
                                 str = "<span class='text-left text-danger'>Ngưng bán</span>";
                             } else {
                                 str = "<span class='text-left text-gray'>Hết hàng</span>";
@@ -157,7 +166,6 @@
                         data: null,
                         render: function(data) {
                             $id = data["product_id"];
-                            console.log($id);
                             $btn = '<a href="/products/' + $id + '/edit" id="popupEdit-' + $id +
                                 '" data-id="' + $id +
                                 '" class="btn btn-info popupEditProduct"><i class="fa fa-edit"></i></a>';
@@ -242,11 +250,12 @@
                                     Swal.fire("{{ __('Notification') }}",
                                         "{{ __('Delete success') }}", 'success');
                                     productsTable.ajax.reload();
-                                } else {
-                                    Swal.fire("{{ __('Notification') }}",
-                                        "{{ __('Delete error') }}", 'error');
                                 }
                             },
+                            error: function(result) {
+                                Swal.fire("{{ __('Notification') }}",
+                                    "{{ __('Delete error') }}", 'error');
+                            }
                         });
                         productsTable.ajax.reload();
                     }

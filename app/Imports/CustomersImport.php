@@ -5,19 +5,18 @@ namespace App\Imports;
 use App\Models\MstCustomer;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Maatwebsite\Excel\Concerns\Importable;
-use Maatwebsite\Excel\Concerns\RemembersRowNumber;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
-use Maatwebsite\Excel\Concerns\SkipsFailures;
-use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Events\ImportFailed;
 
-class CustomersImport implements ToModel,SkipsEmptyRows, ShouldQueue, WithChunkReading, WithValidation, SkipsOnFailure, WithHeadingRow
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStartRow;
+use Maatwebsite\Excel\Concerns\WithUpserts;
+use Maatwebsite\Excel\Concerns\WithValidation;
+
+class CustomersImport implements ToModel,SkipsEmptyRows, ShouldQueue, WithChunkReading, WithValidation, WithHeadings, WithStartRow
 {
-    use Importable, SkipsFailures;
+    use Importable;
     /**
     * @param array $row
     *
@@ -26,7 +25,7 @@ class CustomersImport implements ToModel,SkipsEmptyRows, ShouldQueue, WithChunkR
     public function model(array $row)
     {
         return new MstCustomer([
-            'name'     => $row[0],
+            'customer_name'     => $row[0],
             'email'    => $row[1], 
             'tel_num' => $row[2], 
             'address' => $row[3], 
@@ -34,7 +33,7 @@ class CustomersImport implements ToModel,SkipsEmptyRows, ShouldQueue, WithChunkR
     }
 
     /**
-     * chèn hàng loạt
+     * giới hạn số lượng truy vấn
      *
      * @return int
      */
@@ -42,18 +41,29 @@ class CustomersImport implements ToModel,SkipsEmptyRows, ShouldQueue, WithChunkR
     {
         return 200;
     }
-
+    /**
+     * This will read the spreadsheet in chunks and keep the memory usage under control.
+     *
+     * @return int
+     */
     public function chunkSize(): int
     {
         return 200;
     }
 
     /**
-     * Start from row 2, avoid header
+     * Write code on Method
      *
+     */
+    public function headings(): array
+    {
+        return ["Tên khách hàng", "Email", "TelNum","Địa chỉ"];
+    }
+
+    /**
      * @return int
      */
-    public function headingRow(): int
+    public function startRow(): int
     {
         return 2;
     }
@@ -67,7 +77,7 @@ class CustomersImport implements ToModel,SkipsEmptyRows, ShouldQueue, WithChunkR
     {
         return [
             '0' => 'required|min:5',
-            '1' => 'required|max:255|email:rfc,dns|unique:mst_customer,email',
+            '1' => 'required|max:255|email:rfc,dns',
             '2' => 'required|regex:/^([0-9]*)$/|min:10|max:12',
             '3' => 'required|max:255',
         ];
@@ -96,7 +106,6 @@ class CustomersImport implements ToModel,SkipsEmptyRows, ShouldQueue, WithChunkR
             "1.required" => trans('email.required'),
             "1.email" => trans('email.email'),
             "1.exists" => trans('email.exists'),
-            "1.unique" => trans('email.unique'),
             "1.max" =>trans('email.max'),
 
             "2.required" => trans('tel_num.required'),

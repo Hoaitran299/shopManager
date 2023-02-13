@@ -51,6 +51,7 @@ class MstProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
+
         try {
             $input = $request->all();
             $id = $request->product_name[0] . floor(time() - 999999999);
@@ -58,7 +59,7 @@ class MstProductController extends Controller
             if ($request->product_image && $request->product_image->getClientOriginalName() != 'default.jpg') {
                 $filename = time(). '_' . $request->product_image->getClientOriginalName();
                 $request->file('product_image')->move(public_path('img/products'), $filename);
-                $img = 'img/products/' . $filename;
+                $img = $filename;
             }
             $data = [
                 'product_id' => $id,
@@ -68,17 +69,21 @@ class MstProductController extends Controller
                 'is_sales' => $input['is_sales'],
                 'product_image' => $img
             ];
-            $product = MstProduct::create($data);
-            if($product){
-                Session::flash('success', 'Product created successfully.');
-            } else {
-                Session::flash('error', 'Tạo mới product thất bại');
-            }
-            return back();
-            // ->with('success', 'Product created successfully.');
+            
+            MstProduct::create($data);
+            $response = array(
+                "status"=>"success",
+                "message"=> trans('Add success'),
+                "status_code" => 200
+            );
         } catch (\Throwable $e) {
-            return back()->withInput($request->only('product_name'))->withErrors(["error" => $e->getMessage()]);
+            $response = array(
+                "status"=>"errors",
+                "message"=> $e->getMessage(),
+                "status_code" => 400
+            );
         }
+        return json_encode($response);
     }
 
     /**
@@ -115,7 +120,6 @@ class MstProductController extends Controller
     {
         try {
             $input = $request->all();
-            dd($input);
             $img = MstProduct::where('product_id', $id)->pluck('product_image')->first();
             if ($request->product_image && $request->product_image->getClientOriginalName() != "default.jpg") {
                 $filename = time(). '_' . $request->product_image->getClientOriginalName();
@@ -135,10 +139,19 @@ class MstProductController extends Controller
             ];
             MstProduct::where('product_id', $id)->update($data);
 
-            return back()->with('success', 'Product update successfully.')->withInput();
+            $response = array(
+                "status"=>"success",
+                "message"=> trans('Edit success'),
+                "status_code" => 200
+            );
         } catch (\Throwable $e) {
-            return back()->with('error', $e->getMessage());
+            $response = array(
+                "status"=>"errors",
+                "message"=> $e->getMessage(),
+                "status_code" => 400
+            );
         }
+        return json_encode($response);
     }
 
     /**

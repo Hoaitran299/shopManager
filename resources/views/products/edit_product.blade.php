@@ -9,33 +9,18 @@
 @section('content')
     @php
         $TitlePage = 'Danh sách sản phẩm';
-        $redirect = "/products";
+        $redirect = '/products';
         $childMenu = 'Chỉnh sửa sản phẩm';
     @endphp
     @include('layouts.header')
     <div class="container pr-0 pl-0">
         <div class="card" style="margin-top:10px">
-            @if (Session::has('success'))
-                <div class="alert alert-success">
-                    {{ Session::get('success') }}
-                    @php
-                        Session::forget('success');
-                    @endphp
-                </div>
-            @endif
-            @if (Session::has('error'))
-                <div class="alert alert-danger">
-                    {{ Session::get('error') }}
-                    @php
-                        Session::forget('error');
-                    @endphp
-                </div>
-            @endif
+            <div class="alert alert-danger print-error-msg" style="display:none">
+                <ul></ul>
+            </div>
             <div class="card-body">
                 <form action="{{ route('products.update', ['id' => $product->product_id]) }}" method="POST" id="productForm"
                     name="productForm" class="form-horizontal" enctype="multipart/form-data">
-                    @csrf
-
                     <div class="row">
                         <div class="col-sm-6">
                             <input type="hidden" value="{{ $product->product_id }}" id="productID">
@@ -45,25 +30,23 @@
                                     <input id='product_name' name='product_name' type="text" class="form-control"
                                         value="{{ $product ? $product->product_name : '' }}"
                                         placeholder="Nhập tên sản phẩm">
-                                    @if ($errors->has('product_name'))
-                                        <span class="text-danger">{{ $errors->first('product_name') }}</span>
-                                    @endif
+                                    <span class="text-danger msg-error" id="product_name-error"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">{{ trans('Price') }}</label>
                                 <div class="col-sm-9">
                                     <input id='product_price' name='product_price' type="text" class="form-control"
-                                        value="{{ $product ? $product->product_price : '' }}">
-                                    @if ($errors->has('product_price'))
-                                        <span class="text-danger">{{ $errors->first('product_price') }}</span>
-                                    @endif
+                                        value="{{ $product ? $product->product_price : '' }}"
+                                        placeholder="Nhập giá sản phẩm">
+                                    <span class="text-danger msg-error" id="product_price-error"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">{{ trans('Description') }}</label>
                                 <div class="col-sm-9">
-                                    <textarea id='description' name='description' type="text" class="form-control" rows="6"> {{ $product ? $product->description : '' }}</textarea>
+                                    <textarea id='description' name='description' type="text" class="form-control" rows="6"
+                                        placeholder="Mô tả sản phẩm"> {{ $product ? $product->description : '' }}</textarea>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -83,12 +66,9 @@
                                 </div>
                                 <div class="row">
                                     <img style="margin-left: 10px;width: 100%;height: 100%%;" id="preview" name="preview"
-                                        src="{{ $product && $product->product_image ? asset($product->product_image) : asset('img/products/default.jpg') }}"
+                                        src="{{ $product && $product->product_image ? asset('img/products/' . $product->product_image) : asset('img/products/default.jpg') }}"
                                         alt="your image" />
-                                    @if ($errors->has('product_image'))
-                                        <span class="text-danger"
-                                            id="image-err">{{ $errors->first('product_image') }}</span>
-                                    @endif
+                                    <span class="text-danger msg-error" id="product_image-error"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -97,8 +77,10 @@
                                 <div class="file-upload col-sm-9">
                                     <div class="file-select">
                                         <div class="file-select-button " id="fileName">Choose File</div>
-                                        <div class="file-select-name" id="noFile"></div>
-                                        <input type="file" name="product_image" id="product_image" class="form-control" value="{{$product->product_image}}">
+                                        <div class="file-select-name" id="noFile">
+                                            {{ $product->product_image ?? 'No file chosen...' }}</div>
+                                        <input type="file" name="product_image" id="product_image" class="form-control"
+                                            value="{{ $product->product_image }}">
                                     </div>
                                 </div>
                             </div>
@@ -114,33 +96,33 @@
                             </div>
                         </div>
                 </form>
+                
             </div>
         </div>
     </div>
 @stop
 @section('scripts')
-    <script>
+    <script type="text/javascript">
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
         $(document).ready(function() {
-            var defaultImage ="default.jpg";
-            $('#product_image').change(function () {
-                var fullPath = document.getElementById("preview").src;
-                var filename = fullPath.replace(/^.*[\\\/]/, '');
-                console.log(filename);
+
+            var defaultImage = "default.jpg";
+            $('#product_image').change(function(e) {
+                $("#product_image-error").val('');
+                e.preventDefault();
                 var fileImg = $('#product_image').prop('files')[0];
                 if (/^\s*$/.test(fileImg)) {
-                    console.log('noneeee');
                     $(".file-upload").removeClass('active');
-                    if(filename != "default.jpg") {
-                        $("#noFile").text(filename)
-                    } else {
-                        $("#noFile").text("No file chosen...");
-                    }
-                    $('#removeImg').css('display', 'none');
+                    $("#noFile").text("No file chosen...");
                 } else {
-                    console.log('yesssss');
+                    console.log(fileImg);
                     $(".file-upload").addClass('active');
-                    $('#removeImg').css('display', 'block');
                     $("#noFile").text(fileImg['name']);
+                    $('#removeImg').css('display', 'block');
                     if (fileImg) {
                         const reader = new FileReader();
                         reader.addEventListener("load", () => {
@@ -150,15 +132,71 @@
                     }
                 }
             });
-             /**
-            * Handle button remove image 
-            */
+
+            // clear error message
+            function clearMessages() {
+                $("#msg-error").val('');
+                $("#product_name-error").val('');
+                $("#description-error").val('');
+                $("#product_price-error").val('');
+                $("#product_image-error").val('');
+            };
+
+            $('#productForm').submit(function(e) {
+                e.preventDefault();
+                clearMessages();
+                var id = $("#productID").val();
+                var form = $('#productForm')[0];
+                var formData = new FormData(this);
+                formData.append('product_image', $('#product_image')[0].files[0]);
+                console.log($('#product_image')[0].files[0]);
+                $.ajax({
+                    url: "/products/update/" + id,
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log(response);
+                        if (response['status'] === 'success') {
+                            $("#closePopup").trigger("click");
+                            Swal.fire("{{ __('Notification') }}",
+                                "{{ __('Edit success') }}",
+                                'success');
+                        }
+                    },
+                    error: function(err) {
+                        clearMessages();
+                        removeMsgEdit();
+                        console.log(err);
+                        // if (err.responseJSON.errors) {
+                        //     $.each(err.responseJSON.errors, function(key, value) {
+                        //         $("#" + key + '-error').html(value[0]);
+                        //     });
+                        // } else {
+                        //     $(".print-error-msg").css('display', 'block');
+                        //     $(".print-error-msg").find("ul").append('<li>' + err.responseJSON
+                        //         .message + '</li>');
+                        // }
+                    }
+                });
+            });
+
+            function removeMsgEdit() {
+                $(".print-error-msg").find("ul").html('');
+                $(".print-error-msg").css('display', 'none');
+            }
+
+            /**
+             * Handle button remove image 
+             */
             $('#removeImg').click(function() {
                 $('#removeImg').hide();
                 $("#preview").attr("src", "{{ asset('img/products/default.jpg') }}");
                 $(".file-upload").removeClass('active');
                 $("#noFile").text("No file chosen...");
-                $("#product_image-err").empty();
+                $("#product_image-error").val('');
             });
         });
     </script>

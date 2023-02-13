@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Exports\CustomersExport;
-use App\Http\Requests\CustomerRequest;
+use App\Http\Requests\AddCustomerRequest;
+use App\Http\Requests\CustomerImportRequest;
+use App\Http\Requests\EditCustomerRequest;
 use App\Imports\CustomersImport;
 use App\Models\MstCustomer;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Exceptions\NoTypeDetectedException;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Yajra\DataTables\Facades\DataTables;
@@ -29,52 +32,53 @@ class MstCustomerController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\CustomerRequest  $request
+     * @param  \App\Http\Requests\AddCustomerRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(CustomerRequest $request)
+    public function store(AddCustomerRequest $request)
     {
         try {
             $input = $request->all();
             $data = [
-                'customer_name' => $input['name'],
-                'email' => $input['email'],
-                'tel_num' => $input['tel_num'],
-                'address' => $input['address'],
+                'customer_name' => $input['txtName'],
+                'email' => $input['txtEmail'],
+                'tel_num' => $input['txtTel_num'],
+                'address' => $input['txtAddress'],
                 'is_active' => $input['is_active'] === "on" ? 1: 0,
             ];
             MstCustomer::create($data);
             return response()->json(['status' => 'success'], 200);
         } catch (\Throwable $e) {
-            return response()->json(['status' => 'error'], 400);
+            return response()->json(['status' => 'error',"message"=> $e->getMessage()], 400);
         }
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\CustomerRequest  $request
+     * @param  \App\Http\Requests\EditCustomerRequest  $request
      * @param  \App\Models\MstCustomer  $mstCustomer
      * @return \Illuminate\Http\Response
      */
-    public function update(CustomerRequest $request, $id)
+    public function update(EditCustomerRequest $request)
     {
         try {
-            $id = $request->id;
-            $input = $request->all();
+    		if($request->action == 'edit')
+    		{   
+                $id = $request->customer_id;
+                $input = $request->all();
 
-            $data = [
-                'name' => $input['name'],
-                'email' => $input['email'],
-                'address' => $input['address'],
-                'tel_num' => $input['tel_num'],
-                'is_active' => $input['is_active'] === "on" ? 1: 0,
-            ];
-            MstCustomer::where('id', $id)->update($data);
-
-            return response()->json(['status' => 'success'], 200);
+                $data = [
+                    'customer_name' => $input['customer_name'],
+                    'email' => $input['email'],
+                    'address' => $input['address'],
+                    'tel_num' => $input['tel_num'],
+                ];
+                MstCustomer::where('customer_id', $id)->update($data);
+                return response()->json(['status' => 'success'], 200);
+            }
         } catch (\Throwable $e) {
-            return response()->json(['status' => 'error'], 400);
+            return response()->json(['status' => 'error',"message"=>$e->getMessage()], 400);
         }
     }
 
@@ -117,7 +121,11 @@ class MstCustomerController extends Controller
                 $data = $data->where('is_active', (int) $input['is_active']);
             }
             $data = $data->orderBy('customer_id', 'DESC')->get();
-            return DataTables::of($data)->make(true);
+            return DataTables::of($data)
+            ->setRowId(function ($user) {
+                return $user->customer_id;
+            })
+            ->make(true);
         }
     }
 
@@ -125,11 +133,10 @@ class MstCustomerController extends Controller
      * Import customer list
      *
      */
-    public function import(Request $request)
+    public function import(CustomerImportRequest $request)
     {
         try {
             $import = Excel::import(new CustomersImport, request()->file('file'));
-            //dd($import);
             return response()->json(['status' => 'success', 'message' => trans('Import success')], 200);
         } catch (ValidationException $e) {
              $failures = $e->failures();
@@ -138,9 +145,11 @@ class MstCustomerController extends Controller
                  $row = $failure->row(); // row that went wrong
                  $column = $failure->attribute(); // either heading key (if using heading row concern) or column index
                  $messages = $failure->errors(); // Actual error messages from Laravel validator
-                 Log::channel('LOG_IMPORT_CUSTOMER_EXCEL')->debug('Error row: ' . $row . ' \n| column error:'.$column.' \n| Message: ' . $messages[0]);
+                 Log::debug('Error row: ' . $row . ' \n| column error:'.$column.' \n| Message: ' . $messages[0]);
             }
-            return response()->json(['status' => 'error', 'message' => trans('Import error')], 400);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 400);
+        } catch (NoTypeDetectedException $e) {
+            return response()->json(['status' => 'error', 'errors' => trans('import.extension')], 400);
         }
     }
 

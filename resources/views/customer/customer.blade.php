@@ -3,14 +3,15 @@
 @section('title', 'RiverCrane Vietnam - Customers')
 
 @section('styles')
+    {{-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" /> --}}
 @stop
 
 @section('content')
-@php
-    $TitlePage = "Danh sách khách hàng";
-    $redirect = "#";
-    $childMenu = "";
-@endphp
+    @php
+        $TitlePage = 'Danh sách khách hàng';
+        $redirect = '#';
+        $childMenu = '';
+    @endphp
     @include('layouts.header')
     <div class="container-fluid pr-0 pl-0">
         <div class="card">
@@ -20,14 +21,14 @@
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>{{ trans('Fullname') }}</label>
-                                <input id='txtName' name='txtName' type="text" class="form-control"
+                                <input id='filterName' name='filterName' type="text" class="form-control"
                                     placeholder="Nhập {{ trans('Fullname') }}">
                             </div>
                         </div>
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>Email</label>
-                                <input id='txtEmail' name='txtEmail' type="text" class="form-control"
+                                <input id='filterEmail' name='filterEmail' type="text" class="form-control"
                                     placeholder="Nhập email">
                             </div>
                         </div>
@@ -44,7 +45,7 @@
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>{{ trans('Address') }}</label>
-                                <input id='txtAddress' name='txtAddress' type="text" class="form-control"
+                                <input id='filterAddress' name='filterAddress' type="text" class="form-control"
                                     placeholder="Nhập địa chỉ">
                             </div>
                         </div>
@@ -52,28 +53,33 @@
                     <div class="row">
                         <div class="col-sm-3 text-left">
                             <button id="btnAdd" name="btnAdd" type="button" class="btn btn-primary" data-toggle="modal"
-                                data-target=".popupCustomer"><i class="fa fa-user-plus fa-border"></i><span> {{ __('Add')}}</span></button>
+                                data-target=".popupCustomer"><i class="fa fa-user-plus fa-border"></i><span>
+                                    {{ __('Add') }}</span></button>
                         </div>
                         <div class="col-sm-4 text-left">
-                                <label class="btn btn-success">
-                                    <i class="fa fa-upload"></i> &nbsp;Import
-                                    <input class="d-none" name="import" id="import" type="file">
-                                </label>
-                                <button id="btnExport" name="btnExport" type="submit" class="btn btn-success" style="margin-bottom: 6px">
-                                    <span><i class="fas fa-file-export"></i>Export</span>
-                                </button>
+                            <label class="btn btn-success">
+                                <i class="fa fa-upload"></i> &nbsp;Import
+                                <input class="d-none" name="import" id="import" type="file">
+                            </label>
+                            <button id="btnExport" name="btnExport" type="submit" class="btn btn-success"
+                                style="margin-bottom: 6px">
+                                <span><i class="fas fa-file-export"></i>Export</span>
+                            </button>
                         </div>
                         <div class="col-sm-5 text-right">
                             <button id="btnSearch" name="btnSearch" type="button" class="btn btn-success"><i
-                                    class="fa fa-search fa-border"></i><span> {{ __('Search')}}</span></button>
+                                    class="fa fa-search fa-border"></i><span> {{ __('Search') }}</span></button>
                             <button id="btnDelSearch" name="btnDelSearch" type="button" class="btn btn-success"><i
-                                    class="fa fa-border">X</i><span> {{ __('DeleteSearch')}}</span></button>
+                                    class="fa fa-border">X</i><span> {{ __('DeleteSearch') }}</span></button>
                         </div>
                     </div>
                 </form>
                 <hr>
                 <div class="row" style="margin:0.25rem">
                     <div class="card">
+                        <div class="alert alert-danger print-error-msg" style="display:none">
+                            <ul></ul>
+                        </div>
                         <div class="table-responsive" style="margin-top:0.25rem">
                             <table class="table table-hover customerList" id="customerList" name="customerList">
                                 <thead>
@@ -94,9 +100,6 @@
                 </div>
             </div>
         </div>
-        @if (session('error'))
-            <div class="alert alert-danger text-center">{{ session('error') }}</div>
-        @endif
         <div class="row">
             <div class="modal fade popupCustomer" tabindex="-1" role="dialog" aria-hidden="true" style="display: none;">
                 @include('customer.popupAddCustomer')
@@ -106,14 +109,16 @@
 @stop
 @section('scripts')
     <!-- jQuery -->
-    <script type="text/javascript" src="//cdn.datatables.net/rowreorder/1.3.2/js/dataTables.rowReorder.min.js"></script>
+    <script type="text/javascript" src="{{ asset('js/jquery.tabledit.js') }}"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+    {{-- <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/additional-methods.js"></script> --}}
     <script>
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-        var dataTemp = null;
+        var dataTemp = [];
         $(document).ready(function() {
             var $table = $('#customerList');
             var action = "add";
@@ -127,10 +132,6 @@
                 autoWidth: false,
                 pagingType: "full_numbers_no_ellipses",
                 pageLength: 20,
-                // rowReorder: {
-                //     dataSrc: 'readingOrder',
-                //     editor:  editor
-                // },
                 select: true,
                 dom: "<'row'<'col-sm-4'i><'col-sm-8 text-center'p>>" +
                     "<'row'<'col-sm-12'tr>>" +
@@ -138,9 +139,9 @@
                 ajax: {
                     url: "{{ route('customers.getData') }}",
                     data: function(d) {
-                        d.name = $("#txtName").val() ?? '';
-                        d.email = $("#txtEmail").val() ?? '';
-                        d.address = $("#txtAddress").val() ?? '';
+                        d.name = $("#filterName").val() ?? '';
+                        d.email = $("#filterEmail").val() ?? '';
+                        d.address = $("#filterAddress").val() ?? '';
                         d.is_active = $("#checkActive").val() ?? '';
                     }
                 },
@@ -168,38 +169,20 @@
                         data: 'tel_num',
                         name: 'tel_num'
                     },
-                    {
-                        data: null,
-                        render: function(data) {
-                            $id = data["customer_id"];
-                            $btn = '<button type="button" id="editCustomer-' + $id + '" data-id="' +
-                                $id +
-                                '" class="btn btn-info editCustomer"><i class="fa fa-edit"></i></button>';
-                            $btn = $btn + ' <button type="button" id="saveCustomer-' + $id +
-                                '" data-id="' +
-                                $id +
-                                '" class="btn btn-info saveCustomer d-none"><i class="fa fa-save"></i></button>';
-                            return $btn;
-                        },
-                        orderable: false,
-                        serachable: false
-                    },
                 ],
                 drawCallback: function() {
                     var row_page = 20;
                     var $api = this.api();
                     var pages = $api.page.info().pages;
                     var rows = $api.data().length;
-                    
-                    if((rows === 0 && pages === 0)){
+
+                    if ((rows === 0 && pages === 0)) {
                         $('.dataTables_paginate ').css('display', 'none');
                         $('.dataTables_info ').css('display', 'none');
-                    }
-                    else if (pages === 1) {
+                    } else if (pages === 1) {
                         $('.dataTables_paginate ').css('display', 'none');
                         $('.dataTables_info ').css('display', 'block');
-                    } 
-                    else {
+                    } else {
                         $('.dataTables_paginate ').css('display', 'block');
                         $('.dataTables_info ').css('display', 'block');
                     }
@@ -218,50 +201,87 @@
                 },
             });
 
+            $('#customerList').on('draw.dt', function() {
+                $('#customerList').Tabledit({
+                    url: '{{ route('customers.update') }}',
+                    dataType: 'json',
+                    columns: {
+                        identifier: [0, 'customer_id'],
+                        editable: [
+                            [1, 'customer_name'],
+                            [2, 'email'],
+                            [3, 'address'],
+                            [4, 'tel_num'],
+                        ]
+                    },
+                    restoreButton: false,
+                    deleteButton: false,
+                    buttons: {
+                        edit: {
+                            class: 'btn btn-sm btn-warning',
+                            html: '<span class="fa fa-edit"></span>',
+                            action: 'edit'
+                        }
+                    },
+                    onSuccess: function(data, textStatus, jqXHR) {
+                        Swal.fire("{{ __('Notification') }}",
+                            "{{ __('Edit success') }}", 'success');
+                        customerTable.ajax.reload();
+                        removeMsgEdit();
+                    },
+                    onFail: function(data) {
+                        console.log(data.responseJSON.errors);
+                        printErrorMsg(data.responseJSON.errors);
+                        customerTable.ajax.reload();
+                    },
+
+                });
+            });
             // validate signup form on keyup and submit
             var validator = $("#addCustomerForm").validate({
                 rules: {
-                    name: {
+                    txtName: {
                         required: true,
                         minlength: 5
                     },
-                    email: {
+                    txtEmail: {
                         required: true,
                         email: true
                     },
-                    address: {
+                    txtAddress: {
                         required: true,
                     },
-                    tel_num: {
+                    txtTel_num: {
                         required: true,
                         digits: true,
-                        max: 999999999999,
-                        min: 7,
+                        maxlength: 12,
+                        minlength: 10
                     },
                 },
                 messages: {
-                    name: {
+                    txtName: {
                         required: "{{ __('CustomerRequired') }}",
                         minlength: "{{ __('CustomerMinlength') }}",
                     },
-                    email: {
+                    txtEmail: {
                         required: "{{ __('EmailRequired') }}",
                         email: "{{ __('EmailType') }}",
                     },
-                    address: {
+                    txtAddress: {
                         required: "{{ __('address.required') }}",
                     },
-                    tel_num: {
+                    txtTel_num: {
                         required: "{{ __('tel_num.required') }}",
                         digits: "{{ __('tel_num.regex') }}",
-                        max: "max",
-                        min: "min"
+                        maxlength: "{{ __('tel_num.max') }}",
+                        minlength: "{{ __('tel_num.min') }}",
                     },
                 },
                 submitHandler: function(form, e) {
                     e.preventDefault();
 
                     var formData = new FormData(form);
+                    console.log(formData)
                     console.log('add custom');
                     $.ajax({
                         url: "/customers",
@@ -274,13 +294,8 @@
                             if (result['status'] === 'success') {
                                 Swal.fire(
                                     "{{ __('Notification') }}",
-                                    "{{ __('Add success') }}",
+                                    "{{ __('Add success ') }}",
                                     'success');
-                            } else {
-                                Swal.fire(
-                                    "{{ __('Notification') }}",
-                                    "{{ __('Add error') }}",
-                                    'error');
                             }
                         },
                     });
@@ -293,12 +308,14 @@
                 $('#txtAddress').val('');
                 $('#txtName').val('');
                 $('#txtEmail').val('');
+                removeMsgEdit();
                 customerTable.ajax.reload();
             });
 
             // Xử lý search dữ liệu cho customerList
             $('#btnSearch').on('click', function(e) {
                 e.preventDefault();
+                removeMsgEdit();
                 customerTable.ajax.reload();
             })
 
@@ -321,22 +338,36 @@
 
             // Reset PopupEditAddUser
             function initCustomerForm() {
-                $("#name").val('');
-                $("#email").val('');
-                $("#tel_num").val('');
-                $("#address").val('');
+                $("#txtName").val('');
+                $("#txtEmail").val('');
+                $("#txtTel_num").val('');
+                $("#txtAddress").val('');
                 $("#is_active").prop('selectedIndex', 0);
+                removeMsgEdit();
             }
 
             // clear error message
             function clearMessages() {
-                $("#name-error").val('');
-                $("#email-error").val('');
-                $("#tel_num-error").val('');
-                $("#address").val('');
+                $("#txtName-error").val('');
+                $("#txtEmail-error").val('');
+                $("#txtTel_num-error").val('');
+                $("#txtAddress").val('');
+                removeMsgEdit();
                 validator.resetForm();
             };
 
+            function removeMsgEdit() {
+                $(".print-error-msg").find("ul").html('');
+                $(".print-error-msg").css('display', 'none');
+            }
+
+            function printErrorMsg(msg) {
+                $(".print-error-msg").find("ul").html('');
+                $(".print-error-msg").css('display', 'block');
+                $.each(msg, function(key, value) {
+                    $(".print-error-msg").find("ul").append('<li>' + value + '</li>');
+                });
+            }
             // Reset Form AddUser
             $('#btnAdd').on('click', function() {
                 clearMessages();
@@ -344,114 +375,17 @@
             });
 
             var customerID = null;
-
-            // Get user cho popupEditCustomer
-            $('#customerList').on('click', '.editCustomer', function() {
-                var id = $(this).data("id");
-                var customer = getCustomerByID(id);
-                console.log(customer);
-                if (customer != null) {
-                    customerID = customer.customer_id;
-                    $(this).val("d-none");
-                    // $save = '.saveCustomer-'+customerID;
-                    // $('.editCustomer-'+customerID).addClass("d-none");
-                    var $row = $(this).closest("tr").off("mousedown");
-                    var $tds = $row.find("td").not(':first').not(':last');
-                    var item = {};
-                    $.each($tds, function(i, el) {
-                        var txt = $(this).text();
-                        var inputName = "";
-                        var title = "";
-                        if (i === 0) {
-                            title = "name";
-                            item.name = txt;
-                        } else if (i === 1) {
-                            title = "email";
-                            item.email = txt;
-                        } else if (i === 2) {
-                            title = "address";
-                            item.address = txt;
-                        } else {
-                            title = "tel_num";
-                            item.tel_num = txt;
-                        }
-                        inputName = title+ "-"+ customerID;
-                        $(this).html("").append("<input class='form-control' id=\"" + inputName +
-                            "\" name=\"" + inputName + "\" type='text' value=\"" + txt +
-                            "\">");
-                    });
-                    console.log(item);
-                } else {
-                    Swal.fire("{{ __('Notification') }}", "{{ __('User not found') }}", 'error');
-                }
-            });
-            $("#customerList").on('mousedown', "input", function(e) {
-                e.stopPropagation();
-            });
-
-            $("#customerList").on('mousedown', ".saveCustomer", function(e) {
-
-                $('.saveCustomer').addClass("d-none");
-                $('.editCustomer').removeClass("d-none");
-                var $row = $(this).closest("tr");
-                var $tds = $row.find("td").not(':first').not(':last');
-
-                $.each($tds, function(i, el) {
-                    var txt = $(this).find("input").val()
-                    $(this).html(txt);
-                });
-            });
-
-            // Xử lý sửa thông tin customers
-            $('body').on('click', '#btnEditCustomer', function(e) {
-                e.preventDefault();
-
-                //clearMessages();
-                var name = $("#name").val();
-                var email = $("#email").val();
-                var address = $("#address").val();
-                var active = ($("#checkActive").val()) === "on" ? 1 : 0;
-
-                $.ajax({
-                    url: '/customers/update/' + customerID,
-                    type: "POST",
-                    data: {
-                        id: customerID,
-                        name: name,
-                        email: email,
-                        address: address,
-                        is_active: active,
-                    },
-                    dataType: 'json',
-                    success: function(data) {
-                        if (result['status'] === 'success') {
-                            Swal.fire("{{ __('Notification') }}",
-                                "{{ __('Edit success') }}", 'success');
-                            $('#btnEditCustomer').attr('id', 'btnAddCustomer');
-                            $("#closePopup").trigger("click");
-                            customerTable.ajax.reload();
-                        } else {
-                            Swal.fire("{{ __('Notification') }}",
-                                "{{ __('Edit error') }}", 'error');
-
-                        }
-                    },
-                    beforeSend: function() {
-                        clearMessages();
-                    },
-                });
-            });
-
             // Xử lý import customers
-            $('#searchForm').on('change', '#import', function(e) {
+            $('body').on('change', '#import', function(e) {
                 e.preventDefault();
+                removeMsgEdit();
                 var file_data = $('#import').prop('files')[0];
                 console.log(file_data);
                 var formData = new FormData();
                 formData.append('file', file_data);
 
                 $.ajax({
-                    //url: "{{ route('customers.import') }}",
+                    url: "{{ route('customers.import') }}",
                     type: "POST",
                     contentType: false,
                     processData: false,
@@ -464,15 +398,17 @@
                                 '{{ __('Import success') }}',
                                 'success'
                             )
-                        } else {
-                            Swal.fire(
-                                '{{ __('Notification') }}',
-                                '{{ __('Import error') }}',
-                                'error'
-                            )
                         }
-
                     },
+                    error: function(err) {
+                        console.log(err);
+                        if (err.responseJSON.errors) {
+                            printErrorMsg(err.responseJSON.errors);
+                        } else {
+                            $(".print-error-msg").css('display', 'block');
+                            $(".print-error-msg").find("ul").append('<li>' + err.responseJSON.message + '</li>');
+                        }
+                    }
                 });
                 customerTable.ajax.reload();
             });
@@ -480,9 +416,9 @@
             // Xử lý export customers
             $('body').on('click', '#btnExport', function(e) {
                 e.preventDefault();
-                var name = $("#txtName").val();
-                var email = $("#txtEmail").val();
-                var address = $("#txtAddress").val();
+                var name = $("#filterName").val();
+                var email = $("#filterEmail").val();
+                var address = $("#filterAddress").val();
                 var active = "";
                 if ($("#checkActive").val()) {
                     active = $("#checkActive").val() === "on" ? 1 : 0

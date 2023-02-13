@@ -36,20 +36,20 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('customers/getData', [MstCustomerController::class, 'getCustomerData'])->name('customers.getData');
     Route::get('customers/info/{id}', [MstCustomerController::class, 'getCustomerByID']);
     Route::post('customers', [MstCustomerController::class, 'store'])->name('customers.store'); 
-    Route::post('customers/update/{id}', [MstCustomerController::class, 'update'])->name('customers.update'); 
+    Route::post('customers/update', [MstCustomerController::class, 'update'])->name('customers.update'); 
     Route::get('customers/export', [MstCustomerController::class, 'export'])->name('customers.export'); 
     Route::post('customers/import', [MstCustomerController::class, 'import'])->name('customers.import');
 
     // Product
     Route::get('products', [MstProductController::class, 'index'])->name('products');
     Route::get('products/create', [MstProductController::class, 'create'])->name('products.create');
-    Route::get('products/getData', [MstProductController::class, 'getProductData'])->name('products.getData');
-    Route::get('products/{id}/edit', [MstProductController::class, 'edit'])->name('products.edit');
-    Route::get('products/details/{id}', [MstProductController::class, 'getProductByID']);
     Route::post('products', [MstProductController::class, 'store'])->name('products.store'); 
+    Route::get('products/{id}/edit', [MstProductController::class, 'edit'])->name('products.edit');
     Route::post('products/update/{id}', [MstProductController::class, 'update'])->name('products.update'); 
+    //Route::get('products/details/{id}', [MstProductController::class, 'getProductByID']);
     Route::delete('products/{id}', [MstProductController::class, 'destroy'])->name('products.delete');
-
+    Route::get('products/getData', [MstProductController::class, 'getProductData'])->name('products.getData');
+    
     Route::get('/logout', [LoginController::class, 'logOut'])->name('logout');
 
 });

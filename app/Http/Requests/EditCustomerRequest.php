@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use Dotenv\Exception\ValidationException;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
 
-class CustomerRequest extends FormRequest
+class EditCustomerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,8 +26,8 @@ class CustomerRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|min:5',
-            'email' => 'required|max:255|email:rfc,dns|unique:mst_customer',
+            'customer_name' => 'required|min:5',
+            'email' => 'required|max:255|email:rfc,dns',
             'tel_num' => 'required|regex:/^([0-9]*)$/|min:10|max:12',
             'address' => 'required|max:255',
         ];
@@ -38,11 +40,10 @@ class CustomerRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => trans('CustomerRequired'),
-            'name.min' => trans('CustomerMinlength'),
+            'customer_name.required' => trans('CustomerRequired'),
+            'customer_name.min' => trans('CustomerMinlength'),
             'email.required' => trans('EmailRequired'),
             'email.email' =>  trans('EmailType'),
-            'email.unique' =>  trans('email.unique'),
             'email.exists' => trans('email.exists'),
             "email.max" => trans('email.max'),
 
@@ -55,4 +56,20 @@ class CustomerRequest extends FormRequest
             "address.max" => trans('address.max'),
         ];
     }
+
+    // /**
+    //  * Hanle a failed validation attempt
+    //  * 
+    //  * @param \Illuminate\Contracts\Validation\Validator
+    //  * @return void
+    //  * 
+    //  * @throws \Illuminate\Validation\ValidationException
+    //  */
+    
+    // protected function failedValidation(Validator $validator) {
+    //     throw(new ValidationException($validator))
+    //     ->status(200)
+    //     ->errorBag($this->errorBag)
+    //     ->redirect($this->getRedirectUrl());
+    // }
 }

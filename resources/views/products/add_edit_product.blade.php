@@ -101,167 +101,168 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+        
         $(document).ready(function() {
-        // // Reset PopupEditAddproduct
-        function initProductForm() {
-            $("#product_name").val('');
-            $("#description").val('');
-            $("#product_price").val('');
-            $("#is_sales").val(1);
-            $("#product_image").empty();
-        };
+            // Reset PopupEditAddproduct
+            function initProductForm() {
+                $("#product_name").val('');
+                $("#description").val('');
+                $("#product_price").val('');
+                $("#is_sales").val(1);
+                $("#product_image").empty();
+            };
 
-        // clear error message
-        function clearMessages() {
-            $("#product_name-error").val('');
-            $("#description-error").val('');
-            $("#product_price-error").val('');
-            $("#is_sales-error").val('');
-            $("#product_image-error").val('');
-            validator.resetForm();
-        };
+            // clear error message
+            function clearMessages() {
+                $("#product_name-error").val('');
+                $("#description-error").val('');
+                $("#product_price-error").val('');
+                $("#is_sales-error").val('');
+                $("#product_image-error").val('');
+                validator.resetForm();
+            };
 
-        //# Xử lý ADD-EDIT PRODUCT POPUP 
-        // validate signup form on keyup and submit
-        var validator = $("#productForm").validate({
-            rules: {
-                product_name: {
-                    required: true,
-                    minlength: 5
+            //# Xử lý ADD-EDIT PRODUCT POPUP 
+            // validate signup form on keyup and submit
+            var validator = $("#productForm").validate({
+                rules: {
+                    product_name: {
+                        required: true,
+                        minlength: 5
+                    },
+                    product_price: {
+                        required: true,
+                        digits: true,
+                        min: 0,
+                    },
+                    product_image: {
+                        extension: "jpg|jpeg|png",
+                        filesize: 2,
+                        maxsize: 1024,
+                    }
                 },
-                product_price: {
-                    required: true,
-                    digits: true,
-                    min: 0,
+                messages: {
+                    product_name: {
+                        required: "{{ __('product_name.required') }}",
+                        minlength: "{{ __('product_name.min') }}",
+                    },
+                    product_price: {
+                        required: "{{ __('product_price.required') }}",
+                        min: "{{ __('product_price.min') }}",
+                        digits: "{{ __('product_price.digits') }}",
+                    },
+                    product_image: {
+                        extension: "{{ __('product_image.extension') }}",
+                        filesize: "{{ __('product_image.max') }}",
+                        maxsize: "{{ __('product_image.maxsize') }}"
+                    }
                 },
-                product_image: {
-                    extension: "jpg|jpeg|png",
-                    filesize: 2,
-                    maxsize: 1024,
-                }
-            },
-            messages: {
-                product_name: {
-                    required: "{{ __('product_name.required') }}",
-                    minlength: "{{ __('product_name.min') }}",
-                },
-                product_price: {
-                    required: "{{ __('product_price.required') }}",
-                    min: "{{ __('product_price.min') }}",
-                    digits: "{{ __('product_price.digits') }}",
-                },
-                product_image: {
-                    extension: "{{ __('product_image.extension') }}",
-                    filesize: "{{ __('product_image.max') }}",
-                    maxsize: "{{ __('product_image.maxsize') }}"
-                }
-            },
-            submitHandler: function(form, e) {
-                e.preventDefault();
-                var formData = new FormData(form);
-                console.log(formData);
-                var action = $('#action').val();
-                console.log(action);
-                if (action === 'add') {
-                    console.log('add product');
-                    $.ajax({
-                        url: "{{ route('products.store') }}",
-                        type: "POST",
-                        data: formData,
-                        contentType: false,
-                        processData: false,
-                        success: function(result) {
-                            console.log(result);
-                            if (result['status'] === 'success') {
-                                $("#closePopup").trigger("click");
-                                Swal.fire("{{ __('Notification') }}",
-                                    "{{ __('Add success') }}",
-                                    'success');
-                            } else {
+                submitHandler: function(form, e) {
+                    e.preventDefault();
+                    var formData = new FormData(form);
+                    console.log(formData);
+                    var action = $('#action').val();
+                    console.log(action);
+                    if (action === 'add') {
+                        console.log('add product');
+                        $.ajax({
+                            url: "{{ route('products.store') }}",
+                            type: "POST",
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            success: function(result) {
+                                console.log(result);
+                                if (result['status'] === 'success') {
+                                    $("#closePopup").trigger("click");
+                                    Swal.fire("{{ __('Notification') }}",
+                                        "{{ __('Add success') }}",
+                                        'success');
+                                } else {
+                                    Swal.fire(
+                                        "{{ __('Notification') }}",
+                                        "{{ __('Add error') }}",
+                                        'error');
+                                }
+                            },
+                            error: function(result) {
                                 Swal.fire(
                                     "{{ __('Notification') }}",
                                     "{{ __('Add error') }}",
                                     'error');
                             }
-                        },
-                        error: function(result) {
-                            Swal.fire(
-                                    "{{ __('Notification') }}",
-                                    "{{ __('Add error') }}",
-                                    'error');
-                        }
-                    });
-                } else {
-                    var productID = $('#productID').val();
-                    console.log('edit product: '+ productID);
-                    $.ajax({
-                        url: '/products/update/' + productID,
-                        type: "POST",
-                        data: {
+                        });
+                    } else {
+                        var productID = $('#productID').val();
+                        console.log('edit product: ' + productID);
+                        $.ajax({
+                            url: '/products/update/' + productID,
+                            type: "POST",
+                            data: {
 
-                        },
-                        contentType: false,
-                        processData: false,
-                        success: function(data) {
-                            if (data['status'] === 'success') {
-                                Swal.fire("{{ __('Notification') }}",
-                                    "{{ __('Edit success') }}", 'success');
-                            } else {
-                                Swal.fire("{{ __('Notification') }}",
-                                    "{{ __('Edit error') }}", 'error');
-                            }
-                        },
-                        error: function(result) {
-                            Swal.fire(
+                            },
+                            contentType: false,
+                            processData: false,
+                            success: function(data) {
+                                if (data['status'] === 'success') {
+                                    Swal.fire("{{ __('Notification') }}",
+                                        "{{ __('Edit success') }}", 'success');
+                                } else {
+                                    Swal.fire("{{ __('Notification') }}",
+                                        "{{ __('Edit error') }}", 'error');
+                                }
+                            },
+                            error: function(result) {
+                                Swal.fire(
                                     "{{ __('Notification') }}",
                                     result['message'],
                                     'error');
-                        }
-                    });
+                            }
+                        });
+                    }
+                    return false;
+                },
+            });
+
+            $.validator.addMethod('filesize', function(value, element, param) {
+                return this.optional(element) || (element.files[0].size <= param * 1000000)
+            }, 'File size must be less than {0} MB');
+
+            $.validator.addMethod('maxsize', function(value, element, param) {
+                var fileImg = $('#chooseImage').prop('files')[0];
+                const reader = new FileReader();
+                reader.readAsDataURL(fileImg);
+                var image = new Image();
+                var imgWidth = 0;
+                var imgHeight = 0;
+                reader.addEventListener("load", () => {
+                    image.src = event.target.result;
+                    image.onload = function() {
+                        imgHeight = image.height;
+                        imgWidth = image.width;
+                    }
+                }, false);
+                return this.optional(element) || (imgWidth <= param || imgHeight <= param)
+            }, 'Size must be less than {0}');
+
+            $('#chooseImage').bind('change', function() {
+                var fileImg = $('#chooseImage').prop('files')[0];
+                if (/^\s*$/.test(fileImg)) {
+                    $(".file-upload").removeClass('active');
+                    $("#noFile").text("No file chosen...");
+                } else {
+                    console.log(fileImg);
+                    $(".file-upload").addClass('active');
+                    $("#noFile").text(fileImg['name']);
+                    if (fileImg) {
+                        const reader = new FileReader();
+                        reader.addEventListener("load", () => {
+                            $("#preview").attr("src", event.target.result);
+                        }, false);
+                        reader.readAsDataURL(fileImg);
+                    }
                 }
-                return false;
-            },
+            });
         });
-
-        $.validator.addMethod('filesize', function(value, element, param) {
-            return this.optional(element) || (element.files[0].size <= param * 1000000)
-        }, 'File size must be less than {0} MB');
-
-        $.validator.addMethod('maxsize', function(value, element, param) {
-            var fileImg = $('#chooseImage').prop('files')[0];
-            const reader = new FileReader();
-            reader.readAsDataURL(fileImg);
-            var image = new Image();
-            var imgWidth = 0;
-            var imgHeight = 0;
-            reader.addEventListener("load", () => {
-                image.src = event.target.result;
-                image.onload = function() {
-                    imgHeight = image.height;
-                    imgWidth = image.width;
-                }
-            }, false);
-            return this.optional(element) || (imgWidth <= param || imgHeight <= param)
-        }, 'Size must be less than {0}');
-
-        $('#chooseImage').bind('change', function() {
-            var fileImg = $('#chooseImage').prop('files')[0];
-            if (/^\s*$/.test(fileImg)) {
-                $(".file-upload").removeClass('active');
-                $("#noFile").text("No file chosen...");
-            } else {
-                console.log(fileImg);
-                $(".file-upload").addClass('active');
-                $("#noFile").text(fileImg['name']);
-                if (fileImg) {
-                    const reader = new FileReader();
-                    reader.addEventListener("load", () => {
-                        $("#preview").attr("src", event.target.result);
-                    }, false);
-                    reader.readAsDataURL(fileImg);
-                }
-            }
-        });
-    });
     </script>
 @stop
