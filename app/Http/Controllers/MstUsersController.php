@@ -59,17 +59,18 @@ class MstUsersController extends Controller
     {
         try {
             $input = $request->all();
+            $is_active = $input['is_active'] === "on" ? 1 : 0;
             $data = [
                 'name' => $input['name'],
                 'email' => $input['email'],
                 'password' => Hash::make($input['password']),
                 'group_role' => $input['group_role'],
-                'is_active' => $input['is_active'],
+                'is_active' => $is_active,
             ];
             MstUsers::create($data);
             return response()->json(['status' => 'success'], 200);
         } catch (\Throwable $e) {
-            return response()->json(['status' => 'error'], 400);
+            return response()->json(['status' => 'error',"message"=> $e->getMessage()], 400);
         }
     }
 
@@ -88,7 +89,6 @@ class MstUsersController extends Controller
 
             $data = [
                 'name' => $input['name'],
-                'email' => $input['email'],
                 'group_role' => $input['group_role'],
                 'is_active' => $input['is_active'] === "on" ? 1: 0,
             ];
@@ -98,7 +98,7 @@ class MstUsersController extends Controller
             MstUsers::where('id', $id)->update($data);
             return response()->json(['status' => 'success'], 200);
         } catch (\Throwable $e) {
-            return response()->json(['status' => 'error'], 400);
+            return response()->json(['status' => 'error',"message"=> $e->getMessage()], 400);
         }
     }
 
@@ -178,16 +178,6 @@ class MstUsersController extends Controller
             }
             $data = $data->orderBy('id', 'DESC')->get();
             return Datatables::of($data)->make(true);
-        }
-    }
-
-    public function checkEmail(Request $request)
-    {
-        $user = MstUsers::where('email', $request->email)->first();
-        if ($user->email) {
-            return response()->json(true);
-        } else {
-            return response()->json(false);
         }
     }
 }

@@ -35,10 +35,10 @@
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>Nhóm</label>
-                                {!! Form::select('group_role', ['Admin' => 'Admin', 'Editor' => 'Editor', 'Reviewer' => 'Reviewer'], null, [
+                                {!! Form::select('selGroup_role', ['Admin' => 'Admin', 'Editor' => 'Editor', 'Reviewer' => 'Reviewer'], null, [
                                     'placeholder' => 'Chọn nhóm...',
                                     'class' => 'form-control',
-                                    'id' => 'group_role',
+                                    'id' => 'selGroup_role',
                                 ]) !!}
                             </div>
                         </div>
@@ -101,7 +101,7 @@
     </div>
 @stop
 @section('scripts')
-    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+    {{-- <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script> --}}
     <script>
         $.ajaxSetup({
             headers: {
@@ -129,7 +129,7 @@
                     data: function(d) {
                         d.name = $("#txtName").val() ?? '';
                         d.email = $("#txtEmail").val() ?? '';
-                        d.role = $("#group_role").val() ?? '';
+                        d.role = $("#selGroup_role").val() ?? '';
                         d.active = $("#checkActive").val() ?? '';
                     }
                 },
@@ -170,20 +170,24 @@
                         data: null,
                         render: function(data) {
                             $id = data["id"];
+                            $email = data['email'];
                             $btn = '<button type="button" id="popupEdit-' + $id + '" data-id="' +
                                 $id +
                                 '" data-toggle="modal" data-target=".popupUser" class="btn btn-info popupEditUser"><i class="fa fa-edit"></i></button>';
-                            $btn = $btn + ' <button type="button" id="delD-' + $id +
-                                '" name="delD-' + $id + '" data-id="' + $id +
-                                '" class="btn btn-danger removeUser" ><i class="fa fa-trash"></i></button>';
-                            if (data["is_active"] === 1) {
-                                $btn = $btn + ' <button type="button" id="lockID-' + $id +
-                                    '" name="lockID-' + $id + '"data-id="' + $id +
-                                    '" class="btn btn-default lockUser"><i class="fa fa-user-lock"></i></button>';
-                            } else {
-                                $btn = $btn + ' <button type="button" id="lockID-' + $id +
-                                    '" name="lockID-' + $id + '"data-id="' + $id +
-                                    '" class="btn btn-default lockUser"><i class="fa fa-unlock"></i></button>';
+
+                            if ($email != "admin@gmail.com") {
+                                $btn = $btn + ' <button type="button" id="delD-' + $id +
+                                    '" name="delD-' + $id + '" data-id="' + $id +
+                                    '" class="btn btn-danger removeUser" ><i class="fa fa-trash"></i></button>';
+                                if (data["is_active"] === 1) {
+                                    $btn = $btn + ' <button type="button" id="lockID-' + $id +
+                                        '" name="lockID-' + $id + '"data-id="' + $id +
+                                        '" class="btn btn-default lockUser"><i class="fa fa-user-lock"></i></button>';
+                                } else {
+                                    $btn = $btn + ' <button type="button" id="lockID-' + $id +
+                                        '" name="lockID-' + $id + '"data-id="' + $id +
+                                        '" class="btn btn-default lockUser"><i class="fa fa-unlock"></i></button>';
+                                }
                             }
                             return $btn;
                         },
@@ -224,125 +228,119 @@
 
             //# Xử lý ADD-EDIT USER POPUP 
             // validate signup form on keyup and submit
-            var validator = $("#userForm").validate({
-                rules: {
-                    name: {
-                        required: true,
-                        minlength: 5
-                    },
-                    email: {
-                        required: true,
-                        email: true,
+            // var validator = $("#addUserForm").validate({
+            //     rules: {
+            //         name: {
+            //             required: true,
+            //             minlength: 5
+            //         },
+            //         email: {
+            //             required: true,
+            //             email: true,
 
-                    },
-                    password: {
-                        required: true,
-                        minlength: 5,
-                        pwchkregex: true
-                    },
-                    password_confirm: {
-                        required: true,
-                        equalTo: "#password"
-                    },
-                    group_role: {
-                        required: true,
-                    }
-                },
-                messages: {
-                    name: {
-                        required: "{{ __('UserRequired') }}",
-                        minlength: "{{ __('UserMinlength') }}",
-                    },
-                    email: {
-                        required: "{{ __('email.required') }}",
-                        email: "{{ __('EmailType') }}",
-                        //remote: "{{ __('email.unique') }}",
-                    },
-                    password: {
-                        required: "{{ __('PasswordRequired') }}",
-                        minlength: "{{ __('PasswordMinlength') }}",
-                        pwchkregex: "{{ __('password.regex') }}",
-                    },
-                    password_confirm: {
-                        required: "{{ __('PasswordConfirmRequired') }}",
-                        equalTo: "{{ __('PasswordConfirmEqualTo') }}",
-                    },
-                },
-                submitHandler: function(form, e) {
-                    e.preventDefault();
-                    var formData = new FormData(form);
-                    var name = $("#name").val();
-                    var email = $("#email").val();
-                    var password = $("#password").val();
-                    var passwordConfirm = $("#password_confirm").val();
-                    var role = $("#group_role").val();
-                    var active = ($("#is_active").val()) === "on" ? 1 : 0;
+            //         },
+            //         password: {
+            //             required: true,
+            //             minlength: 5,
+            //             pwchkregex: true
+            //         },
+            //         password_confirm: {
+            //             required: true,
+            //             equalTo: "#password"
+            //         },
+            //         group_role: {
+            //             required: true,
+            //         }
+            //     },
+            //     messages: {
+            //         name: {
+            //             required: "{{ __('UserRequired') }}",
+            //             minlength: "{{ __('UserMinlength') }}",
+            //         },
+            //         email: {
+            //             required: "{{ __('email.required') }}",
+            //             email: "{{ __('EmailType') }}",
+            //             //remote: "{{ __('email.unique') }}",
+            //         },
+            //         password: {
+            //             required: "{{ __('PasswordRequired') }}",
+            //             minlength: "{{ __('PasswordMinlength') }}",
+            //             pwchkregex: "{{ __('password.regex') }}",
+            //         },
+            //         password_confirm: {
+            //             required: "{{ __('PasswordConfirmRequired') }}",
+            //             equalTo: "{{ __('PasswordConfirmEqualTo') }}",
+            //         },
+            //     },
+            //     submitHandler: function(form, e) {
+            //         e.preventDefault();
+            //         var formData = new FormData(form);
+            //         var name = $("#name").val();
+            //         var email = $("#email").val();
+            //         var password = $("#password").val();
+            //         var passwordConfirm = $("#password_confirm").val();
+            //         var role = $("#group_role").val();
+            //         var active = ($("#is_active").val()) === "on" ? 1 : 0;
 
-                    if (action === 'add') {
-                        console.log('add user');
-                        $.ajax({
-                            url: "/users",
-                            type: "POST",
-                            data: {
-                                name: name,
-                                email: email,
-                                password: password,
-                                password_confirm: passwordConfirm,
-                                group_role: role,
-                                is_active: active,
-                            },
-                            success: function(result) {
-                                console.log(result);
-                                if (result['status'] === 'success') {
-                                    $("#closePopup").trigger("click");
-                                    Swal.fire("{{ __('Notification') }}",
-                                        "{{ __('Add success') }}",
-                                        'success');
-                                } else {
-                                    Swal.fire(
-                                        "{{ __('Notification') }}",
-                                        "{{ __('Add error') }}",
-                                        'error');
-                                }
-                            },
-                            error: function(error){
-                                console.log(error);
-                            }
-                        });
-                    } else {
-                        console.log('edit user');
-                        $.ajax({
-                            url: '/users/update/' + userID,
-                            type: "POST",
-                            data: formData,
-                            contentType: false,
-                            processData: false,
-                            success: function(data) {
-                                if (data['status'] === 'success') {
-                                    //$("#closePopup").trigger("click");
-                                    Swal.fire("{{ __('Notification') }}",
-                                        "{{ __('Edit success') }}", 'success');
-                                } else {
-                                    Swal.fire("{{ __('Notification') }}",
-                                        "{{ __('Edit error') }}", 'error');
-
-                                }
-                            },
-                            error: function(error){
-                                console.log(error);
-                            }
-                        });
-                    }
-                    usersTable.ajax.reload();
-                },
-            });
+            //         if (action === 'add') {
+            //             $.ajax({
+            //                 url: "/users",
+            //                 type: "POST",
+            //                 data: {
+            //                     name: name,
+            //                     email: email,
+            //                     password: password,
+            //                     password_confirm: passwordConfirm,
+            //                     group_role: role,
+            //                     is_active: active,
+            //                 },
+            //                 success: function(result) {
+            //                     if (result['status'] === 'success') {
+            //                         $("#closePopup").trigger("click");
+            //                         Swal.fire("{{ __('Notification') }}",
+            //                             "{{ __('Add success') }}",
+            //                             'success');
+            //                     } else {
+            //                         Swal.fire(
+            //                             "{{ __('Notification') }}",
+            //                             "{{ __('Add error') }}",
+            //                             'error');
+            //                     }
+            //                 },
+            //                 error: function(error) {
+            //                     console.log(error);
+            //                     // $.each(error.responseJSON.errors, function(key, value) {
+            //                     //     $("#" + key + '-error').html(value[0]);
+            //                     // });
+            //                 }
+            //             });
+            //         } else {
+            //             $.ajax({
+            //                 url: '/users/update/' + userID,
+            //                 type: "POST",
+            //                 data: formData,
+            //                 contentType: false,
+            //                 processData: false,
+            //                 success: function(data) {
+            //                     $("#closePopup").trigger("click");
+            //                     Swal.fire("{{ __('Notification') }}",
+            //                         "{{ __('Edit success') }}", 'success');
+            //                 },
+            //                 error: function(error) {
+            //                     console.log(error);
+            //                 }
+            //             });
+            //         }
+            //         usersTable.ajax.reload();
+            //     },
+            // });
 
             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
-                $('#is_active').prop('selectedIndex', 0);
-                $('#group_role').prop('selectedIndex', 0);
-                $('#name').val('');
-                $('#email').val('');
+                $('#checkActive').prop('selectedIndex', -1);
+                $('#selGroup_role').prop('selectedIndex', -1);
+                $('#txtName').val('');
+                $('#txtEmail').val('');
                 usersTable.ajax.reload();
             });
 
@@ -367,6 +365,55 @@
                 return user;
             }
 
+            $('#userForm').submit(function(e) {
+                clearMessages();
+                e.preventDefault();
+                var form = $('#userForm')[0];
+                var formData = new FormData(form);
+                formData.append('is_active',$("#is_active").val());
+                if (action === 'add') {
+                    console.log(action);
+                    $.ajax({
+                        url: "/users",
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(result) {
+                            clearMessages();
+                            $("#closePopup").trigger("click");
+                            Swal.fire("{{ __('Notification') }}",
+                                "{{ __('Add success') }}",
+                                'success');
+                        },
+                        error: function(error) {
+                            clearMessages();
+                            $.each(error.responseJSON.errors, function(key, value) {
+                                $("#" + key + '-error').html(value[0]);
+                            });
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: '/users/update/' + userID,
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function(data) {
+                            $("#closePopup").trigger("click");
+                            Swal.fire("{{ __('Notification') }}",
+                                "{{ __('Edit success') }}", 'success');
+                        },
+                        error: function(error) {
+                            $.each(error.responseJSON.errors, function(key, value) {
+                                $("#" + key + '-error').html(value[0]);
+                            });
+                        }
+                    });
+                }
+                usersTable.ajax.reload();
+            });
             // Xử lý xoá user is_delete = 1
             $(document).on('click', '.removeUser', function(e) {
                 var id = $(this).data("id");
@@ -388,14 +435,9 @@
                             type: "delete",
                             async: false,
                             success: function(result) {
-                                if (result['status'] === 'success') {
-                                    Swal.fire("{{ __('Notification') }}",
-                                        "{{ __('Delete success') }}", 'success');
-                                    usersTable.ajax.reload();
-                                } else {
-                                    Swal.fire("{{ __('Notification') }}",
-                                        "{{ __('Delete error') }}", 'error');
-                                }
+                                Swal.fire("{{ __('Notification') }}",
+                                    "{{ __('Delete success') }}", 'success');
+                                usersTable.ajax.reload();
                             },
                         });
                     }
@@ -409,7 +451,6 @@
                 var active = user.is_active;
                 var cfm = (active === 1) ? "{{ __('Confirm lock') }}" + " " + user.name + " ?" :
                     "{{ __('Confirm unlock') }}" + " " + user.name + " ?"
-                console.log(cfm);
                 e.preventDefault();
                 Swal.fire({
                     title: "{{ __('Warning') }}",
@@ -455,19 +496,19 @@
             function initUserForm() {
                 $("#name").val('');
                 $("#email").val('');
+                $("#email").attr('disabled',false);
                 $("#password").val('');
                 $("#password_confirm").val('');
-                $("#checkActive").empty();
-                $("#group_role").val("Admin");
+                $("#is_active").val();
+                $("#group_role").prop('selectedIndex',0);
             };
 
             // clear error message
             function clearMessages() {
-                $("#name-error").val('');
-                $("#email-error").val('');
-                $("#password-error").val('');
-                $("#password_confirm-error").val('');
-                validator.resetForm();
+                $("#name-error").empty();
+                $("#email-error").empty();
+                $("#password-error").empty();
+                $("#password_confirm-error").empty();
             };
 
             // Reset Form AddUser
@@ -477,33 +518,6 @@
                 initUserForm();
             });
 
-            // check validate password
-            $.validator.addMethod("pwchkregex", function(value) {
-                return /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/.test(
-                        value) // consists of only these
-                    &&
-                    /[a-z]/.test(value) // has a lowercase letter
-                    &&
-                    /\d/.test(value) // has a digit
-                    &&
-                    /[#?!@$%^&*-]/.test(value) // has special character
-            });
-
-            // check validate email
-            $.validator.addMethod("chkemail", function(value) {
-                var flag = false;
-                $.ajax({
-                    url: "{{ route('user.chkemail') }}",
-                    type: "GET",
-                    async: false,
-                    dataType: 'json',
-                    success: function(data) {
-                        console.log(data);
-                        flag = data;
-                    },
-                });
-                return flag;
-            });
 
             var userID = null;
 
@@ -515,17 +529,16 @@
                 $('#popupTitle').html("{{ __('Edit user') }}")
                 var idUSer = $(this).data("id");
                 var user = getUserByID(idUSer);
-                console.log(user);
+                $("#email").attr('disabled',true);
                 if (user != null) {
                     userID = user.id;
                     $("#name").val(user.name);
                     $("#email").val(user.email);
-
                     $('select option:contains("' + user.group_role + '")').prop('selected', true);
                     if (user.is_active === 1) {
-                        $('#checkActive').bootstrapToggle('on');
+                        $('#is_active').bootstrapToggle('on');
                     } else {
-                        $('#checkActive').bootstrapToggle('off');
+                        $('#is_active').bootstrapToggle('off');
                     }
                 } else {
                     Swal.fire("{{ __('Notification') }}", "{{ __('User not found') }}", 'error');

@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
  */
 
 Route::get('/', [LoginController::class, 'index'])->name('login');
-Route::post('/login', [LoginController::class, 'loginUser'])->name('loginUser');
+Route::post('login', [LoginController::class, 'loginUser'])->name('loginUser');
 Route::group(['middleware' => ['auth']], function () {
     //Route::resource('users', MstUsersController::class);
     Route::get('users/index', [MstUsersController::class, 'index'])->name('users');
@@ -46,7 +46,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('products', [MstProductController::class, 'store'])->name('products.store'); 
     Route::get('products/{id}/edit', [MstProductController::class, 'edit'])->name('products.edit');
     Route::post('products/update/{id}', [MstProductController::class, 'update'])->name('products.update'); 
-    //Route::get('products/details/{id}', [MstProductController::class, 'getProductByID']);
+    Route::get('products/detail/{id}', [MstProductController::class, 'getProductByID']);
     Route::delete('products/{id}', [MstProductController::class, 'destroy'])->name('products.delete');
     Route::get('products/getData', [MstProductController::class, 'getProductData'])->name('products.getData');
     

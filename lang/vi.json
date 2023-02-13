@@ -1,8 +1,8 @@
 {
   "Incorrect password": "Mật khẩu không đúng.",
-  "Add success ": "Thêm mới thành công",
-  "Add error ": "Thêm mới thất bại, vui lòng thử lại",
-  "Edit success ": "Sửa thông tin thành công",
+  "Add success": "Thêm mới thành công",
+  "Add error": "Thêm mới thất bại, vui lòng thử lại",
+  "Edit success": "Sửa thông tin thành công",
   "Edit user": "Chỉnh sửa User",
   "Edit error ": "Sửa thông tin thất bại, vui lòng thử lại",
   "Delete success": "Xoá thành công.",

@@ -70,6 +70,7 @@
                                 <thead>
                                     <tr class="bg-primary">
                                         <th style="width: 10px; text-align: center"> # </th>
+                                        <th>Product ID</th>
                                         <th>{{ trans('ProductName') }}</th>
                                         <th>{{ trans('Description') }}</th>
                                         <th>{{ trans('Price') }}</th>
@@ -83,7 +84,6 @@
                         </div>
                     </div>
                 </div>
-                <img src="http://via.placeholder.com/30x30" id="avatar" style="position: relative">
             </div>
         </div>
 
@@ -91,6 +91,8 @@
 @stop
 @section('scripts')
     <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js" type="text/javascript"></script>
+
     <script>
         $.ajaxSetup({
             headers: {
@@ -98,13 +100,6 @@
             }
         });
         $(document).ready(function() {
-            $(".productList table tr").mousemove(function(e) {
-                console.log('aaaaaaaa');
-                $("#avatar").css({
-                    top: e.pageY,
-                    left: e.pageX
-                });
-            });
 
             $.fn.DataTable.ext.pager.numbers_length = 10;
             var productsTable = $('.productList').DataTable({
@@ -131,12 +126,24 @@
                 ],
                 lengthChange: false,
                 columns: [{
+                        data: 'id',
+                        name: 'id'
+                    }, {
                         data: 'product_id',
                         name: 'product_id'
                     },
                     {
-                        data: 'product_name',
-                        name: 'product_name'
+                        data: null,
+                        render: function(data) {
+                            $id = data["id"];
+                            $name = data["product_name"];
+                            $imgName = data["product_image"] ?
+                                "{{ asset('img/products/"+data["product_image"]+"') }}" :
+                                "{{ asset('img/products/default.jpg') }}";
+                            var str = "<div><a href='#' class='imgProduct' data-id=" + $id +
+                                " data-image=" + $imgName + ">" + $name + "</a></div>";
+                            return str;
+                        },
                     },
                     {
                         data: 'description',
@@ -165,7 +172,7 @@
                     {
                         data: null,
                         render: function(data) {
-                            $id = data["product_id"];
+                            $id = data["id"];
                             $btn = '<a href="/products/' + $id + '/edit" id="popupEdit-' + $id +
                                 '" data-id="' + $id +
                                 '" class="btn btn-info popupEditProduct"><i class="fa fa-edit"></i></a>';
@@ -208,7 +215,19 @@
                     },
                 },
             });
-
+            $('#productList').on('mouseover', '.imgProduct', function(e) {
+                if ($(this).parent('div').children('div.image').length) {
+                    $(this).parent('div').children('div.image').show();
+                } else {
+                    var image_name = $(this).data('image');
+                    var imageTag = '<div class="image" style="position:absolute;">' + '<img src="' +
+                        image_name + '" alt="image" height="100" />' + '</div>';
+                    $(this).parent('div').append(imageTag);
+                }
+            }).on('mouseout', 'td', function() {
+                console.log('out');
+                $(this).parent('div').children('div.image').hide();
+            });
 
             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {

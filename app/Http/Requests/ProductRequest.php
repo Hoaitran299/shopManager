@@ -51,4 +51,16 @@ class ProductRequest extends FormRequest
 
         ];
     }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        if($this->product_image){
+            $this->request->remove('product_image');
+        }
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\PasswordRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EditUserRequest extends FormRequest
@@ -25,8 +26,7 @@ class EditUserRequest extends FormRequest
     {
         return [
             'name' => 'required|min:5',
-            'email' => 'required|max:255|email:rfc,dns|unique:mst_users,email',
-            'password' => 'sometimes|min:5|regex:/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/',
+            'password' => ['sometimes','min:5',new PasswordRule],
             'password_confirm' => 'sometimes|min:5|same:password',
         ];
     }
@@ -40,17 +40,23 @@ class EditUserRequest extends FormRequest
         return [
             'name.required' => trans('UserRequired'),
             'name.min' => trans('UserMinlength'),
-            'email.required' => trans('EmailRequired'),
-            'email.email' =>  trans('EmailType'),
-            'email.unique' =>  trans('email.unique'),
-            'email.exists' => trans('email.exists'),
-            "email.max" => trans('email.max'),
-            
             "password.min" => trans('PasswordMinlength'),
             "password.regex" => trans('password.regex'),
-
             "password_confirm.min" => trans('PasswordConfirmMinlength'),
             "password_confirm.same" => trans('PasswordConfirmEqualTo')
         ];
+    }
+
+    /**
+     * Return validation error message
+     *
+     * @return array
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->password == null) {
+            $this->request->remove('password');
+            $this->request->remove('password_confirm');
+        }
     }
 }

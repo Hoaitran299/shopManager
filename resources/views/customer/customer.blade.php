@@ -111,7 +111,6 @@
     <!-- jQuery -->
     <script type="text/javascript" src="{{ asset('js/jquery.tabledit.js') }}"></script>
     <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
-    {{-- <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/additional-methods.js"></script> --}}
     <script>
         $.ajaxSetup({
             headers: {
@@ -230,7 +229,6 @@
                         removeMsgEdit();
                     },
                     onFail: function(data) {
-                        console.log(data.responseJSON.errors);
                         printErrorMsg(data.responseJSON.errors);
                         customerTable.ajax.reload();
                     },
@@ -281,8 +279,7 @@
                     e.preventDefault();
 
                     var formData = new FormData(form);
-                    console.log(formData)
-                    console.log('add custom');
+                    formData.append('is_active',$('#is_active').val());
                     $.ajax({
                         url: "/customers",
                         type: "POST",
@@ -290,11 +287,11 @@
                         contentType: false,
                         processData: false,
                         success: function(result) {
-                            console.log(result);
+                            $("#closePopup").trigger("click");
                             if (result['status'] === 'success') {
                                 Swal.fire(
                                     "{{ __('Notification') }}",
-                                    "{{ __('Add success ') }}",
+                                    "{{ __('Add success') }}",
                                     'success');
                             }
                         },
@@ -380,7 +377,7 @@
                 e.preventDefault();
                 removeMsgEdit();
                 var file_data = $('#import').prop('files')[0];
-                console.log(file_data);
+
                 var formData = new FormData();
                 formData.append('file', file_data);
 
@@ -401,7 +398,6 @@
                         }
                     },
                     error: function(err) {
-                        console.log(err);
                         if (err.responseJSON.errors) {
                             printErrorMsg(err.responseJSON.errors);
                         } else {
@@ -419,10 +415,7 @@
                 var name = $("#filterName").val();
                 var email = $("#filterEmail").val();
                 var address = $("#filterAddress").val();
-                var active = "";
-                if ($("#checkActive").val()) {
-                    active = $("#checkActive").val() === "on" ? 1 : 0
-                }
+                var active = $("#checkActive").val();
                 var filter = {
                     name: name,
                     email: email,
@@ -442,7 +435,6 @@
 
             // Reset addCustomerForm sau khi close popup
             $(document).on('click', '#closePopup', function() {
-                $('#popupTitle').html("{{ __('TitleAddUser') }}")
                 clearMessages();
                 initCustomerForm();
             })

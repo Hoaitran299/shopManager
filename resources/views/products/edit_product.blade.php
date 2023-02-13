@@ -19,11 +19,11 @@
                 <ul></ul>
             </div>
             <div class="card-body">
-                <form action="{{ route('products.update', ['id' => $product->product_id]) }}" method="POST" id="productForm"
+                <form method="POST" id="productForm"
                     name="productForm" class="form-horizontal" enctype="multipart/form-data">
                     <div class="row">
                         <div class="col-sm-6">
-                            <input type="hidden" value="{{ $product->product_id }}" id="productID">
+                            <input type="hidden" value="{{ $product->id }}" id="id">
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">{{ trans('ProductName') }}</label>
                                 <div class="col-sm-9">
@@ -66,13 +66,13 @@
                                 </div>
                                 <div class="row">
                                     <img style="margin-left: 10px;width: 100%;height: 100%%;" id="preview" name="preview"
-                                        src="{{ $product && $product->product_image ? asset('img/products/' . $product->product_image) : asset('img/products/default.jpg') }}"
+                                        src="{{ $product->product_image ? asset('img/products/' . $product->product_image) : asset('img/products/default.jpg') }}"
                                         alt="your image" />
                                     <span class="text-danger msg-error" id="product_image-error"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <button id="removeImg" name="removeImg" type="button" class="btn btn-danger col-sm-3">Xóa
+                                <button id="removeImg" name="removeImg" type="button" class="btn btn-danger col-sm-3" style="display: none">Xóa
                                     ảnh</button>
                                 <div class="file-upload col-sm-9">
                                     <div class="file-select">
@@ -80,7 +80,7 @@
                                         <div class="file-select-name" id="noFile">
                                             {{ $product->product_image ?? 'No file chosen...' }}</div>
                                         <input type="file" name="product_image" id="product_image" class="form-control"
-                                            value="{{ $product->product_image }}">
+                                            value="{{ asset('img/products/' .$product->product_image) }}">
                                     </div>
                                 </div>
                             </div>
@@ -109,17 +109,19 @@
             }
         });
         $(document).ready(function() {
-
+            var product = getProductByID($("#id").val());
+            product['product_image'] ? $('#removeImg').css('display', 'block') : $('#removeImg').css('display', 'none')
             var defaultImage = "default.jpg";
+            
             $('#product_image').change(function(e) {
-                $("#product_image-error").val('');
+                $("#product_image-error").empty();
                 e.preventDefault();
                 var fileImg = $('#product_image').prop('files')[0];
                 if (/^\s*$/.test(fileImg)) {
                     $(".file-upload").removeClass('active');
                     $("#noFile").text("No file chosen...");
+                    $('#removeImg').css('display', 'none');
                 } else {
-                    console.log(fileImg);
                     $(".file-upload").addClass('active');
                     $("#noFile").text(fileImg['name']);
                     $('#removeImg').css('display', 'block');
@@ -133,23 +135,22 @@
                 }
             });
 
-            // clear error message
-            function clearMessages() {
-                $("#msg-error").val('');
-                $("#product_name-error").val('');
-                $("#description-error").val('');
-                $("#product_price-error").val('');
-                $("#product_image-error").val('');
+             // clear error message
+             function clearMessages() {
+                $("#product_name-error").empty();
+                $("#description-error").empty();
+                $("#product_price-error").empty();
+                $("#product_image-error").empty();
             };
 
             $('#productForm').submit(function(e) {
                 e.preventDefault();
                 clearMessages();
-                var id = $("#productID").val();
+                var id = $("#id").val();
                 var form = $('#productForm')[0];
                 var formData = new FormData(this);
                 formData.append('product_image', $('#product_image')[0].files[0]);
-                console.log($('#product_image')[0].files[0]);
+
                 $.ajax({
                     url: "/products/update/" + id,
                     type: "POST",
@@ -158,7 +159,6 @@
                     processData: false,
                     dataType: 'json',
                     success: function(response) {
-                        console.log(response);
                         if (response['status'] === 'success') {
                             $("#closePopup").trigger("click");
                             Swal.fire("{{ __('Notification') }}",
@@ -169,16 +169,15 @@
                     error: function(err) {
                         clearMessages();
                         removeMsgEdit();
-                        console.log(err);
-                        // if (err.responseJSON.errors) {
-                        //     $.each(err.responseJSON.errors, function(key, value) {
-                        //         $("#" + key + '-error').html(value[0]);
-                        //     });
-                        // } else {
-                        //     $(".print-error-msg").css('display', 'block');
-                        //     $(".print-error-msg").find("ul").append('<li>' + err.responseJSON
-                        //         .message + '</li>');
-                        // }
+                        if (err.responseJSON.errors) {
+                            $.each(err.responseJSON.errors, function(key, value) {
+                                $("#" + key + '-error').html(value[0]);
+                            });
+                        } else {
+                            $(".print-error-msg").css('display', 'block');
+                            $(".print-error-msg").find("ul").append('<li>' + err.responseJSON
+                                .message + '</li>');
+                        }
                     }
                 });
             });
@@ -188,6 +187,20 @@
                 $(".print-error-msg").css('display', 'none');
             }
 
+            // Get thông tin user by ID
+            function getProductByID(id) {
+                var product = null;
+                $.ajax({
+                    url: "/products/detail/" + id,
+                    type: "GET",
+                    async: false,
+                    dataType: 'json',
+                    success: function(data) {
+                        product = data.data;
+                    },
+                });
+                return product;
+            }
             /**
              * Handle button remove image 
              */
@@ -196,7 +209,8 @@
                 $("#preview").attr("src", "{{ asset('img/products/default.jpg') }}");
                 $(".file-upload").removeClass('active');
                 $("#noFile").text("No file chosen...");
-                $("#product_image-error").val('');
+                $("#product_image").val('');
+                $("#product_image-error").empty();
             });
         });
     </script>

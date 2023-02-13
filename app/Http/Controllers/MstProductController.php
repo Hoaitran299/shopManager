@@ -51,18 +51,19 @@ class MstProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-
         try {
+            $strNum = "000000000";
             $input = $request->all();
-            $id = $request->product_name[0] . floor(time() - 999999999);
+            $firstN = strtoupper($request->product_name[0]);
+            $product_id = $firstN. $strNum;
             $img = "";
-            if ($request->product_image && $request->product_image->getClientOriginalName() != 'default.jpg') {
+            if ($request->product_image) {
                 $filename = time(). '_' . $request->product_image->getClientOriginalName();
                 $request->file('product_image')->move(public_path('img/products'), $filename);
                 $img = $filename;
             }
             $data = [
-                'product_id' => $id,
+                'product_id' =>$product_id,
                 'product_name' => $input['product_name'],
                 'product_price' => $input['product_price'],
                 'description' => $input['description'],
@@ -70,7 +71,12 @@ class MstProductController extends Controller
                 'product_image' => $img
             ];
             
-            MstProduct::create($data);
+            $product = MstProduct::create($data);
+            if($product->id){
+                $product_id = $firstN.substr($strNum,0,-(strlen($product->id))).$product->id;
+                $product->product_id = $product_id;
+                $product->save();
+            }
             $response = array(
                 "status"=>"success",
                 "message"=> trans('Add success'),
@@ -105,7 +111,7 @@ class MstProductController extends Controller
      */
     public function edit($id)
     {
-        $product = MstProduct::where('product_id',$id)->first();
+        $product = MstProduct::where('id',$id)->first();
         return view('products.edit_product',["product"=> $product]);
     }
 
@@ -120,24 +126,31 @@ class MstProductController extends Controller
     {
         try {
             $input = $request->all();
-            $img = MstProduct::where('product_id', $id)->pluck('product_image')->first();
-            if ($request->product_image && $request->product_image->getClientOriginalName() != "default.jpg") {
+            $strNum = "000000000";
+            $input = $request->all();
+            $firstN = strtoupper($request->product_name[0]);
+            $product_id = $firstN.substr($strNum,0,-(strlen($id))).$id;
+            $img = MstProduct::where('id', $id)->pluck('product_image')->first();
+            if ($request->product_image) {
                 $filename = time(). '_' . $request->product_image->getClientOriginalName();
                 $request->file('product_image')->move(public_path('img/products'), $filename);
                 if($img!= "") {
                     Storage::disk('public')->delete($img);
                 }
-                $img = 'img/products/' . $filename;
+                $img = $filename;
                 
+            } else {
+                $img = "";
             }
             $data = [
+                'product_id' => $product_id,
                 'product_name' => $input['product_name'],
                 'product_price' => $input['product_price'],
                 'description' => $input['description'],
                 'is_sales' => $input['is_sales'],
                 'product_image' => $img
             ];
-            MstProduct::where('product_id', $id)->update($data);
+            MstProduct::where('id', $id)->update($data);
 
             $response = array(
                 "status"=>"success",
@@ -179,10 +192,11 @@ class MstProductController extends Controller
     public function getProductByID($id)
     {
         try {
-            $product = MstProduct::where('product_id',$id)->first();
+            //$id = $request->id;
+            $product = MstProduct::where('id',$id)->first();
             return response()->json(['status' => 'success', 'data' => $product], 200);
         } catch (\Throwable $e) {
-            return response()->json(['status' => 'error', 'data' => [], 'message' => __('User not found')], 200);
+            return response()->json(['status' => 'error', 'message' => __('product_found')], 200);
         }
     }
 

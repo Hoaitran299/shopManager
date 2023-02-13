@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\PasswordRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AddUserRequest extends FormRequest
+class CustomerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,9 +25,9 @@ class AddUserRequest extends FormRequest
     {
         return [
             'name' => 'required|min:5',
-            'email' => 'required|max:255|email|unique:mst_users,email',
-            'password' => ['required','min:5',new PasswordRule],
-            'password_confirm' => 'required|min:5|same:password',
+            'email' => 'required|max:255|email:rfc,dns|unique:mst_customer',
+            'tel_num' => 'required|regex:/^([0-9]*)$/|min:10|max:12',
+            'address' => 'required|max:255',
         ];
     }
 
@@ -39,21 +38,21 @@ class AddUserRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => trans('UserRequired'),
-            'name.min' => trans('UserMinlength'),
+            'name.required' => trans('CustomerRequired'),
+            'name.min' => trans('CustomerMinlength'),
             'email.required' => trans('EmailRequired'),
             'email.email' =>  trans('EmailType'),
             'email.unique' =>  trans('email.unique'),
             'email.exists' => trans('email.exists'),
             "email.max" => trans('email.max'),
 
-            'password.required' =>  trans('password.required'),
-            "password.min" => trans('PasswordMinlength'),
-            "password.regex" => trans('password.regex'),
+            "tel_num.required" => trans('tel_num.required'),
+            "tel_num.regex" => trans('tel_num.regex'),
+            "tel_num.min" => trans('tel_num.min'),
+            "tel_num.max" => trans('tel_num.max'),
 
-            "password_confirm.required" => trans('PasswordConfirmRequired'),
-            "password_confirm.min" => trans('PasswordConfirmMinlength'),
-            "password_confirm.same" => trans('PasswordConfirmEqualTo')
+            "address.required" => trans('address.required'),
+            "address.max" => trans('address.max'),
         ];
     }
 }

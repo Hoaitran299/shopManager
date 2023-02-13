@@ -34,14 +34,16 @@
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">{{ trans('Price') }}</label>
                                 <div class="col-sm-9">
-                                    <input id='product_price' name='product_price' type="text" class="form-control" placeholder="Nhập giá sản phẩm">
+                                    <input id='product_price' name='product_price' type="text" class="form-control"
+                                        placeholder="Nhập giá sản phẩm">
                                     <span class="text-danger msg-error" id="product_price-error"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">{{ trans('Description') }}</label>
                                 <div class="col-sm-9">
-                                    <textarea id='description' name='description' type="text" class="form-control" rows="6" placeholder="Mô tả sản phẩm"></textarea>
+                                    <textarea id='description' name='description' type="text" class="form-control" rows="6"
+                                        placeholder="Mô tả sản phẩm"></textarea>
                                 </div>
                                 <span class="text-danger msg-error" id="description-error"></span>
                             </div>
@@ -102,6 +104,7 @@
         });
 
         $(document).ready(function() {
+            var defaultImage = "{{ asset('img/products/default.jpg') }}";
             initProductForm();
             // Reset PopupEditAddproduct
             function initProductForm() {
@@ -109,27 +112,27 @@
                 $("#description").val('');
                 $("#product_price").val('');
                 $("#is_sales").prop('selectIndex', 1);
-                $("#product_image").empty();
+                $("#product_image").val('');
             };
 
             // clear error message
             function clearMessages() {
-                $("#msg-error").val('');
-                $("#product_name-error").val('');
-                $("#description-error").val('');
-                $("#product_price-error").val('');
-                $("#product_image-error").val('');
+                $("#product_name-error").empty();
+                $("#description-error").empty();
+                $("#product_price-error").empty();
+                $("#product_image-error").empty();
             };
 
             $('#product_image').change(function(e) {
-                $("#product_image-error").val('');
+                $("#product_image-error").empty();
                 e.preventDefault();
                 var fileImg = $('#product_image').prop('files')[0];
+
                 if (/^\s*$/.test(fileImg)) {
                     $(".file-upload").removeClass('active');
                     $("#noFile").text("No file chosen...");
+                    $('#removeImg').css('display', 'none');
                 } else {
-                    console.log(fileImg);
                     $(".file-upload").addClass('active');
                     $("#noFile").text(fileImg['name']);
                     $('#removeImg').css('display', 'block');
@@ -146,8 +149,9 @@
 
 
             $('#productForm').submit(function(e) {
-                e.preventDefault();
                 clearMessages();
+                removeMsgEdit();
+                e.preventDefault();
                 var form = $('#productForm')[0];
                 var formData = new FormData(this);
                 formData.append('product_image', $('#product_image')[0].files[0]);
@@ -160,7 +164,8 @@
                     processData: false,
                     dataType: 'json',
                     success: function(response) {
-                        console.log(response);
+                        clearMessages();
+                        removeMsgEdit();
                         if (response['status'] === 'success') {
                             $("#closePopup").trigger("click");
                             Swal.fire("{{ __('Notification') }}",
@@ -169,16 +174,14 @@
                         }
                     },
                     error: function(response) {
-                        console.log(response.responseJSON.errors);
-                        clearMessages();
-                        removeMsgEdit();
                         if (response.responseJSON.errors) {
                             $.each(response.responseJSON.errors, function(key, value) {
                                 $("#" + key + '-error').html(value[0]);
                             });
                         } else {
                             $(".print-error-msg").css('display', 'block');
-                            $(".print-error-msg").find("ul").append('<li>' + err.responseJSON.message + '</li>');
+                            $(".print-error-msg").find("ul").append('<li>' + err.responseJSON
+                                .message + '</li>');
                         }
                     }
                 });
@@ -192,13 +195,13 @@
             /**
              * Handle button remove image 
              */
-            $('#removeImg').click(function() {
+             $('#removeImg').click(function() {
                 $('#removeImg').hide();
-                $("#preview").attr("src", defaultImage);
-                $("#product_image").val("");
-                $('.file-msg').text('Hoặc kéo thả ảnh vào đây');
-                $('.fake-btn').text('Chọn ảnh');
-                $("#product_image-err").empty();
+                $("#preview").attr("src", "{{ asset('img/products/default.jpg') }}");
+                $(".file-upload").removeClass('active');
+                $("#noFile").text("No file chosen...");
+                $("#product_image").val('');
+                $("#product_image-error").empty();
             });
         });
     </script>
