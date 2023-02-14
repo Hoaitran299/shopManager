@@ -24,8 +24,9 @@ class ProductRequest extends FormRequest
     public function rules()
     {
         return [
-            'product_name' => 'required|min:5',
+            'product_name' => 'required|min:5|max:50',
             'product_price' => 'required|min:0|numeric',
+            'description' => 'max: 100',
             'product_image' => 'sometimes|mimes:jpeg,jpg,png|max:2048|dimensions:max_width=1024,max_height=1024',
         ];
     }
@@ -40,6 +41,7 @@ class ProductRequest extends FormRequest
         return [
             "product_name.required" => trans('product_name.required'),
             "product_name.min" => trans('product_name.min'),
+            "product_name.max" => trans('name.max'),
 
             "product_price.required" => trans('product_price.required'),
             "product_price.numeric" => trans('product_price.digits'),
@@ -48,6 +50,8 @@ class ProductRequest extends FormRequest
             "product_image.mimes" => trans('product_image.extension'),
             "product_image.max" => trans('product_image.max'),
             "product_image.dimensions" => trans('product_image.maxsize'),
+
+            'description' => trans('description.max'),
 
         ];
     }

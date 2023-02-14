@@ -12,7 +12,7 @@
                 <div class="form-group">
                     <label>Tên</label>
                     <input type="text" class="form-control" id="name" name="name"
-                        placeholder="Nhập họ tên">
+                        placeholder="Nhập họ tên" autofocus>
                         <span class="text-danger msg-error" id="name-error"></span>
                 </div>
                 <div class="form-group">
@@ -49,7 +49,7 @@
             <div class="modal-footer">
                 <button type="button" id="closePopup" name="closePopup" class="btn btn-secondary"
                     data-dismiss="modal">Hủy</button>
-                <button id="btnAddSave" name="btnSave" type="submit" class="btn btn-danger btnSave">Lưu</button>
+                <button id="btnSave" name="btnSave" type="submit" class="btn btn-danger btnSave">Lưu</button>
             </div>
         </form>
     </div>

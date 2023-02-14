@@ -77,7 +77,7 @@
                 <hr>
                 <div class="row" style="margin:0.25rem">
                     <div class="card">
-                        <div class="alert alert-danger print-error-msg" style="display:none">
+                        <div class="alert alert-danger print-error-msg row" style="display:none">
                             <ul></ul>
                         </div>
                         <div class="table-responsive" style="margin-top:0.25rem">
@@ -240,14 +240,17 @@
                 rules: {
                     txtName: {
                         required: true,
-                        minlength: 5
+                        minlength: 5,
+                        maxlength:50
                     },
                     txtEmail: {
                         required: true,
-                        email: true
+                        email: true,
+                        maxlegnth:150
                     },
                     txtAddress: {
                         required: true,
+                        maxlength:100,
                     },
                     txtTel_num: {
                         required: true,
@@ -260,13 +263,16 @@
                     txtName: {
                         required: "{{ __('CustomerRequired') }}",
                         minlength: "{{ __('CustomerMinlength') }}",
+                        maxlength: "{{ __('name.max') }}",
                     },
                     txtEmail: {
                         required: "{{ __('EmailRequired') }}",
                         email: "{{ __('EmailType') }}",
+                        maxlegnth: "{{ __('email.max') }}",
                     },
                     txtAddress: {
                         required: "{{ __('address.required') }}",
+                        maxlength: "{{ __('address.max') }}",
                     },
                     txtTel_num: {
                         required: "{{ __('tel_num.required') }}",
@@ -299,6 +305,7 @@
                     customerTable.ajax.reload();
                 }
             });
+
             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
                 $('#checkActive').prop('selectedIndex', 0);

@@ -25,10 +25,9 @@ class PasswordRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        return preg_match('/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/', $value) && 
+        return preg_match('/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{5,}$/', $value) && 
         preg_match('/[a-z]/',$value) && 
-        preg_match('/\d/',$value) && 
-        preg_match('/[#?!@$%^&*-]/',$value);
+        preg_match('/\d/',$value);
     }
 
     /**

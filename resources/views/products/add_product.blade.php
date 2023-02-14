@@ -19,8 +19,7 @@
                 <ul></ul>
             </div>
             <div class="card-body">
-                <form name="productForm" id="productForm" method="POST" class="form-horizontal"
-                    enctype="multipart/form-data">
+                <form name="productForm" id="productForm" class="form-horizontal" enctype="multipart/form-data">
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="form-group row">
@@ -28,7 +27,7 @@
                                 <div class="col-sm-9">
                                     <input id='product_name' name='product_name' type="text" class="form-control"
                                         placeholder="Nhập tên sản phẩm">
-                                    <span class="text-danger msg-error" id="product_name-error"></span>
+                                    <span class="text-danger msg-error error" id="product_name-error"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -36,7 +35,7 @@
                                 <div class="col-sm-9">
                                     <input id='product_price' name='product_price' type="text" class="form-control"
                                         placeholder="Nhập giá sản phẩm">
-                                    <span class="text-danger msg-error" id="product_price-error"></span>
+                                    <span class="text-danger msg-error error" id="product_price-error"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -45,7 +44,7 @@
                                     <textarea id='description' name='description' type="text" class="form-control" rows="6"
                                         placeholder="Mô tả sản phẩm"></textarea>
                                 </div>
-                                <span class="text-danger msg-error" id="description-error"></span>
+                                <span class="text-danger msg-error error" id="description-error"></span>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">{{ trans('Active') }}</label>
@@ -65,7 +64,7 @@
                                 <div class="row">
                                     <img style="width: 100%;height: 100%%;" id="preview" name="preview"
                                         src="{{ asset('img/products/default.jpg') }}" alt="your image" />
-                                    <span class="text-danger msg-error" id="product_image-error"></span>
+                                    <span class="text-danger msg-error error" id="product_image-error"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -84,8 +83,7 @@
                         <div class="row">
                             <div class="col-sm-7"></div>
                             <div class="col-sm-5 text-right">
-                                <a href="{{ route('products') }}" id="btnCancel" name="btnCancel"
-                                    class="btn btn-secondary">
+                                <a href="{{ route('products') }}" id="btnCancel" name="btnCancel" class="btn btn-secondary">
                                     Hủy</a>
                                 <button id="btnSave" name="btnSave" type="submit" class="btn btn-danger">
                                     Lưu</button>
@@ -97,6 +95,9 @@
     </div>
 @stop
 @section('scripts')
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+    <script src="//cdn.jsdelivr.net/jquery.validation/1.16.0/additional-methods.js"></script>
+
     <script type="text/javascript">
         $.ajaxSetup({
             headers: {
@@ -105,7 +106,102 @@
         });
 
         $(document).ready(function() {
-            var defaultImage = "{{ asset('img/products/default.jpg') }}";
+
+            // Xử lý ADD 
+            // validate add product form on keyup and submit
+            var validator = $("#productForm").validate({
+                onkeyup: function(element) {
+                    this.element(element);
+                },
+                onfocusout: function(element) {
+                    this.element(element);
+                },
+                rules: {
+                    product_name: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 50,
+                    },
+                    product_price: {
+                        required: true,
+                        digits: true,
+                        min: 0,
+                    },
+                    product_image: {
+                        extension: "jpg|jpeg|png",
+                        capacity: 2, //2 MB
+                        maxsize: 1024
+                    },
+                    description: {
+                        maxlength: 100,
+                    },
+
+                },
+                messages: {
+                    product_name: {
+                        required: "{{ __('product_name.required') }}",
+                        minlength: "{{ __('product_name.min') }}",
+                        maxlength: "{{ __('name.max') }}",
+                    },
+                    product_price: {
+                        required: "{{ __('product_price.required') }}",
+                        digits: "{{ __('product_price.digits') }}",
+                        min: "{{ __('product_price.min') }}",
+                    },
+                    product_image: {
+                        extension: "{{ __('product_image.extension') }}",
+                        capacity: "{{ __('product_image.capacity') }}",
+                        maxsize: "{{ __('product_image.maxsize') }}",
+                    },
+                    description: {
+                        maxlength: "{{ __('description.max') }}",
+                    },
+                },
+                errorPlacement: function(error, element) {
+                    if (element.attr("name") == "product_image") {
+                        error.insertAfter("#product_image-error");
+                    } else {
+                        error.insertAfter(element);
+                    }
+                },
+                submitHandler: function(form, e) {
+                    e.preventDefault();
+                    console.log('aaaaaaa');
+                    var formData = new FormData(form);
+                    formData.append('product_image', $('#product_image')[0].files[0]);
+                    $.ajax({
+                        url: "{{ route('products.store') }}",
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        dataType: 'json',
+                        success: function(response) {
+                            clearMessages();
+                            removeMsgEdit();
+                            //window.location.href = "/products";
+                            Swal.fire("{{ __('Notification') }}",
+                                "{{ __('Add success') }}",
+                                'success');
+                        },
+                        error: function(response) {
+                            if (response.responseJSON.errors) {
+                                $.each(response.responseJSON.errors, function(key, value) {
+                                    $("#" + key + '-error').html(value[0]);
+                                });
+                            }
+                            // } else {
+                            //     $(".print-error-msg").css('display', 'block');
+                            //     $(".print-error-msg").find("ul").append('<li>' + err
+                            //         .responseJSON
+                            //         .message + '</li>');
+                            // }
+                        }
+                    });
+                    return false;
+                }
+            });
+
             initProductForm();
             // Reset PopupEditAddproduct
             function initProductForm() {
@@ -123,6 +219,28 @@
                 $("#product_price-error").empty();
                 $("#product_image-error").empty();
             };
+
+            $.validator.addMethod('capacity', function(value, element, param) {
+                return this.optional(element) || (element.files[0].size <= param * 1000000)
+            }, 'Dung lượng hình phải bé hơn {0} MB');
+
+            $.validator.addMethod('maxsize', function(value, element, param) {
+                var fileImg = element.files[0];
+                var image = new Image();
+                var imgWidth = 0;
+                var imgHeight = 0;
+
+                const reader = new FileReader();
+                reader.addEventListener("load", (event) => {
+                    image.src = event.target.result;
+                    image.onload = function() {
+                        imgHeight = image.height;
+                        imgWidth = image.width;
+                    }
+                }, false);
+                reader.readAsDataURL(fileImg);
+                return this.optional(element) || (imgWidth <= param || imgHeight <= param)
+            }, 'Kích thước hình phải là {0} x {0}');
 
             $('#product_image').change(function(e) {
                 $("#product_image-error").empty();
@@ -147,47 +265,6 @@
                 }
             });
 
-
-
-            $('#productForm').submit(function(e) {
-                clearMessages();
-                removeMsgEdit();
-                e.preventDefault();
-                var form = $('#productForm')[0];
-                var formData = new FormData(this);
-                formData.append('product_image', $('#product_image')[0].files[0]);
-
-                $.ajax({
-                    url: "{{ route('products.store') }}",
-                    type: "POST",
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    dataType: 'json',
-                    success: function(response) {
-                        clearMessages();
-                        removeMsgEdit();
-                        if (response['status'] === 'success') {
-                            $("#closePopup").trigger("click");
-                            Swal.fire("{{ __('Notification') }}",
-                                "{{ __('Add success') }}",
-                                'success');
-                        }
-                    },
-                    error: function(response) {
-                        if (response.responseJSON.errors) {
-                            $.each(response.responseJSON.errors, function(key, value) {
-                                $("#" + key + '-error').html(value[0]);
-                            });
-                        } else {
-                            $(".print-error-msg").css('display', 'block');
-                            $(".print-error-msg").find("ul").append('<li>' + err.responseJSON
-                                .message + '</li>');
-                        }
-                    }
-                });
-            });
-
             function removeMsgEdit() {
                 $(".print-error-msg").find("ul").html('');
                 $(".print-error-msg").css('display', 'none');
@@ -196,7 +273,7 @@
             /**
              * Handle button remove image 
              */
-             $('#removeImg').click(function() {
+            $('#removeImg').click(function() {
                 $('#removeImg').hide();
                 $("#preview").attr("src", "{{ asset('img/products/default.jpg') }}");
                 $(".file-upload").removeClass('active');

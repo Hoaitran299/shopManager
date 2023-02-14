@@ -26,10 +26,10 @@ class EditCustomerRequest extends FormRequest
     public function rules()
     {
         return [
-            'customer_name' => 'required|min:5',
-            'email' => 'required|max:255|email:rfc,dns',
+            'customer_name' => 'required|min:5|max:50',
+            'email' => 'required|max:150|email:rfc,dns',
             'tel_num' => 'required|regex:/^([0-9]*)$/|min:10|max:12',
-            'address' => 'required|max:255',
+            'address' => 'required|max:100',
         ];
     }
 
@@ -42,6 +42,7 @@ class EditCustomerRequest extends FormRequest
         return [
             'customer_name.required' => trans('CustomerRequired'),
             'customer_name.min' => trans('CustomerMinlength'),
+            'customer_name.max' => trans('name.max'),
             'email.required' => trans('EmailRequired'),
             'email.email' =>  trans('EmailType'),
             'email.exists' => trans('email.exists'),

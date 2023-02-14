@@ -19,8 +19,8 @@
                 </div>
                 <div class="form-group">
                     <label>Địa chỉ</label>
-                    <input type="text" class="form-control" id="txtAddress" name="txtAddress"
-                        placeholder="Nhập địa chỉ">
+                    <textarea id='txtAddress' name='txtAddress' type="text" class="form-control" rows="3"
+                                        placeholder="Nhập địa chỉ"></textarea>
                 </div>
                 <div class="form-group">
                     <label>Điện thoại</label>

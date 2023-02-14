@@ -101,7 +101,7 @@
     </div>
 @stop
 @section('scripts')
-    {{-- <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script> --}}
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
     <script>
         $.ajaxSetup({
             headers: {
@@ -111,8 +111,7 @@
 
         $(document).ready(function() {
             var $table = $('#userList');
-            var action = 'add';
-
+            var action = "add";
             $.fn.DataTable.ext.pager.numbers_length = 10;
             var usersTable = $('.userList').DataTable({
                 processing: true,
@@ -226,119 +225,130 @@
                 },
             });
 
-            //# Xử lý ADD-EDIT USER POPUP 
+            // Xử lý ADD - EDIT USER POPUP
             // validate signup form on keyup and submit
-            // var validator = $("#addUserForm").validate({
-            //     rules: {
-            //         name: {
-            //             required: true,
-            //             minlength: 5
-            //         },
-            //         email: {
-            //             required: true,
-            //             email: true,
+            var validator = $("#userForm").validate({
+                onkeyup: function(element) {
+                    this.element(element);
+                    clearMessages();
+                },
+                onfocusout: function(element) {
+                    this.element(element);
+                },
+                rules: {
+                    name: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 50,
+                    },
+                    email: {
+                        required: true,
+                        email: true,
+                        maxlength: 150,
+                    },
+                    password: {
+                        required: true,
+                        minlength: 5,
+                        pwReg: true,
+                        maxlength: 30,
+                    },
+                    password_confirm: {
+                        required: true,
+                        minlength: 5,
+                        equalTo: "#password"
+                    },
+                    group_role: {
+                        required: true,
+                    }
+                },
+                messages: {
+                    name: {
+                        required: "{{ __('UserRequired') }}",
+                        minlength: "{{ __('UserMinlength') }}",
+                        maxlength: "{{ __('name.max') }}",
+                    },
+                    email: {
+                        required: "{{ __('email.required') }}",
+                        email: "{{ __('EmailType') }}",
+                        maxlength: "{{ __('email.max') }}",
+                    },
+                    password: {
+                        required: "{{ __('PasswordRequired') }}",
+                        minlength: "{{ __('PasswordMinlength') }}",
+                        maxlength: "{{ __('password.max') }}",
+                        pwReg: "{{ __('password.regex') }}",
+                    },
+                    password_confirm: {
+                        required: "{{ __('PasswordConfirmRequired') }}",
+                        minlength: "{{ __('PasswordConfirmMinlength') }}",
+                        equalTo: "{{ __('PasswordConfirmEqualTo') }}",
+                    },
+                },
+                submitHandler: function(form, e) {
+                    clearMessages();
+                    e.preventDefault();
+                    var formData = new FormData(form);
+                    formData.append('is_active', $("#is_active").val());
+                    if (action === "add") {
+                        $.ajax({
+                            url: "/users",
+                            type: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function(result) {
+                                clearMessages();
+                                $("#closePopup").trigger("click");
+                                Swal.fire("{{ __('Notification') }}",
+                                    "{{ __('Add success') }}",
+                                    'success');
+                            },
+                            error: function(error) {
+                                clearMessages();
+                                $.each(error.responseJSON.errors, function(key, value) {
+                                    $("#" + key + '-error').html(value[0]);
+                                });
+                            }
+                        });
+                    } else {
+                        var email = $("#email").val();
+                        console.log(email);
+                        formData.append('email', email);
+                        $.ajax({
+                            url: '/users/update/' + userID,
+                            type: "POST",
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            success: function(data) {
+                                $("#closePopup").trigger("click");
+                                Swal.fire("{{ __('Notification') }}",
+                                    "{{ __('Edit success') }}", 'success');
+                            },
+                            error: function(error) {
+                                $.each(error.responseJSON.errors, function(key, value) {
+                                    $("#" + key + '-error').html(value[0]);
+                                });
+                            }
+                        });
+                    }
+                    usersTable.ajax.reload();
+                    return false;
+                }
+            });
 
-            //         },
-            //         password: {
-            //             required: true,
-            //             minlength: 5,
-            //             pwchkregex: true
-            //         },
-            //         password_confirm: {
-            //             required: true,
-            //             equalTo: "#password"
-            //         },
-            //         group_role: {
-            //             required: true,
-            //         }
-            //     },
-            //     messages: {
-            //         name: {
-            //             required: "{{ __('UserRequired') }}",
-            //             minlength: "{{ __('UserMinlength') }}",
-            //         },
-            //         email: {
-            //             required: "{{ __('email.required') }}",
-            //             email: "{{ __('EmailType') }}",
-            //             //remote: "{{ __('email.unique') }}",
-            //         },
-            //         password: {
-            //             required: "{{ __('PasswordRequired') }}",
-            //             minlength: "{{ __('PasswordMinlength') }}",
-            //             pwchkregex: "{{ __('password.regex') }}",
-            //         },
-            //         password_confirm: {
-            //             required: "{{ __('PasswordConfirmRequired') }}",
-            //             equalTo: "{{ __('PasswordConfirmEqualTo') }}",
-            //         },
-            //     },
-            //     submitHandler: function(form, e) {
-            //         e.preventDefault();
-            //         var formData = new FormData(form);
-            //         var name = $("#name").val();
-            //         var email = $("#email").val();
-            //         var password = $("#password").val();
-            //         var passwordConfirm = $("#password_confirm").val();
-            //         var role = $("#group_role").val();
-            //         var active = ($("#is_active").val()) === "on" ? 1 : 0;
-
-            //         if (action === 'add') {
-            //             $.ajax({
-            //                 url: "/users",
-            //                 type: "POST",
-            //                 data: {
-            //                     name: name,
-            //                     email: email,
-            //                     password: password,
-            //                     password_confirm: passwordConfirm,
-            //                     group_role: role,
-            //                     is_active: active,
-            //                 },
-            //                 success: function(result) {
-            //                     if (result['status'] === 'success') {
-            //                         $("#closePopup").trigger("click");
-            //                         Swal.fire("{{ __('Notification') }}",
-            //                             "{{ __('Add success') }}",
-            //                             'success');
-            //                     } else {
-            //                         Swal.fire(
-            //                             "{{ __('Notification') }}",
-            //                             "{{ __('Add error') }}",
-            //                             'error');
-            //                     }
-            //                 },
-            //                 error: function(error) {
-            //                     console.log(error);
-            //                     // $.each(error.responseJSON.errors, function(key, value) {
-            //                     //     $("#" + key + '-error').html(value[0]);
-            //                     // });
-            //                 }
-            //             });
-            //         } else {
-            //             $.ajax({
-            //                 url: '/users/update/' + userID,
-            //                 type: "POST",
-            //                 data: formData,
-            //                 contentType: false,
-            //                 processData: false,
-            //                 success: function(data) {
-            //                     $("#closePopup").trigger("click");
-            //                     Swal.fire("{{ __('Notification') }}",
-            //                         "{{ __('Edit success') }}", 'success');
-            //                 },
-            //                 error: function(error) {
-            //                     console.log(error);
-            //                 }
-            //             });
-            //         }
-            //         usersTable.ajax.reload();
-            //     },
-            // });
+            $.validator.addMethod("pwReg", function(value) {
+                return /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{5,}$/.test(value) // consists of only these
+                    &&
+                    /[a-z]/.test(value) // has a lowercase letter
+                    &&
+                    /\d/.test(value) // has a digit
+            });
 
             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
-                $('#checkActive').prop('selectedIndex', -1);
-                $('#selGroup_role').prop('selectedIndex', -1);
+                $('#checkActive').prop('selectedIndex', 0);
+                $('#selGroup_role').prop('selectedIndex', 0);
                 $('#txtName').val('');
                 $('#txtEmail').val('');
                 usersTable.ajax.reload();
@@ -365,55 +375,55 @@
                 return user;
             }
 
-            $('#userForm').submit(function(e) {
-                clearMessages();
-                e.preventDefault();
-                var form = $('#userForm')[0];
-                var formData = new FormData(form);
-                formData.append('is_active',$("#is_active").val());
-                if (action === 'add') {
-                    console.log(action);
-                    $.ajax({
-                        url: "/users",
-                        type: "POST",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(result) {
-                            clearMessages();
-                            $("#closePopup").trigger("click");
-                            Swal.fire("{{ __('Notification') }}",
-                                "{{ __('Add success') }}",
-                                'success');
-                        },
-                        error: function(error) {
-                            clearMessages();
-                            $.each(error.responseJSON.errors, function(key, value) {
-                                $("#" + key + '-error').html(value[0]);
-                            });
-                        }
-                    });
-                } else {
-                    $.ajax({
-                        url: '/users/update/' + userID,
-                        type: "POST",
-                        data: formData,
-                        contentType: false,
-                        processData: false,
-                        success: function(data) {
-                            $("#closePopup").trigger("click");
-                            Swal.fire("{{ __('Notification') }}",
-                                "{{ __('Edit success') }}", 'success');
-                        },
-                        error: function(error) {
-                            $.each(error.responseJSON.errors, function(key, value) {
-                                $("#" + key + '-error').html(value[0]);
-                            });
-                        }
-                    });
-                }
-                usersTable.ajax.reload();
-            });
+            // $('#userForm').submit(function(e) {
+            //     clearMessages();
+            //     e.preventDefault();
+            //     var form = $('#userForm')[0];
+            //     var formData = new FormData(form);
+            //     formData.append('is_active',$("#is_active").val());
+            //     if (action === 'add') {
+            //         console.log(action);
+            //         $.ajax({
+            //             url: "/users",
+            //             type: "POST",
+            //             data: formData,
+            //             processData: false,
+            //             contentType: false,
+            //             success: function(result) {
+            //                 clearMessages();
+            //                 $("#closePopup").trigger("click");
+            //                 Swal.fire("{{ __('Notification') }}",
+            //                     "{{ __('Add success') }}",
+            //                     'success');
+            //             },
+            //             error: function(error) {
+            //                 clearMessages();
+            //                 $.each(error.responseJSON.errors, function(key, value) {
+            //                     $("#" + key + '-error').html(value[0]);
+            //                 });
+            //             }
+            //         });
+            //     } else {
+            //         $.ajax({
+            //             url: '/users/update/' + userID,
+            //             type: "POST",
+            //             data: formData,
+            //             contentType: false,
+            //             processData: false,
+            //             success: function(data) {
+            //                 $("#closePopup").trigger("click");
+            //                 Swal.fire("{{ __('Notification') }}",
+            //                     "{{ __('Edit success') }}", 'success');
+            //             },
+            //             error: function(error) {
+            //                 $.each(error.responseJSON.errors, function(key, value) {
+            //                     $("#" + key + '-error').html(value[0]);
+            //                 });
+            //             }
+            //         });
+            //     }
+            //     usersTable.ajax.reload();
+            // });
             // Xử lý xoá user is_delete = 1
             $(document).on('click', '.removeUser', function(e) {
                 var id = $(this).data("id");
@@ -496,11 +506,11 @@
             function initUserForm() {
                 $("#name").val('');
                 $("#email").val('');
-                $("#email").attr('disabled',false);
+                $("#email").attr('disabled', false);
                 $("#password").val('');
                 $("#password_confirm").val('');
                 $("#is_active").val();
-                $("#group_role").prop('selectedIndex',0);
+                $("#group_role").prop('selectedIndex', 0);
             };
 
             // clear error message
@@ -509,32 +519,64 @@
                 $("#email-error").empty();
                 $("#password-error").empty();
                 $("#password_confirm-error").empty();
+                validator.resetForm();
             };
 
             // Reset Form AddUser
             $('#btnAdd').on('click', function() {
-                action = "add";
+                $('#popupTitle').html("{{ __('TitleAddUser') }}");
+                action ="add";
+                $("#email").attr('readoly', false);
                 clearMessages();
                 initUserForm();
             });
-
+            
+            // Input password có thể trống trên form edit
+            $('#password').on('change', function() {
+                //Add rules in validation
+                var pass = $('#password').val();
+                if (action === "edit" && pass === "") {
+                    $("#password").rules("remove", "required minlength maxlength pwReg");
+                    $("#password_confirm").rules("remove", "required equalTo minlength");
+                } else {
+                    $("#password").rules("add", {
+                        required: true,
+                        minlength: 5,
+                        pwReg: true,
+                        maxlength: 30
+                    });
+                    $("#password_confirm").rules("add", {
+                        required: true,
+                        minlength: 5,
+                        equalTo: "#password"
+                    });
+                }
+            });
 
             var userID = null;
 
             // Get user cho popupEditUser
             $(document).on('click', '.popupEditUser', function() {
                 clearMessages();
-                action = "edit";
+                action ="edit";
 
                 $('#popupTitle').html("{{ __('Edit user') }}")
+                $("#email").attr('readoly', true);
+
+                //Delete rules in validation
+                var settings = $('#userForm').validate().settings;
+                delete settings.rules.password.required;
+                delete settings.rules.password_confirm.required;
+
                 var idUSer = $(this).data("id");
                 var user = getUserByID(idUSer);
-                $("#email").attr('disabled',true);
                 if (user != null) {
                     userID = user.id;
                     $("#name").val(user.name);
                     $("#email").val(user.email);
-                    $('select option:contains("' + user.group_role + '")').prop('selected', true);
+                    $('select#group_role option:contains("' + user.group_role + '")').prop(
+                        'selected',
+                        true);
                     if (user.is_active === 1) {
                         $('#is_active').bootstrapToggle('on');
                     } else {

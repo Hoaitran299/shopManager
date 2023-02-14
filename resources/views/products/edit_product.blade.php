@@ -165,12 +165,10 @@
                     processData: false,
                     dataType: 'json',
                     success: function(response) {
-                        if (response['status'] === 'success') {
-                            $("#closePopup").trigger("click");
-                            Swal.fire("{{ __('Notification') }}",
-                                "{{ __('Edit success') }}",
-                                'success');
-                        }
+                        window.location.href = "/products";
+                        Swal.fire("{{ __('Notification') }}",
+                            "{{ __('Edit success') }}",
+                            'success');
                     },
                     error: function(err) {
                         clearMessages();

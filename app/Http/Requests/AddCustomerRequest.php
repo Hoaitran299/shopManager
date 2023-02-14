@@ -26,10 +26,10 @@ class AddCustomerRequest extends FormRequest
     public function rules()
     {
         return [
-            'txtName' => 'required|min:5',
-            'txtEmail' => 'required|max:255|email:rfc,dns',
+            'txtName' => 'required|min:5|max: 30',
+            'txtEmail' => 'required|max:150|email:rfc,dns',
             'txtTel_num' => 'required|regex:/^([0-9]*)$/|min:10|max:12',
-            'txtAddress' => 'required|max:255',
+            'txtAddress' => 'required|max:100',
         ];
     }
 
@@ -42,6 +42,7 @@ class AddCustomerRequest extends FormRequest
         return [
             'txtName.required' => trans('CustomerRequired'),
             'txtName.min' => trans('CustomerMinlength'),
+            'txtName.max' => trans('name.max'),
             'txtEmail.required' => trans('EmailRequired'),
             'txtEmail.email' =>  trans('EmailType'),
             'txtEmail.exists' => trans('email.exists'),

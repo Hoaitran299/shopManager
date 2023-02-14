@@ -25,8 +25,8 @@ class EditUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|min:5',
-            'password' => ['sometimes','min:5',new PasswordRule],
+            'name' => 'required|min:5|max:50',
+            'password' => ['sometimes','min:5','max:30',new PasswordRule],
             'password_confirm' => 'sometimes|min:5|same:password',
         ];
     }
@@ -40,8 +40,9 @@ class EditUserRequest extends FormRequest
         return [
             'name.required' => trans('UserRequired'),
             'name.min' => trans('UserMinlength'),
+            'name.max' => trans('name.max'),
             "password.min" => trans('PasswordMinlength'),
-            "password.regex" => trans('password.regex'),
+            "password.max" => trans('password.max'),
             "password_confirm.min" => trans('PasswordConfirmMinlength'),
             "password_confirm.same" => trans('PasswordConfirmEqualTo')
         ];
