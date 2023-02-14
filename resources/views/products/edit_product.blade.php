@@ -30,16 +30,16 @@
                                     <input id='product_name' name='product_name' type="text" class="form-control"
                                         value="{{ $product ? $product->product_name : '' }}"
                                         placeholder="Nhập tên sản phẩm">
-                                    <span class="text-danger msg-error" id="product_name-error"></span>
+                                    <span class="text-danger error" id="product_name-error"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">{{ trans('Price') }}</label>
                                 <div class="col-sm-9">
                                     <input id='product_price' name='product_price' type="text" class="form-control"
-                                        value="{{ $product ? $product->product_price : '' }}"
+                                        value="{{ $product ? (float)$product->product_price : '' }}"
                                         placeholder="Nhập giá sản phẩm">
-                                    <span class="text-danger msg-error" id="product_price-error"></span>
+                                    <span class="text-danger error" id="product_price-error"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -68,7 +68,7 @@
                                     <img style="margin-left: 10px;width: 100%;height: 100%%;" id="preview" name="preview"
                                         src="{{ $product->product_image ? '/img/products/' . $product->product_image : '/img/products/default.jpg' }}"
                                         alt="your image" />
-                                    <span class="text-danger msg-error" id="product_image-error"></span>
+                                    <span class="text-danger error" id="product_image-error"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -104,6 +104,9 @@
     </div>
 @stop
 @section('scripts')
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+    <script src="//cdn.jsdelivr.net/jquery.validation/1.16.0/additional-methods.js"></script>
+
     <script type="text/javascript">
         $.ajaxSetup({
             headers: {
@@ -114,29 +117,113 @@
             var product = getProductByID($("#id").val());
             product['product_image'] ? $('#removeImg').css('display', 'block') : $('#removeImg').css('display',
                 'none')
-            var defaultImage = "default.jpg";
 
-            $('#product_image').change(function(e) {
-                $("#product_image-error").empty();
-                e.preventDefault();
-                var fileImg = $('#product_image').prop('files')[0];
-                if (/^\s*$/.test(fileImg)) {
-                    $(".file-upload").removeClass('active');
-                    $("#noFile").text("No file chosen...");
-                    $('#removeImg').css('display', 'none');
-                } else {
-                    $(".file-upload").addClass('active');
-                    $("#noFile").text(fileImg['name']);
-                    $('#removeImg').css('display', 'block');
-                    if (fileImg) {
-                        const reader = new FileReader();
-                        reader.addEventListener("load", () => {
-                            $("#preview").attr("src", event.target.result);
-                        }, false);
-                        reader.readAsDataURL(fileImg);
+            var imgWidth = 0;
+            var imgHeight = 0;
+
+            // Xử lý ADD 
+            // validate add product form on keyup and submit
+            var validator = $("#productForm").validate({
+                onkeyup: function(element) {
+                    this.element(element);
+                },
+                onfocusout: function(element) {
+                    this.element(element);
+                },
+                rules: {
+                    product_name: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 50,
+                    },
+                    product_price: {
+                        required: true,
+                        number: true,
+                        min: 0,
+                        maxlength: 16
+                    },
+                    product_image: {
+                        extension: "jpg|jpeg|png",
+                        capacity: 2, //2 MB
+                        maxsize: 1024
+                    },
+                    description: {
+                        maxlength: 100,
+                    },
+
+                },
+                messages: {
+                    product_name: {
+                        required: "{{ __('product_name.required') }}",
+                        minlength: "{{ __('product_name.min') }}",
+                        maxlength: "{{ __('name.max') }}",
+                    },
+                    product_price: {
+                        required: "{{ __('product_price.required') }}",
+                        number: "{{ __('product_price.digits') }}",
+                        min: "{{ __('product_price.min') }}",
+                        maxlength: "{{ __('product_price.max') }}",
+                    },
+                    product_image: {
+                        extension: "{{ __('product_image.extension') }}",
+                        capacity: "{{ __('product_image.capacity') }}",
+                        maxsize: "{{ __('product_image.maxsize') }}",
+                    },
+                    description: {
+                        maxlength: "{{ __('description.max') }}",
+                    },
+                },
+                errorPlacement: function(error, element) {
+                    if (element.attr("name") == "product_image") {
+                        error.insertAfter("#product_image-error");
+                    } else {
+                        error.insertAfter(element);
                     }
+                },
+                submitHandler: function(form, e) {
+                    e.preventDefault();
+                    console.log('bbbb');
+                    clearMessages();
+                    var id = $("#id").val();
+                    var formData = new FormData(form);
+                    var srcImg = $('#preview').attr('src').split('/');
+                    var imgName = srcImg[srcImg.length - 1];
+                    console.log(imgName);
+                    formData.append('img', imgName);
+                    formData.append('product_image', $('#product_image')[0].files[0]);
+
+                    $.ajax({
+                        url: "/products/update/" + id,
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        dataType: 'json',
+                        success: function(response) {
+                            //window.location.href = "/products";
+                            Swal.fire("{{ __('Notification') }}",
+                                "{{ __('Edit success') }}",
+                                'success');
+                        },
+                        error: function(err) {
+                            clearMessages();
+                            removeMsgEdit();
+                            if (err.responseJSON.errors) {
+                                $.each(err.responseJSON.errors, function(key, value) {
+                                    $("#" + key + '-error').html(value[0]);
+                                });
+                            } else {
+                                $(".print-error-msg").css('display', 'block');
+                                $(".print-error-msg").find("ul").append('<li>' + err
+                                    .responseJSON
+                                    .message + '</li>');
+                            }
+                        }
+                    });
+                    return false;
                 }
             });
+
 
             // clear error message
             function clearMessages() {
@@ -146,50 +233,61 @@
                 $("#product_image-error").empty();
             };
 
-            $('#productForm').submit(function(e) {
-                e.preventDefault();
-                clearMessages();
-                var id = $("#id").val();
-                var form = $('#productForm')[0];
-                var formData = new FormData(this);
-                var srcImg = $('#preview').attr('src').split('/');
-                var imgName = srcImg[srcImg.length - 1];
-                formData.append('img', imgName);
-                formData.append('product_image', $('#product_image')[0].files[0]);
+            $.validator.addMethod('capacity', function(value, element, param) {
+                return this.optional(element) || (element.files[0].size <= param * 1000000)
+            }, 'Dung lượng hình phải bé hơn {0} MB');
 
-                $.ajax({
-                    url: "/products/update/" + id,
-                    type: "POST",
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    dataType: 'json',
-                    success: function(response) {
-                        window.location.href = "/products";
-                        Swal.fire("{{ __('Notification') }}",
-                            "{{ __('Edit success') }}",
-                            'success');
-                    },
-                    error: function(err) {
-                        clearMessages();
-                        removeMsgEdit();
-                        if (err.responseJSON.errors) {
-                            $.each(err.responseJSON.errors, function(key, value) {
-                                $("#" + key + '-error').html(value[0]);
-                            });
-                        } else {
-                            $(".print-error-msg").css('display', 'block');
-                            $(".print-error-msg").find("ul").append('<li>' + err.responseJSON
-                                .message + '</li>');
-                        }
+            $.validator.addMethod('maxsize', function(value, element, param) {
+                return this.optional(element) || (imgWidth <= param || imgHeight <= param)
+            }, 'Kích thước hình phải là {0} x {0}');
+
+            $('#product_image').change(function(e) {
+                $("#product_image-error").empty();
+                e.preventDefault();
+                var fileImg = $('#product_image').prop('files')[0];
+
+                if (/^\s*$/.test(fileImg)) {
+                    $(".file-upload").removeClass('active');
+                    $("#noFile").text("No file chosen...");
+                    $('#removeImg').css('display', 'none');
+                    imgHeight = 0;
+                    imgWidth = 0;
+                } else {
+                    $(".file-upload").addClass('active');
+                    $("#noFile").text(fileImg['name']);
+                    $('#removeImg').css('display', 'block');
+                    if (fileImg) {
+                        const reader = new FileReader();
+                        reader.addEventListener("load", () => {
+                            $("#preview").attr("src", event.target.result);
+                            $("#preview").onload = function() {
+                                imgHeight = $("#preview").height;
+                                imgWidth = $("#preview").width;
+                            }
+                        }, false);
+                        reader.readAsDataURL(fileImg);
                     }
-                });
+                }
             });
 
             function removeMsgEdit() {
                 $(".print-error-msg").find("ul").html('');
                 $(".print-error-msg").css('display', 'none');
             }
+
+            /**
+             * Handle button remove image 
+             */
+            $('#removeImg').click(function() {
+                $('#removeImg').hide();
+                $("#preview").attr("src", "{{ asset('img/products/default.jpg') }}");
+                $(".file-upload").removeClass('active');
+                $("#noFile").text("No file chosen...");
+                $("#product_image").val('');
+                $("#product_image-error").empty();
+                imgHeight = 0;
+                imgWidth = 0;
+            });
 
             // Get thông tin user by ID
             function getProductByID(id) {
@@ -205,17 +303,6 @@
                 });
                 return product;
             }
-            /**
-             * Handle button remove image 
-             */
-            $('#removeImg').click(function() {
-                $('#removeImg').hide();
-                $("#preview").attr("src", "{{ asset('img/products/default.jpg') }}");
-                $(".file-upload").removeClass('active');
-                $("#noFile").text("No file choosen");
-                $("#product_image").val('');
-                $("#product_image-error").empty();
-            });
         });
     </script>
 @stop

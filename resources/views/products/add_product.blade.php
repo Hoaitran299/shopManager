@@ -106,6 +106,8 @@
         });
 
         $(document).ready(function() {
+            var imgWidth = 0;
+            var imgHeight = 0;
 
             // Xử lý ADD 
             // validate add product form on keyup and submit
@@ -124,8 +126,9 @@
                     },
                     product_price: {
                         required: true,
-                        digits: true,
+                        number: true,
                         min: 0,
+                        maxlength: 16
                     },
                     product_image: {
                         extension: "jpg|jpeg|png",
@@ -145,8 +148,9 @@
                     },
                     product_price: {
                         required: "{{ __('product_price.required') }}",
-                        digits: "{{ __('product_price.digits') }}",
+                        number: "{{ __('product_price.digits') }}",
                         min: "{{ __('product_price.min') }}",
+                        maxlength: "{{ __('product_price.max') }}",
                     },
                     product_image: {
                         extension: "{{ __('product_image.extension') }}",
@@ -166,7 +170,7 @@
                 },
                 submitHandler: function(form, e) {
                     e.preventDefault();
-                    console.log('aaaaaaa');
+                    
                     var formData = new FormData(form);
                     formData.append('product_image', $('#product_image')[0].files[0]);
                     $.ajax({
@@ -179,23 +183,23 @@
                         success: function(response) {
                             clearMessages();
                             removeMsgEdit();
-                            //window.location.href = "/products";
+                            window.location.href = "/products";
                             Swal.fire("{{ __('Notification') }}",
                                 "{{ __('Add success') }}",
                                 'success');
                         },
                         error: function(response) {
-                            if (response.responseJSON.errors) {
+                            if (response.responseJSON && response.responseJSON.errors) {
                                 $.each(response.responseJSON.errors, function(key, value) {
                                     $("#" + key + '-error').html(value[0]);
                                 });
+                            
+                            } else {
+                                $(".print-error-msg").css('display', 'block');
+                                $(".print-error-msg").find("ul").append('<li>' + err
+                                    .responseJSON
+                                    .message + '</li>');
                             }
-                            // } else {
-                            //     $(".print-error-msg").css('display', 'block');
-                            //     $(".print-error-msg").find("ul").append('<li>' + err
-                            //         .responseJSON
-                            //         .message + '</li>');
-                            // }
                         }
                     });
                     return false;
@@ -210,6 +214,8 @@
                 $("#product_price").val('');
                 $("#is_sales").prop('selectIndex', 1);
                 $("#product_image").val('');
+                imgHeight = 0;
+                imgWidth = 0;
             };
 
             // clear error message
@@ -225,20 +231,6 @@
             }, 'Dung lượng hình phải bé hơn {0} MB');
 
             $.validator.addMethod('maxsize', function(value, element, param) {
-                var fileImg = element.files[0];
-                var image = new Image();
-                var imgWidth = 0;
-                var imgHeight = 0;
-
-                const reader = new FileReader();
-                reader.addEventListener("load", (event) => {
-                    image.src = event.target.result;
-                    image.onload = function() {
-                        imgHeight = image.height;
-                        imgWidth = image.width;
-                    }
-                }, false);
-                reader.readAsDataURL(fileImg);
                 return this.optional(element) || (imgWidth <= param || imgHeight <= param)
             }, 'Kích thước hình phải là {0} x {0}');
 
@@ -251,6 +243,8 @@
                     $(".file-upload").removeClass('active');
                     $("#noFile").text("No file chosen...");
                     $('#removeImg').css('display', 'none');
+                    imgHeight = 0;
+                    imgWidth = 0;
                 } else {
                     $(".file-upload").addClass('active');
                     $("#noFile").text(fileImg['name']);
@@ -259,6 +253,10 @@
                         const reader = new FileReader();
                         reader.addEventListener("load", () => {
                             $("#preview").attr("src", event.target.result);
+                            $("#preview").onload = function() {
+                                imgHeight = $("#preview").height;
+                                imgWidth = $("#preview").width;
+                            }
                         }, false);
                         reader.readAsDataURL(fileImg);
                     }
@@ -280,6 +278,8 @@
                 $("#noFile").text("No file chosen...");
                 $("#product_image").val('');
                 $("#product_image-error").empty();
+                imgHeight = 0;
+                imgWidth = 0;
             });
         });
     </script>

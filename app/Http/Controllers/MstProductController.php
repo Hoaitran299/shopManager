@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductRequest;
 use App\Models\MstProduct;
+use App\Models\ProductGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
@@ -51,15 +52,21 @@ class MstProductController extends Controller
     public function store(ProductRequest $request)
     {
         try {
-            $strNum = "000000000";
             $input = $request->all();
-            $firstN = strtoupper($request->product_name[0]);
-            $product_id = $firstN. $strNum;
-            $img = "";
+
+            // Xử lý productID
+            $strNum = "000000000";
+            $firstChar = strtoupper($request->product_name[0]);
+            $index_group = ProductGroup::where('prex_group',$firstChar)->orderBy('index', 'DESC')->pluck('index')->first();
+            $index = $index_group ? ($index_group + 1): 1;
+            ProductGroup::create(['prex_group'=> $firstChar,'index'=> $index]);
+            $product_id = $firstChar.substr($strNum,0,-(strlen($index))).$index;
+
+            $image = "";
             if ($request->product_image) {
                 $filename = time(). '_' . $request->product_image->getClientOriginalName();
                 $request->file('product_image')->move(public_path('img/products'), $filename);
-                $img = $filename;
+                $image = $filename;
             }
             $data = [
                 'product_id' =>$product_id,
@@ -67,15 +74,10 @@ class MstProductController extends Controller
                 'product_price' => $input['product_price'],
                 'description' => $input['description'],
                 'is_sales' => $input['is_sales'],
-                'product_image' => $img
+                'product_image' => $image
             ];
             
-            $product = MstProduct::create($data);
-            if($product->id){
-                $product_id = $firstN.substr($strNum,0,-(strlen($product->id))).$product->id;
-                $product->product_id = $product_id;
-                $product->save();
-            }
+            MstProduct::create($data);
             $response = array(
                 "status"=>"success",
                 "message"=> trans('Add success'),
@@ -125,24 +127,37 @@ class MstProductController extends Controller
     {
         try {
             $input = $request->all();
+
             $strNum = "000000000";
-            $input = $request->all();
-            $firstN = strtoupper($request->product_name[0]);
-            $product_id = $firstN.substr($strNum,0,-(strlen($id))).$id;
-            $img = MstProduct::where('id', $id)->pluck('product_image')->first();
+            $oldChar = MstProduct::where('id', $id)->pluck('product_id')->first();
+            $firstChar = strtoupper($request->product_name[0]);
+            $product_id = "";
+
+            // Kiểm tra tên sản phẩm thay đổi là nhóm cũ hay nhóm mới
+            if($oldChar[0] === $firstChar){
+                $product_id = $oldChar;
+            } else{
+                // Nếu nhóm mới, xoá nhóm cũ và thêm nhóm mới.
+                $index_group = ProductGroup::where('prex_group',$firstChar)->orderBy('index', 'DESC')->pluck('index')->first();
+                $index = $index_group ? ($index_group + 1): 1;
+                ProductGroup::where('prex_group', strtoupper($oldChar[0]))->where('index', (int)(substr($oldChar,1)))->delete();
+                ProductGroup::create(['prex_group'=> $firstChar,'index'=> $index]);
+                $product_id = $firstChar.substr($strNum,0,-(strlen($index))).$index;
+            }
+            $image = MstProduct::where('id', $id)->pluck('product_image')->first();
             if ($request->product_image) {
                 $filename = time(). '_' . $request->product_image->getClientOriginalName();
                 $request->file('product_image')->move(public_path('img/products'), $filename);
-                if($img!= "") {
-                    File::delete('img/products/'.$img);
+                if($image!= "") {
+                    File::delete('img/products/'.$image);
                 }
-                $img = $filename;
-            } else if ($img != "" && $request->img === "default.jpg"){
-                File::delete('img/products/'.$img);
-                $img = "";
+                $image = $filename;
+            } else if ($image != "" && $request->img === "default.jpg"){
+                File::delete('img/products/'.$image);
+                $image = "";
             }
-            else {
-                $img = "";
+            else if($image =="" && !$request->product_image){
+                $image = "";
             }
             $data = [
                 'product_id' => $product_id,
@@ -150,7 +165,7 @@ class MstProductController extends Controller
                 'product_price' => $input['product_price'],
                 'description' => $input['description'],
                 'is_sales' => $input['is_sales'],
-                'product_image' => $img
+                'product_image' => $image
             ];
             MstProduct::where('id', $id)->update($data);
 
@@ -178,7 +193,12 @@ class MstProductController extends Controller
     public function destroy($id)
     {
         try {
-            MstProduct::where('product_id', $id)->delete();
+            $image = MstProduct::where('id', $id)->pluck('product_image')->first();
+            if($image){
+                File::delete('img/products/'.$image);
+            }     
+            MstProduct::where('id', $id)->delete();
+
             return response()->json(['status' => 'success', 'data' => []], 200);
         } catch (\Throwable $e) {
             return response()->json(['status' => 'error', 'data' => []], 400);

@@ -279,6 +279,21 @@
                     }
                 })
             });
+
+            // Get thông tin product by ID
+            function getProductByID(id) {
+                var user = null;
+                $.ajax({
+                    url: "/products/detail/" + id,
+                    type: "GET",
+                    async: false,
+                    dataType: 'json',
+                    success: function(data) {
+                        user = data.data;
+                    },
+                });
+                return user;
+            }
         });
     </script>
 @stop
