@@ -192,32 +192,30 @@
                     formData.append('img', imgName);
                     formData.append('product_image', $('#product_image')[0].files[0]);
 
-                    $.ajax({
-                        url: "/products/update/" + id,
-                        type: "POST",
-                        data: formData,
-                        contentType: false,
-                        processData: false,
-                        dataType: 'json',
-                        success: function(response) {
-                            //window.location.href = "/products";
-                            Swal.fire("{{ __('Notification') }}",
-                                "{{ __('Edit success') }}",
-                                'success');
-                        },
-                        error: function(err) {
-                            clearMessages();
-                            removeMsgEdit();
-                            if (err.responseJSON.errors) {
-                                $.each(err.responseJSON.errors, function(key, value) {
-                                    $("#" + key + '-error').html(value[0]);
-                                });
-                            } else {
-                                $(".print-error-msg").css('display', 'block');
-                                $(".print-error-msg").find("ul").append('<li>' + err
-                                    .responseJSON
-                                    .message + '</li>');
-                            }
+                $.ajax({
+                    url: "/products/update/" + id,
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json',
+                    success: function(response) {
+                        window.location.href = "/products";
+                        Swal.fire("{{ __('Notification') }}",
+                            "{{ __('Edit success') }}",
+                            'success');
+                    },
+                    error: function(err) {
+                        clearMessages();
+                        removeMsgEdit();
+                        if (err.responseJSON.errors) {
+                            $.each(err.responseJSON.errors, function(key, value) {
+                                $("#" + key + '-error').html(value[0]);
+                            });
+                        } else {
+                            $(".print-error-msg").css('display', 'block');
+                            $(".print-error-msg").find("ul").append('<li>' + err.responseJSON
+                                .message + '</li>');
                         }
                     });
                     return false;

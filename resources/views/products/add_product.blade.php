@@ -231,7 +231,7 @@
             }, 'Dung lượng hình phải bé hơn {0} MB');
 
             $.validator.addMethod('maxsize', function(value, element, param) {
-                return this.optional(element) || (imgWidth <= param || imgHeight <= param)
+                return this.optional(element) || (imgWidth <= param && imgHeight <= param)
             }, 'Kích thước hình phải là {0} x {0}');
 
             $('#product_image').change(function(e) {

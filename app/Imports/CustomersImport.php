@@ -77,7 +77,7 @@ class CustomersImport implements ToModel,SkipsEmptyRows, ShouldQueue, WithChunkR
     {
         return [
             '0' => 'required|min:5|max:50',
-            '1' => 'required|max:150|email:rfc,dns',
+            '1' => 'required|max:50|email:rfc,dns',
             '2' => 'required|regex:/^([0-9]*)$/|min:10|max:12',
             '3' => 'required|max:100',
         ];

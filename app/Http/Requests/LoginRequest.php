@@ -23,7 +23,7 @@ class LoginRequest extends FormRequest
     public function rules()
     {
         return [
-            'email' => 'required|email|exists:mst_users,email',
+            'email' => 'required|max:50|email|exists:mst_users,email',
             'password' => 'required',
         ];
     }
@@ -38,6 +38,7 @@ class LoginRequest extends FormRequest
             'email.required' => trans('email.required'),
             'email.email' =>  trans('email.email'),
             'email.exists' =>  trans('email.exists'),
+            'email.max' =>  trans('email.email'),
             'password.required' =>  trans('password.required'),
         ];
     }

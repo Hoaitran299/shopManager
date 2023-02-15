@@ -26,8 +26,8 @@ class AddCustomerRequest extends FormRequest
     public function rules()
     {
         return [
-            'txtName' => 'required|min:5|max: 30',
-            'txtEmail' => 'required|max:150|email:rfc,dns',
+            'txtName' => 'required|min:5|max:50',
+            'txtEmail' => 'required|max:50|email:rfc,dns',
             'txtTel_num' => 'required|regex:/^([0-9]*)$/|min:10|max:12',
             'txtAddress' => 'required|max:100',
         ];

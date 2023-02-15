@@ -25,7 +25,7 @@ class CustomerRequest extends FormRequest
     {
         return [
             'name' => 'required|min:5',
-            'email' => 'required|max:255|email:rfc,dns|unique:mst_customer',
+            'email' => 'required|max:50|email:rfc,dns|unique:mst_customer',
             'tel_num' => 'required|regex:/^([0-9]*)$/|min:10|max:12',
             'address' => 'required|max:255',
         ];

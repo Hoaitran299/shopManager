@@ -241,16 +241,16 @@
                     txtName: {
                         required: true,
                         minlength: 5,
-                        maxlength:50
+                        maxlength: 50
                     },
                     txtEmail: {
                         required: true,
                         email: true,
-                        maxlegnth:150
+                        maxlength: 50
                     },
                     txtAddress: {
                         required: true,
-                        maxlength:100,
+                        maxlength: 100,
                     },
                     txtTel_num: {
                         required: true,
@@ -268,7 +268,7 @@
                     txtEmail: {
                         required: "{{ __('EmailRequired') }}",
                         email: "{{ __('EmailType') }}",
-                        maxlegnth: "{{ __('email.max') }}",
+                        maxlength: "{{ __('email.max') }}",
                     },
                     txtAddress: {
                         required: "{{ __('address.required') }}",
@@ -285,7 +285,7 @@
                     e.preventDefault();
 
                     var formData = new FormData(form);
-                    formData.append('is_active',$('#is_active').val());
+                    formData.append('is_active', $('#is_active').val());
                     $.ajax({
                         url: "/customers",
                         type: "POST",
@@ -309,9 +309,9 @@
             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
                 $('#checkActive').prop('selectedIndex', 0);
-                $('#txtAddress').val('');
-                $('#txtName').val('');
-                $('#txtEmail').val('');
+                $('#filterAddress').val('');
+                $('#filterName').val('');
+                $('#filterEmail').val('');
                 removeMsgEdit();
                 customerTable.ajax.reload();
             });
@@ -348,6 +348,11 @@
                 $("#txtAddress").val('');
                 $("#is_active").prop('selectedIndex', 0);
                 removeMsgEdit();
+                if (customerTable.Rows.Count == 0) {
+                    $('.tabledit-edit-button').css('display', 'none');
+                } else {
+                    $('.tabledit-edit-button').css('display', 'block');
+                }
             }
 
             // clear error message
@@ -409,7 +414,8 @@
                             printErrorMsg(err.responseJSON.errors);
                         } else {
                             $(".print-error-msg").css('display', 'block');
-                            $(".print-error-msg").find("ul").append('<li>' + err.responseJSON.message + '</li>');
+                            $(".print-error-msg").find("ul").append('<li>' + err.responseJSON
+                                .message + '</li>');
                         }
                     }
                 });

@@ -127,7 +127,6 @@ class MstProductController extends Controller
     {
         try {
             $input = $request->all();
-
             $strNum = "000000000";
             $oldChar = MstProduct::where('id', $id)->pluck('product_id')->first();
             $firstChar = strtoupper($request->product_name[0]);

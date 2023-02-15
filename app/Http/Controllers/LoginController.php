@@ -37,15 +37,15 @@ class LoginController extends Controller
      */
     public function loginUser(LoginRequest $request)
     {
-        $data = $request->only('email', 'password');
+        $data = $request->only('email', 'password','remember_token');
         $date = date_format(Carbon::now(), Config::get('config.FORMAT_DATE_TIME'));
-        if (Auth::attempt($data, $request->remember)) {
+        if (Auth::attempt($data, $request->remember_token)) {
             $request->session()->put('info', $request->input());
             MstUsers::where('email', $request->email)
                 ->update(['last_login_at' => $date, 'last_login_ip' => $request->ip()]);
             return redirect()->intended('products');
         }
-        return back()->withInput($request->only('email', 'remember'))->withErrors([
+        return back()->withInput($request->only('email', 'remember_token'))->withErrors([
             'password' => trans('Incorrect password')
         ]);
     }

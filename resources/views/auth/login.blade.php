@@ -57,8 +57,8 @@
                         <div class="row mb-2">
                             <div class="col-8">
                                 <div class="icheck-primary">
-                                    <input type="checkbox" id="remember" name="remember">
-                                    <label for="remember">
+                                    <input type="checkbox" id="remember_token" name="remember_token">
+                                    <label for="remember_token">
                                         Remember Me
                                     </label>
                                 </div>
@@ -101,7 +101,7 @@
 
                 password: {
                     required: true,
-                    //minlength: 5
+                    minlength: 5
                 },
             },
             messages: {
@@ -112,7 +112,7 @@
                 },
                 password: {
                     required: "{{ __('PasswordRequired') }}",
-                    //minlength: "{{ __('PasswordMinlength') }}",
+                    minlength: "{{ __('PasswordMinlength') }}",
                 }
             }
         });

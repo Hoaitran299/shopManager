@@ -27,7 +27,7 @@ class EditCustomerRequest extends FormRequest
     {
         return [
             'customer_name' => 'required|min:5|max:50',
-            'email' => 'required|max:150|email:rfc,dns',
+            'email' => 'required|max:50|email:rfc,dns',
             'tel_num' => 'required|regex:/^([0-9]*)$/|min:10|max:12',
             'address' => 'required|max:100',
         ];

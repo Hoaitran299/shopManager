@@ -13,23 +13,23 @@
                     <label>Tên</label>
                     <input type="text" class="form-control" id="name" name="name"
                         placeholder="Nhập họ tên" autofocus>
-                        <span class="text-danger msg-error" id="name-error"></span>
+                        <span class="text-danger error" id="name-error"></span>
                 </div>
                 <div class="form-group">
                     <label>Email</label>
                     <input type="text" class="form-control" id="email" name="email" placeholder="Email">
-                    <span class="text-danger msg-error" id="email-error"></span>
+                    <span class="text-danger error" id="email-error"></span>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu">
-                    <span class="text-danger msg-error" id="password-error"></span>
+                    <span class="text-danger error" id="password-error"></span>
                 </div>
                 <div class="form-group">
                     <label>Xác nhận</label>
                     <input type="password" class="form-control" id="password_confirm" name="password_confirm"
                         placeholder="Xác nhận mật khẩu">
-                        <span class="text-danger msg-error" id="password_confirm-error"></span>
+                        <span class="text-danger error" id="password_confirm-error"></span>
                 </div>
                 <div class="form-group">
                     <label>Nhóm</label>

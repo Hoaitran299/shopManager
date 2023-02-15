@@ -22,7 +22,7 @@ Route::get('/', [LoginController::class, 'index'])->name('login');
 Route::post('login', [LoginController::class, 'loginUser'])->name('loginUser');
 Route::group(['middleware' => ['auth']], function () {
     //Route::resource('users', MstUsersController::class);
-    Route::get('users/index', [MstUsersController::class, 'index'])->name('users');
+    Route::get('users', [MstUsersController::class, 'index'])->name('users');
     Route::get('users/getData', [MstUsersController::class, 'getUsersData'])->name('user.getData');
     Route::get('users/info/{id}', [MstUsersController::class, 'getUserByID']);
     Route::post('users/{id}', [MstUsersController::class, 'lockOrUnlockUser'])->name('user.lock');

@@ -230,7 +230,7 @@
             var validator = $("#userForm").validate({
                 onkeyup: function(element) {
                     this.element(element);
-                    clearMessages();
+                    checkValidatePasssword();
                 },
                 onfocusout: function(element) {
                     this.element(element);
@@ -244,12 +244,12 @@
                     email: {
                         required: true,
                         email: true,
-                        maxlength: 150,
+                        maxlength: 50,
                     },
                     password: {
                         required: true,
                         minlength: 5,
-                        pwReg: true,
+                        //pwReg: true,
                         maxlength: 30,
                     },
                     password_confirm: {
@@ -286,6 +286,7 @@
                 },
                 submitHandler: function(form, e) {
                     clearMessages();
+                    checkValidatePasssword();
                     e.preventDefault();
                     var formData = new FormData(form);
                     formData.append('is_active', $("#is_active").val());
@@ -297,22 +298,23 @@
                             processData: false,
                             contentType: false,
                             success: function(result) {
-                                clearMessages();
                                 $("#closePopup").trigger("click");
                                 Swal.fire("{{ __('Notification') }}",
                                     "{{ __('Add success') }}",
                                     'success');
                             },
                             error: function(error) {
-                                clearMessages();
                                 $.each(error.responseJSON.errors, function(key, value) {
                                     $("#" + key + '-error').html(value[0]);
+                                    $("#" + key + '-error').css('display','block');
                                 });
                             }
                         });
                     } else {
+                        $("#email").attr('disabled', false);
                         var email = $("#email").val();
                         console.log(email);
+                        $("#email").attr('disabled', true);
                         formData.append('email', email);
                         $.ajax({
                             url: '/users/update/' + userID,
@@ -328,6 +330,7 @@
                             error: function(error) {
                                 $.each(error.responseJSON.errors, function(key, value) {
                                     $("#" + key + '-error').html(value[0]);
+                                    $("#" + key + '-error').css('display','block');
                                 });
                             }
                         });
@@ -344,6 +347,32 @@
                     &&
                     /\d/.test(value) // has a digit
             });
+
+            function checkValidatePasssword() {
+                //Add rules in validation
+                var pass = $('#password').val();
+                if (action === "edit" && pass === "") {
+                    $("#password").rules("remove");
+                    $("#password_confirm").rules("remove");
+                } else {
+                    $("#password").rules("add", {
+                        required: true,
+                        minlength: 5,
+                        pwReg: true,
+                        maxlength: 30
+                    });
+                    $("#password_confirm").rules("add", {
+                        required: true,
+                        minlength: 5,
+                        equalTo: "#password"
+                    });
+                }
+            }
+
+            // Input password có thể trống trên form edit
+            // $('#password').on('change', function() {
+            //     checkValidatePasssword();
+            // });
 
             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
@@ -375,55 +404,6 @@
                 return user;
             }
 
-            // $('#userForm').submit(function(e) {
-            //     clearMessages();
-            //     e.preventDefault();
-            //     var form = $('#userForm')[0];
-            //     var formData = new FormData(form);
-            //     formData.append('is_active',$("#is_active").val());
-            //     if (action === 'add') {
-            //         console.log(action);
-            //         $.ajax({
-            //             url: "/users",
-            //             type: "POST",
-            //             data: formData,
-            //             processData: false,
-            //             contentType: false,
-            //             success: function(result) {
-            //                 clearMessages();
-            //                 $("#closePopup").trigger("click");
-            //                 Swal.fire("{{ __('Notification') }}",
-            //                     "{{ __('Add success') }}",
-            //                     'success');
-            //             },
-            //             error: function(error) {
-            //                 clearMessages();
-            //                 $.each(error.responseJSON.errors, function(key, value) {
-            //                     $("#" + key + '-error').html(value[0]);
-            //                 });
-            //             }
-            //         });
-            //     } else {
-            //         $.ajax({
-            //             url: '/users/update/' + userID,
-            //             type: "POST",
-            //             data: formData,
-            //             contentType: false,
-            //             processData: false,
-            //             success: function(data) {
-            //                 $("#closePopup").trigger("click");
-            //                 Swal.fire("{{ __('Notification') }}",
-            //                     "{{ __('Edit success') }}", 'success');
-            //             },
-            //             error: function(error) {
-            //                 $.each(error.responseJSON.errors, function(key, value) {
-            //                     $("#" + key + '-error').html(value[0]);
-            //                 });
-            //             }
-            //         });
-            //     }
-            //     usersTable.ajax.reload();
-            // });
             // Xử lý xoá user is_delete = 1
             $(document).on('click', '.removeUser', function(e) {
                 var id = $(this).data("id");
@@ -525,32 +505,10 @@
             // Reset Form AddUser
             $('#btnAdd').on('click', function() {
                 $('#popupTitle').html("{{ __('TitleAddUser') }}");
-                action ="add";
-                $("#email").attr('readoly', false);
+                action = "add";
+                $("#email").attr('disabled', false);
                 clearMessages();
                 initUserForm();
-            });
-            
-            // Input password có thể trống trên form edit
-            $('#password').on('change', function() {
-                //Add rules in validation
-                var pass = $('#password').val();
-                if (action === "edit" && pass === "") {
-                    $("#password").rules("remove", "required minlength maxlength pwReg");
-                    $("#password_confirm").rules("remove", "required equalTo minlength");
-                } else {
-                    $("#password").rules("add", {
-                        required: true,
-                        minlength: 5,
-                        pwReg: true,
-                        maxlength: 30
-                    });
-                    $("#password_confirm").rules("add", {
-                        required: true,
-                        minlength: 5,
-                        equalTo: "#password"
-                    });
-                }
             });
 
             var userID = null;
@@ -558,15 +516,13 @@
             // Get user cho popupEditUser
             $(document).on('click', '.popupEditUser', function() {
                 clearMessages();
-                action ="edit";
+                action = "edit";
 
                 $('#popupTitle').html("{{ __('Edit user') }}")
-                $("#email").attr('readoly', true);
+                $("#email").attr('disabled', true);
 
                 //Delete rules in validation
-                var settings = $('#userForm').validate().settings;
-                delete settings.rules.password.required;
-                delete settings.rules.password_confirm.required;
+                checkValidatePasssword();
 
                 var idUSer = $(this).data("id");
                 var user = getUserByID(idUSer);
@@ -593,6 +549,7 @@
                 action = "add";
                 clearMessages();
                 initUserForm();
+                checkValidatePasssword();
             });
         });
     </script>
