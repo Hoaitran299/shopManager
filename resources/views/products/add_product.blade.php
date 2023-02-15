@@ -126,9 +126,9 @@
                     },
                     product_price: {
                         required: true,
-                        number: true,
                         min: 0,
-                        maxlength: 16
+                        maxlength: 10,
+                        priceRegex: true,
                     },
                     product_image: {
                         extension: "jpg|jpeg|png",
@@ -148,14 +148,14 @@
                     },
                     product_price: {
                         required: "{{ __('product_price.required') }}",
-                        number: "{{ __('product_price.digits') }}",
+                        priceRegex: "{{ __('product_price.digits') }}",
                         min: "{{ __('product_price.min') }}",
                         maxlength: "{{ __('product_price.max') }}",
                     },
                     product_image: {
                         extension: "{{ __('product_image.extension') }}",
                         capacity: "{{ __('product_image.capacity') }}",
-                        maxsize: "{{ __('product_image.maxsize') }}",
+                        maxsize: "{{ __('product_image.maxsize') }}"+". Hình hiện tại widthxheight: "+ imgWidth +" x "+ imgHeight,
                     },
                     description: {
                         maxlength: "{{ __('description.max') }}",
@@ -233,6 +233,10 @@
             $.validator.addMethod('maxsize', function(value, element, param) {
                 return this.optional(element) || (imgWidth <= param && imgHeight <= param)
             }, 'Kích thước hình phải là {0} x {0}');
+
+            $.validator.addMethod("priceRegex", function(value) {
+                return /^(\d{0,6})(\.\d{1,3})?$/.test(value) // Định dạng price ######.XX
+            });
 
             $('#product_image').change(function(e) {
                 $("#product_image-error").empty();

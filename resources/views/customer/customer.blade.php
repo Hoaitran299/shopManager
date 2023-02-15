@@ -348,11 +348,6 @@
                 $("#txtAddress").val('');
                 $("#is_active").prop('selectedIndex', 0);
                 removeMsgEdit();
-                if (customerTable.Rows.Count == 0) {
-                    $('.tabledit-edit-button').css('display', 'none');
-                } else {
-                    $('.tabledit-edit-button').css('display', 'block');
-                }
             }
 
             // clear error message

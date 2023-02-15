@@ -71,7 +71,7 @@ class MstProductController extends Controller
             $data = [
                 'product_id' =>$product_id,
                 'product_name' => $input['product_name'],
-                'product_price' => $input['product_price'],
+                'product_price' => (float)$input['product_price'],
                 'description' => $input['description'],
                 'is_sales' => $input['is_sales'],
                 'product_image' => $image
@@ -136,10 +136,9 @@ class MstProductController extends Controller
             if($oldChar[0] === $firstChar){
                 $product_id = $oldChar;
             } else{
-                // Nếu nhóm mới, xoá nhóm cũ và thêm nhóm mới.
+                // Nếu nhóm mới và thêm nhóm mới.
                 $index_group = ProductGroup::where('prex_group',$firstChar)->orderBy('index', 'DESC')->pluck('index')->first();
                 $index = $index_group ? ($index_group + 1): 1;
-                ProductGroup::where('prex_group', strtoupper($oldChar[0]))->where('index', (int)(substr($oldChar,1)))->delete();
                 ProductGroup::create(['prex_group'=> $firstChar,'index'=> $index]);
                 $product_id = $firstChar.substr($strNum,0,-(strlen($index))).$index;
             }
@@ -161,7 +160,7 @@ class MstProductController extends Controller
             $data = [
                 'product_id' => $product_id,
                 'product_name' => $input['product_name'],
-                'product_price' => $input['product_price'],
+                'product_price' => (float)$input['product_price'],
                 'description' => $input['description'],
                 'is_sales' => $input['is_sales'],
                 'product_image' => $image
@@ -235,15 +234,15 @@ class MstProductController extends Controller
                 $data = $data->where('product_name', 'like', '%' . $input['name'] . '%');
             }
             if(!empty($input['price_from']) && !empty($input['price_to'])) {
-                $data = $data->whereBetween('product_price', [(int)$input['price_from'], (int)$input['price_to']]);
+                $data = $data->whereBetween('product_price', [(float)$input['price_from'], (float)$input['price_to']]);
             } else if (!empty($input['price_from'])) {
-                $data = $data->where('product_price', '>=', $input['price_from']);
+                $data = $data->where('product_price', '>=', (float)$input['price_from']);
             }
             else if (!empty($input['price_to'])) {
-                $data = $data->where('product_price', '<=', $input['price_to']);
+                $data = $data->where('product_price', '<=', (float)$input['price_to']);
             }
             if ($input['is_sales'] != "") {
-                $data = $data->where('is_sales', (int) $input['is_sales']);
+                $data = $data->where('is_sales', (float) $input['is_sales']);
             }
             $data = $data->orderBy('product_id', 'DESC')->get();
             return DataTables::of($data)->make(true);

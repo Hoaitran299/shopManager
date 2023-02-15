@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'RiverCrane Vietnam - Chỉnh sửa Sản phẩm')
+@section('title', 'RiverCrane Vietnam - Danh sách Sản phẩm')
 
 @section('styles')
 @stop
@@ -15,7 +15,7 @@
     <div class="container-fluid pr-0 pl-0">
         <div class="card">
             <div class="card-body">
-                <form action="" method="post">
+                <form action="" method="post" id="searchProduct">
                     <div class="row">
                         <div class="col-sm-3">
                             <div class="form-group">
@@ -148,7 +148,7 @@
                     {
                         data: 'product_price',
                         name: 'product_price',
-                        render: $.fn.dataTable.render.number(',', '.', 0, '$')
+                        render: $.fn.dataTable.render.number(',', '.', 2, '$')
                     },
                     {
                         data: 'is_sales',
@@ -212,6 +212,35 @@
                 },
             });
 
+            // validate add product form search on keyup
+            var validator = $("#searchProduct").validate({
+                onkeyup: function(element) {
+                    this.element(element);
+                },
+                onfocusout: function(element) {
+                    this.element(element);
+                },
+                rules: {
+                    txtPriceTo: {
+                        number: true,
+                        maxlength: 9
+                    },
+                    txtPriceFrom: {
+                        number: true,
+                        maxlength: 9
+                    },
+                },
+                messages: {
+                    txtPriceTo: {
+                        number: "{{ __('product_price.digits') }}",
+                        maxlength: "{{ __('product_price.max') }}",
+                    },
+                    txtPriceFrom: {
+                        number: "{{ __('product_price.digits') }}",
+                        maxlength: "{{ __('product_price.max') }}",
+                    },
+                },
+            });
             //Show image when mouse over product name
             $('#productList').on('mouseover', '.imgProduct', function(e) {
                 e.preventDefault();

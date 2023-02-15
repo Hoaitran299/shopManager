@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 
-class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping, WithStyles
+class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, WithMapping 
 {
     use Exportable;
     /**
@@ -62,10 +62,4 @@ class CustomersExport implements FromCollection, WithHeadings, ShouldAutoSize, W
         ;
            return $data;
     }
-	/**
-	 * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet
-	 * @return mixed
-	 */
-	public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet) {
-	}
 }

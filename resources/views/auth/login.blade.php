@@ -101,7 +101,7 @@
 
                 password: {
                     required: true,
-                    minlength: 5
+                    //minlength: 5
                 },
             },
             messages: {

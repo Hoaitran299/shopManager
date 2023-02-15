@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'RiverCrane Vietnam - Sản phẩm')
+@section('title', 'RiverCrane Vietnam - Chỉnh sửa Sản phẩm')
 
 @section('styles')
     <link href="{{ asset('css/product.css') }}" rel="stylesheet">
@@ -37,7 +37,7 @@
                                 <label class="col-sm-3 col-form-label">{{ trans('Price') }}</label>
                                 <div class="col-sm-9">
                                     <input id='product_price' name='product_price' type="text" class="form-control"
-                                        value="{{ $product ? (float)$product->product_price : '' }}"
+                                        value="{{ $product ? (float) $product->product_price : '' }}"
                                         placeholder="Nhập giá sản phẩm">
                                     <span class="text-danger error" id="product_price-error"></span>
                                 </div>
@@ -138,9 +138,9 @@
                     },
                     product_price: {
                         required: true,
-                        number: true,
                         min: 0,
-                        maxlength: 16
+                        maxlength: 10,
+                        priceRegex: true,
                     },
                     product_image: {
                         extension: "jpg|jpeg|png",
@@ -160,14 +160,14 @@
                     },
                     product_price: {
                         required: "{{ __('product_price.required') }}",
-                        number: "{{ __('product_price.digits') }}",
+                        priceRegex: "{{ __('product_price.digits') }}",
                         min: "{{ __('product_price.min') }}",
                         maxlength: "{{ __('product_price.max') }}",
                     },
                     product_image: {
                         extension: "{{ __('product_image.extension') }}",
                         capacity: "{{ __('product_image.capacity') }}",
-                        maxsize: "{{ __('product_image.maxsize') }}",
+                        maxsize: "{{ __('product_image.maxsize') }}"+". Hình hiện tại widthxheight: "+ imgWidth +" x "+ imgHeight,
                     },
                     description: {
                         maxlength: "{{ __('description.max') }}",
@@ -192,30 +192,32 @@
                     formData.append('img', imgName);
                     formData.append('product_image', $('#product_image')[0].files[0]);
 
-                $.ajax({
-                    url: "/products/update/" + id,
-                    type: "POST",
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    dataType: 'json',
-                    success: function(response) {
-                        window.location.href = "/products";
-                        Swal.fire("{{ __('Notification') }}",
-                            "{{ __('Edit success') }}",
-                            'success');
-                    },
-                    error: function(err) {
-                        clearMessages();
-                        removeMsgEdit();
-                        if (err.responseJSON.errors) {
-                            $.each(err.responseJSON.errors, function(key, value) {
-                                $("#" + key + '-error').html(value[0]);
-                            });
-                        } else {
-                            $(".print-error-msg").css('display', 'block');
-                            $(".print-error-msg").find("ul").append('<li>' + err.responseJSON
-                                .message + '</li>');
+                    $.ajax({
+                        url: "/products/update/" + id,
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        dataType: 'json',
+                        success: function(response) {
+                            window.location.href = "/products";
+                            Swal.fire("{{ __('Notification') }}",
+                                "{{ __('Edit success') }}",
+                                'success');
+                        },
+                        error: function(err) {
+                            clearMessages();
+                            removeMsgEdit();
+                            if (err.responseJSON.errors) {
+                                $.each(err.responseJSON.errors, function(key, value) {
+                                    $("#" + key + '-error').html(value[0]);
+                                });
+                            } else {
+                                $(".print-error-msg").css('display', 'block');
+                                $(".print-error-msg").find("ul").append('<li>' + err
+                                    .responseJSON
+                                    .message + '</li>');
+                            }
                         }
                     });
                     return false;
@@ -238,6 +240,10 @@
             $.validator.addMethod('maxsize', function(value, element, param) {
                 return this.optional(element) || (imgWidth <= param || imgHeight <= param)
             }, 'Kích thước hình phải là {0} x {0}');
+
+            $.validator.addMethod("priceRegex", function(value) {
+                return /^(\d{0,6})(\.\d{1,3})?$/.test(value) // Định dạng price ######.XX
+            });
 
             $('#product_image').change(function(e) {
                 $("#product_image-error").empty();
