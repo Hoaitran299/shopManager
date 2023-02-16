@@ -21,7 +21,7 @@
                     <span class="text-danger error" id="email-error"></span>
                 </div>
                 <div class="form-group">
-                    <label>Password</label>
+                    <label>Mật khẩu</label>
                     <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu">
                     <span class="text-danger error" id="password-error"></span>
                 </div>

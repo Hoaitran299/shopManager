@@ -167,7 +167,7 @@
                     product_image: {
                         extension: "{{ __('product_image.extension') }}",
                         capacity: "{{ __('product_image.capacity') }}",
-                        maxsize: "{{ __('product_image.maxsize') }}"+". Hình hiện tại widthxheight: "+ imgWidth +" x "+ imgHeight,
+                        maxsize: "{{ __('product_image.maxsize') }}",
                     },
                     description: {
                         maxlength: "{{ __('description.max') }}",

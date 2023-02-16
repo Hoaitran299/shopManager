@@ -232,11 +232,11 @@
                 },
                 messages: {
                     txtPriceTo: {
-                        number: "{{ __('product_price.digits') }}",
+                        number: "{{ __('product_price.number') }}",
                         maxlength: "{{ __('product_price.max') }}",
                     },
                     txtPriceFrom: {
-                        number: "{{ __('product_price.digits') }}",
+                        number: "{{ __('product_price.number') }}",
                         maxlength: "{{ __('product_price.max') }}",
                     },
                 },

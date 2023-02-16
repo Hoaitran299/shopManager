@@ -155,7 +155,7 @@
                     product_image: {
                         extension: "{{ __('product_image.extension') }}",
                         capacity: "{{ __('product_image.capacity') }}",
-                        maxsize: "{{ __('product_image.maxsize') }}"+". Hình hiện tại widthxheight: "+ imgWidth +" x "+ imgHeight,
+                        maxsize:  "{{ __('product_image.maxsize') }}",
                     },
                     description: {
                         maxlength: "{{ __('description.max') }}",
@@ -231,11 +231,11 @@
             }, 'Dung lượng hình phải bé hơn {0} MB');
 
             $.validator.addMethod('maxsize', function(value, element, param) {
-                return this.optional(element) || (imgWidth <= param && imgHeight <= param)
+                return this.optional(element) || (imgWidth >= param && imgHeight >= param)
             }, 'Kích thước hình phải là {0} x {0}');
 
             $.validator.addMethod("priceRegex", function(value) {
-                return /^(\d{0,6})(\.\d{1,3})?$/.test(value) // Định dạng price ######.XX
+                return /^(\d{0,6})(\.\d{1,3})?$/.test(value) // Định dạng price ######.XXX
             });
 
             $('#product_image').change(function(e) {
@@ -247,8 +247,6 @@
                     $(".file-upload").removeClass('active');
                     $("#noFile").text("No file chosen...");
                     $('#removeImg').css('display', 'none');
-                    imgHeight = 0;
-                    imgWidth = 0;
                 } else {
                     $(".file-upload").addClass('active');
                     $("#noFile").text(fileImg['name']);
@@ -257,10 +255,9 @@
                         const reader = new FileReader();
                         reader.addEventListener("load", () => {
                             $("#preview").attr("src", event.target.result);
-                            $("#preview").onload = function() {
-                                imgHeight = $("#preview").height;
-                                imgWidth = $("#preview").width;
-                            }
+                            let img = document.getElementById('preview');
+                            imgWidth = img.width;
+                            imgHeight = img.height;
                         }, false);
                         reader.readAsDataURL(fileImg);
                     }
@@ -276,6 +273,7 @@
              * Handle button remove image 
              */
             $('#removeImg').click(function() {
+                console.log(imgHeight + " - "+ imgWidth);
                 $('#removeImg').hide();
                 $("#preview").attr("src", "{{ asset('img/products/default.jpg') }}");
                 $(".file-upload").removeClass('active');
