@@ -59,7 +59,7 @@ class MstUsersController extends Controller
     {
         try {
             $input = $request->all();
-            $is_active = $input['is_active'] === "on" ? 1 : 0;
+            $is_active = $input['is_active'] === "true" ? 1 : 0;
             $data = [
                 'name' => $input['name'],
                 'email' => $input['email'],
@@ -86,11 +86,11 @@ class MstUsersController extends Controller
         try {
             $id = $request->id;
             $input = $request->all();
-
+            $is_active = $input['is_active'] === "true" ? 1 : 0;
             $data = [
                 'name' => $input['name'],
                 'group_role' => $input['group_role'],
-                'is_active' => $input['is_active'] === "on" ? 1: 0,
+                'is_active' => $is_active
             ];
             if (!empty($input['password'])) {
                 $data['password'] = Hash::make($input['password']);

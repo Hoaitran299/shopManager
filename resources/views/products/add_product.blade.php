@@ -27,7 +27,7 @@
                                 <div class="col-sm-9">
                                     <input id='product_name' name='product_name' type="text" class="form-control"
                                         placeholder="Nhập tên sản phẩm">
-                                    <span class="text-danger msg-error error" id="product_name-error"></span>
+                                    <span class="text-danger msg-error error" id="product_name-err"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -35,7 +35,7 @@
                                 <div class="col-sm-9">
                                     <input id='product_price' name='product_price' type="text" class="form-control"
                                         placeholder="Nhập giá sản phẩm">
-                                    <span class="text-danger msg-error error" id="product_price-error"></span>
+                                    <span class="text-danger msg-error error" id="product_price-err"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -44,7 +44,7 @@
                                     <textarea id='description' name='description' type="text" class="form-control" rows="6"
                                         placeholder="Mô tả sản phẩm"></textarea>
                                 </div>
-                                <span class="text-danger msg-error error" id="description-error"></span>
+                                <span class="text-danger msg-error error" id="description-err"></span>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">{{ trans('Active') }}</label>
@@ -64,7 +64,7 @@
                                 <div class="row">
                                     <img style="width: 100%;height: 100%%;" id="preview" name="preview"
                                         src="{{ asset('img/products/default.jpg') }}" alt="your image" />
-                                    <span class="text-danger msg-error error" id="product_image-error"></span>
+                                    <span class="text-danger msg-error error" id="product_image-err"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -136,7 +136,7 @@
                         maxsize: 1024
                     },
                     description: {
-                        maxlength: 100,
+                        maxlength: 255,
                     },
 
                 },
@@ -155,7 +155,7 @@
                     product_image: {
                         extension: "{{ __('product_image.extension') }}",
                         capacity: "{{ __('product_image.capacity') }}",
-                        maxsize:  "{{ __('product_image.maxsize') }}",
+                        maxsize: "{{ __('product_image.maxsize') }}",
                     },
                     description: {
                         maxlength: "{{ __('description.max') }}",
@@ -163,14 +163,14 @@
                 },
                 errorPlacement: function(error, element) {
                     if (element.attr("name") == "product_image") {
-                        error.insertAfter("#product_image-error");
+                        error.insertAfter("#product_image-err");
                     } else {
                         error.insertAfter(element);
                     }
                 },
                 submitHandler: function(form, e) {
                     e.preventDefault();
-                    
+
                     var formData = new FormData(form);
                     formData.append('product_image', $('#product_image')[0].files[0]);
                     $.ajax({
@@ -191,9 +191,9 @@
                         error: function(response) {
                             if (response.responseJSON && response.responseJSON.errors) {
                                 $.each(response.responseJSON.errors, function(key, value) {
-                                    $("#" + key + '-error').html(value[0]);
+                                    $("#" + key + '-err').html(value[0]);
                                 });
-                            
+
                             } else {
                                 $(".print-error-msg").css('display', 'block');
                                 $(".print-error-msg").find("ul").append('<li>' + err
@@ -220,10 +220,10 @@
 
             // clear error message
             function clearMessages() {
-                $("#product_name-error").empty();
-                $("#description-error").empty();
-                $("#product_price-error").empty();
-                $("#product_image-error").empty();
+                $("#product_name-err").empty();
+                $("#description-err").empty();
+                $("#product_price-err").empty();
+                $("#product_image-err").empty();
             };
 
             $.validator.addMethod('capacity', function(value, element, param) {
@@ -231,15 +231,16 @@
             }, 'Dung lượng hình phải bé hơn {0} MB');
 
             $.validator.addMethod('maxsize', function(value, element, param) {
-                return this.optional(element) || (imgWidth >= param && imgHeight >= param)
+                return this.optional(element) || (imgWidth <= param && imgHeight <= param)
             }, 'Kích thước hình phải là {0} x {0}');
 
             $.validator.addMethod("priceRegex", function(value) {
-                return /^(\d{0,6})(\.\d{1,3})?$/.test(value) // Định dạng price ######.XXX
+                return /^(\d{0,6})(\.\d{1,2})?$/.test(value) // Định dạng price ######.XX
             });
 
             $('#product_image').change(function(e) {
                 $("#product_image-error").empty();
+                $("#product_image-err").empty();
                 e.preventDefault();
                 var fileImg = $('#product_image').prop('files')[0];
 
@@ -273,13 +274,13 @@
              * Handle button remove image 
              */
             $('#removeImg').click(function() {
-                console.log(imgHeight + " - "+ imgWidth);
                 $('#removeImg').hide();
                 $("#preview").attr("src", "{{ asset('img/products/default.jpg') }}");
                 $(".file-upload").removeClass('active');
                 $("#noFile").text("No file chosen...");
                 $("#product_image").val('');
                 $("#product_image-error").empty();
+                $("#product_image-err").empty();
                 imgHeight = 0;
                 imgWidth = 0;
             });

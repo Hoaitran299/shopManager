@@ -44,7 +44,7 @@ class MstCustomerController extends Controller
                 'email' => $input['txtEmail'],
                 'tel_num' => $input['txtTel_num'],
                 'address' => $input['txtAddress'],
-                'is_active' => $input['is_active'] === "on" ? 1: 0,
+                'is_active' => $input['is_active'] === "true" ? 1: 0,
             ];
             MstCustomer::create($data);
             return response()->json(['status' => 'success'], 200);

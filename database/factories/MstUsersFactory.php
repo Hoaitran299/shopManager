@@ -24,7 +24,7 @@ class MstUsersFactory extends Factory
             'email' => preg_replace('/@example\..*/', '@gmail.com', fake()->unique()->safeEmail),
             'is_active' => $arrNum[array_rand($arrNum)],
             'is_delete' => $arrNum[array_rand($arrNum)],
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'password' => '$2y$10$l2Wtf8cin4haMqApAxh9X.Cxbg8svJWfQIKSBZ78DGHRu5Z2I2fti', // Admin123
             'remember_token' => \Illuminate\Support\Str::random(10),
         ];
     }

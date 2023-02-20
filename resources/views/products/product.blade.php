@@ -3,6 +3,7 @@
 @section('title', 'RiverCrane Vietnam - Danh sách Sản phẩm')
 
 @section('styles')
+    <link href="{{ asset('css/product.css') }}" rel="stylesheet">
 @stop
 
 @section('content')
@@ -66,13 +67,15 @@
                 <div class="row" style="margin:0.25rem">
                     <div class="card">
                         <div class="table-responsive dt-responsive nowrap" style="margin-top:0.25rem;width: 100%;">
-                            <table class="table table-hover productList " id="productList" name="productList">
+                            <table class="table table-hover productList " id="productList" name="productList"
+                                style="width:100%">
                                 <thead>
                                     <tr class="bg-primary">
                                         <th style="width: 10px; text-align: center"> # </th>
                                         <th>Product ID</th>
+                                        <th class="d-none">{{ trans('ProductName') }}</th>
                                         <th>{{ trans('ProductName') }}</th>
-                                        <th>{{ trans('Description') }}</th>
+                                        <th style="width: 500px;">{{ trans('Description') }}</th>
                                         <th>{{ trans('Price') }}</th>
                                         <th>{{ trans('Active') }}</th>
                                         <th>Action</th>
@@ -91,7 +94,7 @@
 @stop
 @section('scripts')
     <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
-    
+
     <script>
         $.ajaxSetup({
             headers: {
@@ -108,6 +111,9 @@
                 autoWidth: false,
                 pagingType: "full_numbers_no_ellipses",
                 pageLength: 20,
+                scrollY: "500px",
+                scrollX: true,
+                scrollCollapse: true,
                 dom: "<'row'<'col-sm-4'i><'col-sm-8 text-center'p>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 text-center'p>>",
@@ -126,24 +132,34 @@
                 lengthChange: false,
                 columns: [{
                         data: 'id',
-                        name: 'id'
+                        name: 'id',
+                        width: '30px',
                     }, {
                         data: 'product_id',
                         name: 'product_id'
+                    },
+                    {
+                        data: 'product_name',
+                        name: 'product_name',
+                        visible: false
                     },
                     {
                         data: null,
                         render: function(data) {
                             var name = data["product_name"];
                             var img = data["product_image"];
-                            var imgName = img != '' ? "img/products/"+ img : "img/products/default.jpg";
-                            var str = "<div><a class='imgProduct' data-image=" + imgName + ">" + name + "</a></div>";
+                            var imgName = img != '' ? "img/products/" + img :
+                                "img/products/default.jpg";
+                            var str = "<div><a class='imgProduct' data-image=" + imgName + ">" +
+                                name + "</a></div>";
                             return str;
                         },
+                        orderData: [2]
                     },
                     {
                         data: 'description',
-                        name: 'description'
+                        name: 'description',
+                        width: '400px',
                     },
                     {
                         data: 'product_price',
@@ -223,20 +239,24 @@
                 rules: {
                     txtPriceTo: {
                         number: true,
+                        min: 0,
                         maxlength: 9
                     },
                     txtPriceFrom: {
                         number: true,
+                        min: 0,
                         maxlength: 9
                     },
                 },
                 messages: {
                     txtPriceTo: {
                         number: "{{ __('product_price.number') }}",
+                        min: "{{ __('product_price.min') }}",
                         maxlength: "{{ __('product_price.max') }}",
                     },
                     txtPriceFrom: {
                         number: "{{ __('product_price.number') }}",
+                        min: "{{ __('product_price.min') }}",
                         maxlength: "{{ __('product_price.max') }}",
                     },
                 },
@@ -260,7 +280,7 @@
             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
                 $('#isSales').prop('selectedIndex', 0);
-                $('#txtPriceFrom').prop('selectedIndex', 0);
+                $('#txtPriceFrom').val('');
                 $('#txtName').val('');
                 $('#txtPriceTo').val('');
                 productsTable.ajax.reload();
@@ -296,7 +316,7 @@
                                 if (result['status'] === 'success') {
                                     Swal.fire("{{ __('Notification') }}",
                                         "{{ __('Delete success') }}", 'success');
-                                    productsTable.ajax.reload();
+                                    productsTable.ajax.reload(null,false);
                                 }
                             },
                             error: function(result) {
@@ -304,7 +324,7 @@
                                     "{{ __('Delete error') }}", 'error');
                             }
                         });
-                        productsTable.ajax.reload();
+                        productsTable.ajax.reload(null,false);
                     }
                 })
             });

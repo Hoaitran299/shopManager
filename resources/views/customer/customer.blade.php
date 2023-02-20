@@ -88,8 +88,7 @@
                                         <th>{{ trans('Fullname') }}</th>
                                         <th>Email</th>
                                         <th>{{ trans('Address') }}</th>
-                                        <th style="width: 80px;">{{ trans('Phone') }}</th>
-                                        <th>Action</th>
+                                        <th style="width: 100px;">{{ trans('Phone') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -131,6 +130,9 @@
                 autoWidth: false,
                 pagingType: "full_numbers_no_ellipses",
                 pageLength: 20,
+                scrollY: "500px",
+                scrollX: true,
+                scrollCollapse: true,
                 select: true,
                 dom: "<'row'<'col-sm-4'i><'col-sm-8 text-center'p>>" +
                     "<'row'<'col-sm-12'tr>>" +
@@ -162,7 +164,8 @@
                     },
                     {
                         data: 'address',
-                        name: 'address'
+                        name: 'address',
+                        width: "400px"
                     },
                     {
                         data: 'tel_num',
@@ -184,7 +187,7 @@
                     } else {
                         $('.dataTables_paginate ').css('display', 'block');
                         $('.dataTables_info ').css('display', 'block');
-                    }
+                    };
                 },
                 language: {
                     processing: "{{ __('processing') }}",
@@ -225,15 +228,20 @@
                     onSuccess: function(data, textStatus, jqXHR) {
                         Swal.fire("{{ __('Notification') }}",
                             "{{ __('Edit success') }}", 'success');
-                        customerTable.ajax.reload();
+                        customerTable.ajax.reload(null,false);
                         removeMsgEdit();
                     },
                     onFail: function(data) {
                         printErrorMsg(data.responseJSON.errors);
-                        customerTable.ajax.reload();
+                        customerTable.ajax.reload(null,false);
                     },
 
                 });
+                if ($("#customerList tbody tr td").hasClass("dataTables_empty")) {
+                        $(".tabledit-edit-button").addClass('d-none');
+                    } else {
+                        $(".tabledit-edit-button").removeClass('d-none');
+                    }
             });
             // validate signup form on keyup and submit
             var validator = $("#addCustomerForm").validate({
@@ -285,7 +293,9 @@
                     e.preventDefault();
 
                     var formData = new FormData(form);
-                    formData.append('is_active', $('#is_active').val());
+                    formData.delete('is_active');
+                    formData.append('is_active', $("#is_active").prop('checked'));
+
                     $.ajax({
                         url: "/customers",
                         type: "POST",
@@ -302,7 +312,7 @@
                             }
                         },
                     });
-                    customerTable.ajax.reload();
+                    customerTable.ajax.reload(null,false);
                 }
             });
 

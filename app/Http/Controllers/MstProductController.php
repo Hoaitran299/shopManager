@@ -72,7 +72,7 @@ class MstProductController extends Controller
                 'product_id' =>$product_id,
                 'product_name' => $input['product_name'],
                 'product_price' => (float)$input['product_price'],
-                'description' => $input['description'],
+                'description' => $input['description'] ? $input['description'] : "",
                 'is_sales' => $input['is_sales'],
                 'product_image' => $image
             ];
@@ -161,7 +161,7 @@ class MstProductController extends Controller
                 'product_id' => $product_id,
                 'product_name' => $input['product_name'],
                 'product_price' => (float)$input['product_price'],
-                'description' => $input['description'],
+                'description' => $input['description'] ? $input['description'] : "",
                 'is_sales' => $input['is_sales'],
                 'product_image' => $image
             ];

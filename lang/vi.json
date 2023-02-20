@@ -78,12 +78,13 @@
   "product_name.required":"Vui lòng nhập tên sản phẩm",
   "product_name.min":"Tên sản phẩm phải lớn hơn 5 ký tự",
   "product_price.required":"Giá bán không được để trống",
-  "product_price.digits":"Giá bán chỉ được nhập số theo format: XXXXXX->XXXXXX.XXX",
-  "product_price.min":"Giá bán không được nhỏ hơn 0",
+  "product_price.digits":"Giá bán chỉ được nhập số theo format: XXXXXX->XXXXXX.XX",
+  "product_price.min":"Giá bán phải là số lớn hơn 0",
+  "product_price.number":"Giá bán chỉ được nhập số.",
   "product_price.max":"Giá bán chỉ được nhập nhỏ hơn 10 kí tự",
   "product_image.extension": "Chỉ cho upload các file hình png, jpg, jpeg",
   "product_image.capacity": "Dung lượng hình không quá 2Mb",
-  "product_image.maxsize": "Kích thước không quá 1024px",
-  "description.max": "Mô tả sản phẩm tối đa 100 kí tự",
+  "product_image.maxsize": "Kích thước không quá 1024px.",
+  "description.max": "Mô tả sản phẩm tối đa 255 kí tự",
   "import.extension": "Chỉ cho import các file csv,xlsx,xls"
 }

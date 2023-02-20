@@ -30,7 +30,7 @@
                                     <input id='product_name' name='product_name' type="text" class="form-control"
                                         value="{{ $product ? $product->product_name : '' }}"
                                         placeholder="Nhập tên sản phẩm">
-                                    <span class="text-danger error" id="product_name-error"></span>
+                                    <span class="text-danger error" id="product_name-err"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -39,7 +39,7 @@
                                     <input id='product_price' name='product_price' type="text" class="form-control"
                                         value="{{ $product ? (float) $product->product_price : '' }}"
                                         placeholder="Nhập giá sản phẩm">
-                                    <span class="text-danger error" id="product_price-error"></span>
+                                    <span class="text-danger error" id="product_price-err"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -68,7 +68,7 @@
                                     <img style="margin-left: 10px;width: 100%;height: 100%%;" id="preview" name="preview"
                                         src="{{ $product->product_image ? '/img/products/' . $product->product_image : '/img/products/default.jpg' }}"
                                         alt="your image" />
-                                    <span class="text-danger error" id="product_image-error"></span>
+                                    <span class="text-danger error" id="product_image-err"></span>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -148,7 +148,7 @@
                         maxsize: 1024
                     },
                     description: {
-                        maxlength: 100,
+                        maxlength: 255,
                     },
 
                 },
@@ -175,20 +175,19 @@
                 },
                 errorPlacement: function(error, element) {
                     if (element.attr("name") == "product_image") {
-                        error.insertAfter("#product_image-error");
+                        error.insertAfter("#product_image-err");
                     } else {
                         error.insertAfter(element);
                     }
                 },
                 submitHandler: function(form, e) {
                     e.preventDefault();
-                    console.log('bbbb');
                     clearMessages();
                     var id = $("#id").val();
                     var formData = new FormData(form);
                     var srcImg = $('#preview').attr('src').split('/');
                     var imgName = srcImg[srcImg.length - 1];
-                    console.log(imgName);
+
                     formData.append('img', imgName);
                     formData.append('product_image', $('#product_image')[0].files[0]);
 
@@ -210,7 +209,7 @@
                             removeMsgEdit();
                             if (err.responseJSON.errors) {
                                 $.each(err.responseJSON.errors, function(key, value) {
-                                    $("#" + key + '-error').html(value[0]);
+                                    $("#" + key + '-err').html(value[0]);
                                 });
                             } else {
                                 $(".print-error-msg").css('display', 'block');
@@ -227,10 +226,10 @@
 
             // clear error message
             function clearMessages() {
-                $("#product_name-error").empty();
-                $("#description-error").empty();
-                $("#product_price-error").empty();
-                $("#product_image-error").empty();
+                $("#product_name-err").empty();
+                $("#description-err").empty();
+                $("#product_price-err").empty();
+                $("#product_image-err").empty();
             };
 
             $.validator.addMethod('capacity', function(value, element, param) {
@@ -242,7 +241,7 @@
             }, 'Kích thước hình phải là {0} x {0}');
 
             $.validator.addMethod("priceRegex", function(value) {
-                return /^(\d{0,6})(\.\d{1,3})?$/.test(value) // Định dạng price ######.XX
+                return /^(\d{0,6})(\.\d{1,2})?$/.test(value) // Định dạng price ######.XX
             });
 
             $('#product_image').change(function(e) {
@@ -251,12 +250,14 @@
                 var fileImg = $('#product_image').prop('files')[0];
 
                 if (/^\s*$/.test(fileImg)) {
+                    $("#product_image-err").empty();
                     $(".file-upload").removeClass('active');
                     $("#noFile").text("No file chosen...");
                     $('#removeImg').css('display', 'none');
                     imgHeight = 0;
                     imgWidth = 0;
                 } else {
+                    $("#product_image-err").empty();
                     $(".file-upload").addClass('active');
                     $("#noFile").text(fileImg['name']);
                     $('#removeImg').css('display', 'block');
@@ -289,6 +290,7 @@
                 $("#noFile").text("No file chosen...");
                 $("#product_image").val('');
                 $("#product_image-error").empty();
+                $("#product_image-err").empty();
                 imgHeight = 0;
                 imgWidth = 0;
             });

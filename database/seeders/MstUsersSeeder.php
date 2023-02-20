@@ -18,7 +18,7 @@ class MstUsersSeeder extends Seeder
         MstUsers::create([
             'name' => 'Admin',
             'email' => 'admin@gmail.com', 
-            'password'=> Hash::make('123'), 
+            'password'=> Hash::make('Admin123'), 
             'group_role'=>'Admin'
         ]);
     }

@@ -18,9 +18,6 @@
                 <li class="nav-item">
                     <a href="{{ route('users') }}" class="nav-link">Users</a>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ route('users') }}" class="nav-link">Shops</a>
-                </li>
             </ul>
             
         <ul class="order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
@@ -43,7 +40,7 @@
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0">{{ $TitlePage }}</h1>
+                <h1 class="m-0">{{ $childMenu? $childMenu :$TitlePage }}</h1>
             </div>
             <div class="col-sm-6" >
                 <ol class="breadcrumb float-sm-right menuRight">

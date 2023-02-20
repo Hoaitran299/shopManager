@@ -132,9 +132,7 @@
                         d.active = $("#checkActive").val() ?? '';
                     }
                 },
-                order: [
-                    [0, 'desc']
-                ],
+                order: [0,"desc"],
                 lengthChange: false,
                 columns: [{
                         data: 'id',
@@ -289,7 +287,9 @@
                     checkValidatePasssword();
                     e.preventDefault();
                     var formData = new FormData(form);
-                    formData.append('is_active', $("#is_active").val());
+                    formData.delete('is_active');
+                    formData.append('is_active', $("#is_active").prop('checked'));
+
                     if (action === "add") {
                         $.ajax({
                             url: "/users",
@@ -298,6 +298,7 @@
                             processData: false,
                             contentType: false,
                             success: function(result) {
+                                usersTable.ajax.reload(null,false);
                                 $("#closePopup").trigger("click");
                                 Swal.fire("{{ __('Notification') }}",
                                     "{{ __('Add success') }}",
@@ -306,14 +307,14 @@
                             error: function(error) {
                                 $.each(error.responseJSON.errors, function(key, value) {
                                     $("#" + key + '-error').html(value[0]);
-                                    $("#" + key + '-error').css('display','block');
+                                    $("#" + key + '-error').css('display', 'block');
                                 });
                             }
                         });
                     } else {
                         $("#email").attr('disabled', false);
                         var email = $("#email").val();
-                        console.log(email);
+
                         $("#email").attr('disabled', true);
                         formData.append('email', email);
                         $.ajax({
@@ -323,6 +324,7 @@
                             contentType: false,
                             processData: false,
                             success: function(data) {
+                                usersTable.ajax.reload(null,false);
                                 $("#closePopup").trigger("click");
                                 Swal.fire("{{ __('Notification') }}",
                                     "{{ __('Edit success') }}", 'success');
@@ -330,12 +332,12 @@
                             error: function(error) {
                                 $.each(error.responseJSON.errors, function(key, value) {
                                     $("#" + key + '-error').html(value[0]);
-                                    $("#" + key + '-error').css('display','block');
+                                    $("#" + key + '-error').css('display', 'block');
                                 });
                             }
                         });
                     }
-                    usersTable.ajax.reload();
+
                     return false;
                 }
             });
@@ -367,12 +369,7 @@
                         equalTo: "#password"
                     });
                 }
-            }
-
-            // Input password có thể trống trên form edit
-            // $('#password').on('change', function() {
-            //     checkValidatePasssword();
-            // });
+            };
 
             // Xử lý xoá textbox search
             $('#btnDelSearch').on('click', function(e) {
@@ -427,7 +424,7 @@
                             success: function(result) {
                                 Swal.fire("{{ __('Notification') }}",
                                     "{{ __('Delete success') }}", 'success');
-                                usersTable.ajax.reload();
+                                usersTable.ajax.reload(null,false);
                             },
                         });
                     }
@@ -466,7 +463,7 @@
                                         Swal.fire("{{ __('Notification') }}",
                                             "{{ __('Lock success') }}", 'success');
                                     }
-                                    usersTable.ajax.reload();
+                                    usersTable.ajax.reload(null,false);
                                 } else {
                                     if (active === 1) {
                                         Swal.fire("{{ __('Notification') }}",
